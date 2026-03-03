@@ -4,6 +4,9 @@
   display: flex;
   flex-direction: column;
   gap: var(--spacing-xl);
+  padding: var(--spacing-xl);
+  background-color: var(--color-status-neutral-bg, #f4f6f8); // distinct background color
+  min-height: calc(100vh - 64px);
 }
 
 // ============================================================================
@@ -95,8 +98,9 @@
   gap: var(--spacing-xl);
   align-items: start;
 
-  @media (max-width: 1200px) {
+  @media (max-width: 768px) {
     grid-template-columns: 1fr;
+    gap: var(--spacing-md);
   }
 }
 
@@ -108,6 +112,25 @@
   display: flex;
   flex-direction: column;
   min-height: 600px;
+  background-color: var(--color-card-bg);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05); // Smooth shadow
+  border-radius: var(--radius-lg);
+  border: none;
+
+  .card-header {
+    padding: 24px;
+    border-bottom: 1px solid var(--color-border-light);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    h3 {
+      font-size: 16px;
+      font-weight: 600;
+      color: var(--color-text-primary);
+      margin: 0;
+    }
+  }
 
   .panel-body {
     padding: 24px;
@@ -271,6 +294,59 @@
       }
     }
   }
+}
+
+// ============================================================================
+// FORM PANEL STYLES
+// ============================================================================
+.form-panel {
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08); // Add real shadow for depth
+  border-radius: var(--radius-lg, 12px); // More modern border-radius
+  background-color: var(--color-card-bg, #ffffff);
+  border: none;
+
+  .card-header {
+    padding: 24px 24px 16px;
+    border-bottom: 1px solid var(--color-table-border, #e2e8f0);
+
+    h3 {
+      font-size: 18px;
+      font-weight: 600;
+      color: var(--color-text-primary, #1e293b);
+      margin: 0;
+    }
+  }
+
+  .form-container {
+    padding: 24px;
+
+    .form-group {
+      margin-bottom: 24px;
+
+      .field-label {
+        display: block;
+        font-size: 14px; // Increased slightly for visibility
+        font-weight: 600;
+        color: var(--color-text-secondary, #64748b);
+        margin-bottom: 8px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+      }
+    }
+  }
+}
+
+.documentation-field-container {
+  // This creates a visual indentation or separation
+  padding: 16px;
+  background-color: var(--color-main-bg);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--color-table-border);
+}
+
+// Custom styling for the category dropdown options
+.custom-category-select .mat-mdc-option:hover {
+  background-color: rgba(0, 0, 0, 0.08);
 }
 
 @keyframes pulse {

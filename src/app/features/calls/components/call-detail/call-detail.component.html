@@ -117,10 +117,44 @@
           <span class="badge badge-neutral">Ausstehende Genehmigung</span>
         </div>
         <div class="card-body">
-          <p class="summary-text">{{ c.draftSummary }}</p>
-          <div class="draft-hint">
-            <mat-icon>info</mat-icon>
-            <span>Dieser Entwurf wurde noch nicht genehmigt.</span>
+          <div *ngIf="!isEditing">
+            <p class="summary-text">{{ c.draftSummary }}</p>
+            <div class="draft-hint">
+              <mat-icon>info</mat-icon>
+              <span>Dieser Entwurf wurde noch nicht genehmigt.</span>
+            </div>
+          </div>
+
+          <div *ngIf="isEditing">
+            <mat-form-field class="w-100">
+              <textarea
+                matInput
+                [(ngModel)]="c.draftSummary"
+                rows="10"
+                cdkTextareaAutosize
+                #autosize="cdkTextareaAutosize"
+              ></textarea>
+            </mat-form-field>
+          </div>
+
+          <div class="draft-actions">
+            <button class="btn btn-secondary" (click)="startEditing()" *ngIf="!isEditing">
+              <mat-icon>edit</mat-icon>
+              Bearbeiten
+            </button>
+            <button class="btn btn-secondary" (click)="cancelEditing()" *ngIf="isEditing">
+              <mat-icon>cancel</mat-icon>
+              Abbrechen
+            </button>
+
+            <button class="btn btn-primary" (click)="approveDraft()" *ngIf="!isEditing">
+              <mat-icon>check_circle</mat-icon>
+              Genehmigen
+            </button>
+            <button class="btn btn-primary" (click)="saveChanges()" *ngIf="isEditing">
+              <mat-icon>save</mat-icon>
+              Speichern
+            </button>
           </div>
         </div>
       </div>

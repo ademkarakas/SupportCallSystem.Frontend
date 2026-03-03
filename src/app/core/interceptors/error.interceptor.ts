@@ -13,8 +13,13 @@ export const errorInterceptor: HttpInterceptorFn = (req, next) => {
       let errorMessage = 'An unexpected error occurred';
 
       if (error.status === 401) {
-        authService.logout();
-        errorMessage = 'Session expired. Please login again.';
+        // Don't logout for login endpoint itself
+        if (req.url.includes('/api/auth/login')) {
+          errorMessage = 'Invalid email or password';
+        } else {
+          authService.logout();
+          errorMessage = 'Session expired. Please login again.';
+        }
       } else if (error.error?.error) {
         // Handle structure: { error: "message", statusCode: 500 }
         errorMessage = error.error.error;

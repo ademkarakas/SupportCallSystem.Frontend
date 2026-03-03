@@ -1,0 +1,84 @@
+.quick-access-page {
+  padding: var(--spacing-6);
+  max-width: 1200px;
+  margin: 0 auto;
+
+  // Sayfayı dikeyde ortalamak için
+  min-height: 80vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center; // İçeriği dikeyde ortalar
+}
+
+.page-header {
+  margin-bottom: var(--spacing-12); // Yukarıdaki boşluğu artırdık
+  text-align: center; // Başlığı da ortalayalım
+
+  .title-row {
+    display: flex;
+    justify-content: center; // İkon ve metni yatayda ortalar
+    align-items: center;
+    gap: var(--spacing-3);
+    margin-bottom: var(--spacing-2);
+    // ... diğer stiller aynı
+  }
+}
+
+.quick-access-grid {
+  display: grid;
+  // Kartların daha geniş durması için minmax değerini artırdık (300px)
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: var(--spacing-8);
+  padding: var(--spacing-4) 0;
+  width: 100%;
+}
+
+.quick-access-card {
+  // --- BEYAZ VE BÜYÜK KART TASARIMI ---
+  background: #ffffff; // Sabit beyaz veya var(--color-surface)
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  border-radius: 24px; // Daha yumuşak köşeler
+  padding: var(--spacing-10) var(--spacing-6); // İç boşluğu (height) artırdık
+  min-height: 320px; // Kartlara minimum yükseklik verdik
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center; // İçeriği kart içinde ortalar
+  text-align: center;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05); // Daha derin gölge
+
+  &:hover {
+    transform: translateY(-8px); // Daha belirgin yükselme
+    box-shadow: 0 20px 30px -10px rgba(0, 0, 0, 0.12);
+    border-color: var(--color-primary);
+  }
+
+  .card-icon {
+    width: 100px; // İkon konteynerını büyüttük
+    height: 100px;
+    border-radius: 20px;
+    margin-bottom: var(--spacing-6);
+
+    mat-icon {
+      font-size: 48px; // İkonun kendisini büyüttük
+      width: 48px;
+      height: 48px;
+    }
+    // Gradient sınıfları aynı kalabilir...
+  }
+
+  .card-content {
+    .card-title {
+      font-size: 1.5rem; // Daha büyük başlık
+      font-weight: 700;
+      margin-bottom: var(--spacing-3);
+    }
+
+    .card-description {
+      font-size: 1rem;
+      max-width: 200px; // Metnin çok yayılmasını engeller
+    }
+  }
+}

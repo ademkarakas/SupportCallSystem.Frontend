@@ -105,13 +105,16 @@
 
   // === TYPOGRAPHY ===
   --font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-  --font-size-xs: 12px;
-  --font-size-sm: 13px;
-  --font-size-base: 14px;
-  --font-size-md: 16px;
-  --font-size-lg: 18px;
-  --font-size-xl: 20px;
-  --font-size-2xl: 24px;
+
+  // Responsive fluid typography using clamp(min, preferred, max)
+  // Scales smoothly from mobile (360px) to desktop (1280px+)
+  --font-size-xs: clamp(11px, 1vw + 9px, 12px);
+  --font-size-sm: clamp(12px, 1vw + 10px, 13px);
+  --font-size-base: clamp(13px, 1vw + 11px, 14px);
+  --font-size-md: clamp(14px, 1.2vw + 11px, 16px);
+  --font-size-lg: clamp(16px, 1.5vw + 12px, 18px);
+  --font-size-xl: clamp(18px, 1.8vw + 13px, 20px);
+  --font-size-2xl: clamp(20px, 2.5vw + 14px, 24px);
 
   --font-weight-normal: 400;
   --font-weight-medium: 500;
@@ -815,6 +818,11 @@ select {
   font-weight: var(--font-weight-medium);
   white-space: nowrap;
   transition: all var(--transition-fast);
+
+  @media (max-width: 640px) {
+    padding: 4px 10px;
+    font-size: 11px;
+  }
 }
 
 .badge-active {
@@ -1147,6 +1155,14 @@ select {
 
   .search-input-wrapper {
     max-width: 280px;
+  }
+
+  @media (max-width: 768px) {
+    padding: var(--spacing-md);
+
+    .search-input-wrapper {
+      max-width: 100%;
+    }
   }
 }
 
@@ -1804,6 +1820,84 @@ select {
 
   .show-mobile {
     display: none !important;
+  }
+}
+
+// ============================================================================
+// MOBILE-SPECIFIC UTILITIES
+// ============================================================================
+
+// Touch-friendly minimum target size (44x44px recommended)
+.touch-target {
+  min-width: 44px;
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+// Mobile spacing utilities
+@include mobile-only {
+  .p-mobile-xs {
+    padding: var(--spacing-xs) !important;
+  }
+  .p-mobile-sm {
+    padding: var(--spacing-sm) !important;
+  }
+  .p-mobile-md {
+    padding: var(--spacing-md) !important;
+  }
+
+  .px-mobile-sm {
+    padding-left: var(--spacing-sm) !important;
+    padding-right: var(--spacing-sm) !important;
+  }
+  .px-mobile-md {
+    padding-left: var(--spacing-md) !important;
+    padding-right: var(--spacing-md) !important;
+  }
+
+  .py-mobile-sm {
+    padding-top: var(--spacing-sm) !important;
+    padding-bottom: var(--spacing-sm) !important;
+  }
+  .py-mobile-md {
+    padding-top: var(--spacing-md) !important;
+    padding-bottom: var(--spacing-md) !important;
+  }
+
+  .gap-mobile-xs {
+    gap: var(--spacing-xs) !important;
+  }
+  .gap-mobile-sm {
+    gap: var(--spacing-sm) !important;
+  }
+  .gap-mobile-md {
+    gap: var(--spacing-md) !important;
+  }
+
+  // Mobile typography
+  .text-mobile-xs {
+    font-size: var(--font-size-xs) !important;
+  }
+  .text-mobile-sm {
+    font-size: var(--font-size-sm) !important;
+  }
+  .text-mobile-base {
+    font-size: var(--font-size-base) !important;
+  }
+
+  // Mobile flex utilities
+  .flex-mobile-column {
+    flex-direction: column !important;
+  }
+  .flex-mobile-wrap {
+    flex-wrap: wrap !important;
+  }
+
+  // Mobile grid utilities
+  .grid-mobile-1 {
+    grid-template-columns: 1fr !important;
   }
 }
 

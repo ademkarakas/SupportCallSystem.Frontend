@@ -48,7 +48,6 @@ export class MainLayoutComponent implements OnInit, OnDestroy {
   isMobile = signal(window.innerWidth <= 768);
   isSidebarCollapsed = signal(false);
   isMobileMenuOpen = signal(false);
-  quickAccessOpen = signal(false);
   private destroy$ = new Subject<void>();
   debugPanelVisible = signal(false);
 
@@ -76,28 +75,6 @@ export class MainLayoutComponent implements OnInit, OnDestroy {
 
   closeMobileMenu() {
     this.isMobileMenuOpen.set(false);
-  }
-
-  toggleQuickAccess() {
-    this.quickAccessOpen.set(!this.quickAccessOpen());
-  }
-
-  quickAccess(type: string) {
-    this.quickAccessOpen.set(false);
-    switch (type) {
-      case 'agent':
-        this.notification.showInfo('Agent-Profil wird geladen...');
-        break;
-      case 'kunden':
-        this.router.navigate(['/calls/history'], { queryParams: { view: 'all' } });
-        break;
-      case 'notizen':
-        this.notification.showInfo('Manuelle Notizen-Funktion wird vorbereitet...');
-        break;
-      case 'hilfe':
-        window.open('https://google.com', '_blank');
-        break;
-    }
   }
 
   toggleTheme() {

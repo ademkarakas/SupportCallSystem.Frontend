@@ -1,0 +1,57 @@
+<div class="quick-access-page page-enter">
+  <!-- Page Header -->
+  <header class="page-header">
+    <div class="header-content">
+      <div class="title-row">
+        <mat-icon class="title-icon">grid_view</mat-icon>
+        <h1 class="page-title">Schnellzugriff</h1>
+      </div>
+      <p class="subtitle">Schneller Zugriff auf häufig verwendete Funktionen und Bereiche</p>
+    </div>
+  </header>
+
+  <!-- Quick Access Grid -->
+  <div class="quick-access-container">
+    <div class="quick-access-grid">
+      <button class="quick-access-card" (click)="quickAccess('agent')">
+        <div class="card-icon qa-agent">
+          <mat-icon>settings_phone</mat-icon>
+        </div>
+        <div class="card-content">
+          <h3 class="card-title">Agent-Profil</h3>
+          <p class="card-description">Profil & Einstellungen verwalten</p>
+        </div>
+      </button>
+
+      <button class="quick-access-card" (click)="quickAccess('kunden')">
+        <div class="card-icon qa-kunden">
+          <mat-icon>contact_page</mat-icon>
+        </div>
+        <div class="card-content">
+          <h3 class="card-title">Kunden</h3>
+          <p class="card-description">Anrufhistorie ansehen</p>
+        </div>
+      </button>
+
+      <button class="quick-access-card" (click)="quickAccess('notizen')">
+        <div class="card-icon qa-notizen">
+          <mat-icon>description</mat-icon>
+        </div>
+        <div class="card-content">
+          <h3 class="card-title">Notizen</h3>
+          <p class="card-description">Manuelle Dokumentation erstellen</p>
+        </div>
+      </button>
+
+      <button class="quick-access-card" (click)="quickAccess('hilfe')">
+        <div class="card-icon qa-hilfe">
+          <mat-icon>help_center</mat-icon>
+        </div>
+        <div class="card-content">
+          <h3 class="card-title">Hilfe</h3>
+          <p class="card-description">Support & Dokumentation</p>
+        </div>
+      </button>
+    </div>
+  </div>
+</div>

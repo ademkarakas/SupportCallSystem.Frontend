@@ -21,6 +21,13 @@ export interface CallRecord {
   nfonCallId?: string;
 }
 
+export interface UpdateCallDto {
+  draftSummary?: string;
+  category?: string;
+  actionItems?: string[];
+  nfonCallId?: string;
+}
+
 @Injectable({
   providedIn: 'root',
 })
@@ -86,6 +93,10 @@ export class CallApiService {
 
   public tidyUpNotes(callId: string, manualNotes: string): Observable<void> {
     return this.http.post<void>(`${this.baseUrl}/${callId}/tidy-up`, { manualNotes });
+  }
+
+  public updateCall(callId: string, updateDto: Partial<UpdateCallDto>): Observable<void> {
+    return this.http.patch<void>(`${this.baseUrl}/${callId}`, updateDto);
   }
 
   public getDashboardStats(agentId: string): Observable<DashboardStats> {

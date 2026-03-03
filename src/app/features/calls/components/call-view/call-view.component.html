@@ -30,7 +30,7 @@
         "
         title="Alle Anrufe dieser Nummer anzeigen"
       >
-        <mat-icon>manage_search</mat-icon>
+        <mat-icon>person_search</mat-icon>
         Anrufer-Profil
       </button>
       <button class="btn btn-danger-filled" *ngIf="isRecording()" (click)="endCall()">
@@ -161,7 +161,7 @@
         <form [formGroup]="approvalForm" class="modern-form">
           <div class="form-group">
             <label class="field-label">Gespräch einordnen</label>
-            <mat-form-field appearance="outline" class="w-full">
+            <mat-form-field appearance="outline" class="w-full custom-category-select">
               <mat-select formControlName="category" placeholder="Kategorie wählen">
                 <mat-option value="TechnicalIssue">Technisches Problem</mat-option>
                 <mat-option value="BillingQuestion">Abrechnung/Rechnung</mat-option>
@@ -173,7 +173,7 @@
             </mat-form-field>
           </div>
 
-          <div class="form-group">
+          <div class="form-group documentation-field-container">
             <div class="flex justify-between items-center mb-2">
               <label class="field-label">Dokumentation</label>
               <span class="char-count"

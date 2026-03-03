@@ -473,6 +473,12 @@
   background-color: var(--color-primary-light) !important;
   color: var(--color-primary) !important;
   border-radius: var(--radius-badge) !important;
+
+  @media (max-width: 640px) {
+    font-size: var(--font-size-xs) !important;
+    height: 24px !important;
+    min-height: 24px !important;
+  }
 }
 
 // ============================================================================
@@ -484,4 +490,61 @@
   color: var(--color-card-bg) !important;
   border-radius: var(--radius-sm) !important;
   font-size: var(--font-size-sm) !important;
+}
+
+// ============================================================================
+// MOBILE-SPECIFIC OVERRIDES
+// ============================================================================
+
+@media (max-width: 768px) {
+  // Dialogs should be full width on mobile with reduced padding
+  .mat-mdc-dialog-container .mdc-dialog__surface {
+    max-width: 95vw !important;
+    margin: 16px !important;
+  }
+
+  // Menu panels should fit mobile screens
+  .mat-mdc-menu-panel {
+    max-width: calc(100vw - 32px) !important;
+  }
+
+  // Buttons should have larger touch targets
+  .mat-mdc-button,
+  .mat-mdc-raised-button,
+  .mat-mdc-flat-button,
+  .mat-mdc-stroked-button {
+    min-height: 44px !important;
+    padding: 0 20px !important;
+  }
+
+  .mat-mdc-icon-button {
+    min-width: 44px !important;
+    min-height: 44px !important;
+    width: 44px !important;
+    height: 44px !important;
+  }
+
+  // Form fields should have better mobile sizing
+  .mat-mdc-form-field {
+    .mat-mdc-text-field-wrapper {
+      min-height: 48px !important;
+    }
+
+    .mat-mdc-input-element {
+      font-size: 16px !important; // Prevents zoom on iOS
+    }
+  }
+
+  // Tables: hide on mobile (let components show card views instead)
+  .mat-mdc-table {
+    min-width: 100% !important;
+  }
+}
+
+// Smaller mobile screens
+@media (max-width: 480px) {
+  .mat-mdc-dialog-container .mdc-dialog__surface {
+    margin: 8px !important;
+    max-width: calc(100vw - 16px) !important;
+  }
 }

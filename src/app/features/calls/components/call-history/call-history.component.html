@@ -27,7 +27,9 @@
         />
       </div>
     </div>
-    <div class="table-container">
+
+    <!-- Desktop Table View -->
+    <div class="table-container" *ngIf="!isMobile">
       <table mat-table [dataSource]="dataSource" matSort class="data-table">
         <ng-container matColumnDef="startTime">
           <th mat-header-cell *matHeaderCellDef mat-sort-header>Datum & Zeit</th>
@@ -72,20 +74,20 @@
           <td mat-cell *matCellDef="let call" class="text-right">
             <div class="action-buttons">
               <button
-                class="btn btn-icon btn-sm"
-                title="Anrufer-Profil anzeigen"
+                class="btn btn-secondary btn-sm"
                 (click)="viewCallerProfile(call.callerNumber, $event)"
               >
-                <mat-icon>manage_search</mat-icon>
+                <mat-icon>person_search</mat-icon>
+                <span>Anrufer-Profil</span>
               </button>
               <button
-                class="btn btn-icon btn-sm"
-                title="Anruf-Details"
+                class="btn btn-secondary btn-sm"
                 [routerLink]="['/calls/detail']"
                 [queryParams]="{ id: call.id }"
                 (click)="$event.stopPropagation()"
               >
-                <mat-icon>open_in_new</mat-icon>
+                <mat-icon>info</mat-icon>
+                <span>Details</span>
               </button>
             </div>
           </td>
@@ -95,16 +97,92 @@
         <tr mat-row *matRowDef="let row; columns: displayedColumns" class="interactive-row"></tr>
       </table>
 
-      <mat-paginator
-        [pageSizeOptions]="[15, 30, 50]"
-        showFirstLastButtons
-        class="custom-paginator"
-      ></mat-paginator>
-
       <div class="empty-state" *ngIf="dataSource.data.length === 0">
         <mat-icon class="empty-icon">history_toggle_off</mat-icon>
         <p>Keine Anrufhistorie für diesen Agenten gefunden.</p>
       </div>
     </div>
+
+    <!-- Mobile Card View -->
+    <div class="mobile-cards-container" *ngIf="isMobile">
+      <div class="empty-state" *ngIf="dataSource.filteredData.length === 0">
+        <mat-icon class="empty-icon">history_toggle_off</mat-icon>
+        <p>Keine Anrufhistorie gefunden.</p>
+      </div>
+
+      <div
+        class="call-card"
+        *ngFor="
+          let call of dataSource.filteredData
+            | slice
+              : (paginator.pageIndex || 0) * (paginator.pageSize || 15)
+              : ((paginator.pageIndex || 0) + 1) * (paginator.pageSize || 15)
+        "
+        [routerLink]="['/calls/detail']"
+        [queryParams]="{ id: call.id }"
+      >
+        <div class="card-header">
+          <div class="card-time">
+            <mat-icon class="time-icon">schedule</mat-icon>
+            <div class="time-info">
+              <span class="date">{{ call.startTime | date: 'mediumDate' }}</span>
+              <span class="time">{{ call.startTime | date: 'shortTime' }}</span>
+            </div>
+          </div>
+          <span class="badge badge-neutral">{{ call.category || 'Unbekannt' }}</span>
+        </div>
+
+        <div class="card-body">
+          <div class="info-row">
+            <mat-icon class="info-icon">person</mat-icon>
+            <div class="info-content">
+              <span class="info-label">Kunde</span>
+              <span class="info-value">{{ call.customerName || 'Manueller Eintrag' }}</span>
+            </div>
+          </div>
+
+          <div class="info-row">
+            <mat-icon class="info-icon">timer</mat-icon>
+            <div class="info-content">
+              <span class="info-label">Dauer</span>
+              <span class="info-value">{{ formatDuration(call.durationSeconds) }}</span>
+            </div>
+          </div>
+
+          <div class="info-row summary-row" *ngIf="call.approvedSummary">
+            <mat-icon class="info-icon">notes</mat-icon>
+            <div class="info-content">
+              <span class="info-label">Zusammenfassung</span>
+              <span class="info-value summary-text">{{ call.approvedSummary }}</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="card-actions">
+          <button
+            class="btn btn-secondary btn-sm btn-block-mobile"
+            (click)="viewCallerProfile(call.callerNumber, $event)"
+          >
+            <mat-icon>person_search</mat-icon>
+            <span>Anrufer-Profil</span>
+          </button>
+          <button
+            class="btn btn-primary btn-sm btn-block-mobile"
+            [routerLink]="['/calls/detail']"
+            [queryParams]="{ id: call.id }"
+            (click)="$event.stopPropagation()"
+          >
+            <mat-icon>info</mat-icon>
+            <span>Details ansehen</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <mat-paginator
+      [pageSizeOptions]="[15, 30, 50]"
+      showFirstLastButtons
+      class="custom-paginator"
+    ></mat-paginator>
   </div>
 </div>

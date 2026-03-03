@@ -77,16 +77,14 @@
         <!-- Home / Quick Access Button -->
         <button
           class="home-btn"
-          (click)="toggleQuickAccess()"
-          [class.active]="quickAccessOpen()"
+          routerLink="/quick-access"
+          routerLinkActive="active"
           title="Schnellzugriff"
         >
           <mat-icon>home</mat-icon>
         </button>
 
         <nav class="breadcrumb" aria-label="Breadcrumb">
-          <span class="separator">/</span>
-          <span class="section">Management</span>
           <span class="separator">/</span>
           <span class="current" aria-current="page">{{ getHeaderTitle() }}</span>
         </nav>
@@ -110,13 +108,6 @@
           [class.active]="debugPanelVisible()"
         >
           <mat-icon>bug_report</mat-icon>
-        </button>
-
-        <!-- Language Selector -->
-        <button class="btn-secondary lang-selector" aria-label="Sprache wechseln">
-          <span class="flag">🇩🇪</span>
-          <span class="code">DE</span>
-          <mat-icon>expand_more</mat-icon>
         </button>
 
         <!-- User Menu -->
@@ -156,61 +147,6 @@
         <router-outlet></router-outlet>
       </div>
     </main>
-
-    <!-- Quick Access Body Panel (positioned over main area) -->
-    <div class="qa-body-overlay" *ngIf="quickAccessOpen()" (click)="quickAccessOpen.set(false)">
-      <div class="qa-body-panel" (click)="$event.stopPropagation()">
-        <div class="qa-body-header">
-          <div class="qa-body-title">
-            <mat-icon>grid_view</mat-icon>
-            <span>Schnellzugriff</span>
-          </div>
-          <button class="btn-icon" (click)="quickAccessOpen.set(false)">
-            <mat-icon>close</mat-icon>
-          </button>
-        </div>
-
-        <div class="qa-body-grid">
-          <button class="qa-body-item" (click)="quickAccess('agent')">
-            <div class="qa-body-icon qa-agent">
-              <mat-icon>settings_phone</mat-icon>
-            </div>
-            <span class="qa-body-label">Agent-Profil</span>
-            <span class="qa-body-desc">Profil &amp; Einstellungen</span>
-          </button>
-          <button class="qa-body-item" (click)="quickAccess('kunden')">
-            <div class="qa-body-icon qa-kunden">
-              <mat-icon>contact_page</mat-icon>
-            </div>
-            <span class="qa-body-label">Kunden</span>
-            <span class="qa-body-desc">Anrufhistorie ansehen</span>
-          </button>
-          <button class="qa-body-item" (click)="quickAccess('notizen')">
-            <div class="qa-body-icon qa-notizen">
-              <mat-icon>description</mat-icon>
-            </div>
-            <span class="qa-body-label">Notizen</span>
-            <span class="qa-body-desc">Manuelle Dokumentation</span>
-          </button>
-          <button class="qa-body-item" (click)="quickAccess('hilfe')">
-            <div class="qa-body-icon qa-hilfe">
-              <mat-icon>help_center</mat-icon>
-            </div>
-            <span class="qa-body-label">Hilfe</span>
-            <span class="qa-body-desc">Support &amp; Dokumentation</span>
-          </button>
-        </div>
-
-        <div class="qa-body-footer" [class.connected]="signalR.connectionStatus() === 'connected'">
-          <div class="qa-status-dot"></div>
-          <span>{{
-            signalR.connectionStatus() === 'connected'
-              ? 'System verbunden &amp; bereit'
-              : 'Verbindung wird hergestellt...'
-          }}</span>
-        </div>
-      </div>
-    </div>
   </div>
 </div>
 
