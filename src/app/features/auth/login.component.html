@@ -1,0 +1,105 @@
+<div class="login-page" [@fadeIn]>
+  <div class="login-card animate-fade-in-up">
+    <!-- Logo / Brand -->
+    <div class="login-brand">
+      <div class="brand-logo">
+        <span class="logo-name">dicom</span>
+        <span class="logo-pipe">|</span>
+        <span class="logo-sub">di-1</span>
+      </div>
+      <h1 class="brand-title">Support Call System</h1>
+    </div>
+
+    <!-- Header -->
+    <div class="login-header">
+      <h2>Willkommen zurück</h2>
+      <p>Melden Sie sich mit Ihren Zugangsdaten an</p>
+    </div>
+
+    <!-- Login Form -->
+    <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="login-form">
+      <!-- Email Field -->
+      <div class="login-field">
+        <label class="login-label" for="email">E-Mail-Adresse</label>
+        <div class="input-underline-wrapper">
+          <mat-icon class="field-icon">email</mat-icon>
+          <input
+            id="email"
+            class="input-underline input-with-icon"
+            type="email"
+            formControlName="email"
+            placeholder="email@dicom.de"
+            autocomplete="username"
+          />
+        </div>
+        <div class="field-error-msg" *ngIf="loginForm.get('email')?.touched">
+          <span *ngIf="loginForm.get('email')?.hasError('required')">E-Mail ist erforderlich</span>
+          <span *ngIf="loginForm.get('email')?.hasError('email')">Ungültiges E-Mail-Format</span>
+        </div>
+      </div>
+
+      <!-- Password Field -->
+      <div class="login-field">
+        <div class="label-row">
+          <label class="login-label" for="password">Passwort</label>
+          <a href="#" class="forgot-link">Passwort vergessen?</a>
+        </div>
+        <div class="input-underline-wrapper">
+          <mat-icon class="field-icon">lock</mat-icon>
+          <input
+            id="password"
+            class="input-underline input-with-icon"
+            [type]="hidePassword() ? 'password' : 'text'"
+            formControlName="password"
+            placeholder="••••••••"
+            autocomplete="current-password"
+          />
+          <button
+            type="button"
+            class="toggle-password"
+            (click)="togglePassword($event)"
+            [attr.aria-label]="'Passwort-Sichtbarkeit umschalten'"
+          >
+            <mat-icon>{{ hidePassword() ? 'visibility' : 'visibility_off' }}</mat-icon>
+          </button>
+        </div>
+        <div class="field-error-msg" *ngIf="loginForm.get('password')?.touched">
+          <span *ngIf="loginForm.get('password')?.hasError('required')"
+            >Passwort ist erforderlich</span
+          >
+        </div>
+      </div>
+
+      <!-- Remember Me -->
+      <div class="login-options">
+        <label class="custom-checkbox">
+          <input type="checkbox" formControlName="rememberMe" />
+          <span class="checkmark"></span>
+          <span class="label-text">Angemeldet bleiben</span>
+        </label>
+      </div>
+
+      <!-- Submit Button -->
+      <button
+        type="submit"
+        class="btn btn-primary btn-block login-submit"
+        [disabled]="loginForm.invalid || isLoading()"
+      >
+        <ng-container *ngIf="!isLoading()">
+          Anmelden
+          <mat-icon>arrow_forward</mat-icon>
+        </ng-container>
+        <mat-spinner diameter="22" *ngIf="isLoading()"></mat-spinner>
+      </button>
+    </form>
+
+    <!-- Footer -->
+    <footer class="login-footer">
+      <p>
+        Support benötigt?
+        <a href="mailto:support@dicom.de">support&#64;dicom.de</a>
+      </p>
+      <p class="copyright">&copy; 2026 dicom GmbH</p>
+    </footer>
+  </div>
+</div>

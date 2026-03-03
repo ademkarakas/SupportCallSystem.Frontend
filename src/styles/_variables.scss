@@ -1,0 +1,142 @@
+// ============================================================================
+// SUPPORT CALL MANAGEMENT SYSTEM - Design Token System
+// ============================================================================
+// Version: 2.0.0
+// Description: CSS Custom Properties-based design system
+// Specification: Matches reference app design exactly
+// ============================================================================
+
+// This file defines all design tokens as CSS custom properties for:
+// - Light/dark mode support via theme switching
+// - Easy maintenance and updates
+// - Runtime theme customization
+// These are applied in styles.scss
+
+// ============================================================================
+// SCSS HELPER VARIABLES (for use in SCSS only, not runtime)
+// ============================================================================
+
+// Spacing System (8px grid)
+$spacing-0: 0;
+$spacing-1: 4px;
+$spacing-2: 8px;
+$spacing-3: 12px;
+$spacing-4: 16px;
+$spacing-5: 20px;
+$spacing-6: 24px;
+$spacing-8: 32px;
+$spacing-10: 40px;
+$spacing-12: 48px;
+$spacing-16: 64px;
+$spacing-20: 80px;
+$spacing-24: 96px;
+
+// Spacing Semantic Aliases
+$spacing-xs: $spacing-1; // 4px
+$spacing-sm: $spacing-2; // 8px
+$spacing-md: $spacing-4; // 16px
+$spacing-lg: $spacing-6; // 24px
+$spacing-xl: $spacing-8; // 32px
+
+// Font Weights
+$font-light: 300;
+$font-normal: 400;
+$font-medium: 500;
+$font-semibold: 600;
+$font-bold: 700;
+$font-extrabold: 800;
+
+// Responsive Breakpoints
+$breakpoint-sm: 640px;
+$breakpoint-md: 768px;
+$breakpoint-lg: 1024px;
+$breakpoint-xl: 1280px;
+$breakpoint-2xl: 1536px;
+
+// Z-Index Scale
+$z-base: 1;
+$z-dropdown: 1000;
+$z-sticky: 1020;
+$z-fixed: 1030;
+$z-modal-backdrop: 1040;
+$z-modal: 1050;
+$z-popover: 1060;
+$z-tooltip: 1070;
+$z-overlay: 1090;
+$z-sidebar: 1100;
+
+// Transition Timing Functions
+$ease-in-out: cubic-bezier(0.4, 0, 0.2, 1);
+$ease-out: cubic-bezier(0, 0, 0.2, 1);
+$ease-in: cubic-bezier(0.4, 0, 1, 1);
+$ease-smooth: cubic-bezier(0.4, 0, 0.2, 1);
+
+// Animation Durations
+$duration-fast: 150ms;
+$duration-base: 200ms;
+$duration-medium: 300ms;
+$duration-slow: 500ms;
+
+// Border Radius Scale
+$radius-xs: 4px;
+$radius-sm: 6px;
+$radius-md: 8px;
+$radius-lg: 12px;
+$radius-xl: 16px;
+$radius-badge: 20px;
+$radius-full: 9999px;
+
+// ============================================================================
+// MIXINS FOR COMMON PATTERNS
+// ============================================================================
+
+// Responsive breakpoint mixin
+@mixin respond-to($breakpoint) {
+  @if $breakpoint == 'sm' {
+    @media (min-width: #{$breakpoint-sm}) {
+      @content;
+    }
+  } @else if $breakpoint == 'md' {
+    @media (min-width: #{$breakpoint-md}) {
+      @content;
+    }
+  } @else if $breakpoint == 'lg' {
+    @media (min-width: #{$breakpoint-lg}) {
+      @content;
+    }
+  } @else if $breakpoint == 'xl' {
+    @media (min-width: #{$breakpoint-xl}) {
+      @content;
+    }
+  } @else if $breakpoint == '2xl' {
+    @media (min-width: #{$breakpoint-2xl}) {
+      @content;
+    }
+  }
+}
+
+// Mobile-first responsive
+@mixin mobile-only {
+  @media (max-width: #{$breakpoint-md - 1px}) {
+    @content;
+  }
+}
+
+@mixin tablet-up {
+  @media (min-width: #{$breakpoint-md}) {
+    @content;
+  }
+}
+
+// Focus visible styles
+@mixin focus-outline {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
+// Truncate text with ellipsis
+@mixin truncate {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}

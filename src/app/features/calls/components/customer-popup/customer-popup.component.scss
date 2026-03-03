@@ -1,0 +1,167 @@
+@use 'sass:color';
+
+.customer-popup {
+  padding: 0;
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  background-color: var(--color-card-bg);
+  box-shadow: var(--shadow-xl);
+  border: 1px solid var(--color-card-border);
+}
+
+.popup-inner {
+  display: flex;
+  flex-direction: column;
+}
+
+// ============================================================================
+// DIALOG HEADER
+// ============================================================================
+
+.dialog-header {
+  padding: 24px;
+  background-color: var(--color-main-bg);
+  border-bottom: 1px solid var(--color-card-border);
+  text-align: center;
+
+  .call-status {
+    margin-bottom: 12px;
+    display: flex;
+    justify-content: center;
+  }
+
+  .status-indicator {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 4px 12px;
+    background-color: rgba(16, 185, 129, 0.1);
+    border-radius: var(--radius-full);
+
+    .pulse-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background-color: #10b981;
+      animation: pulse 2s infinite;
+    }
+
+    .status-label {
+      font-size: 11px;
+      font-weight: 600;
+      color: #059669;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+  }
+
+  .caller-id {
+    .number {
+      font-size: 24px;
+      font-weight: 700;
+      color: var(--color-text-primary);
+      margin: 0;
+      letter-spacing: 0.05em;
+    }
+  }
+}
+
+// ============================================================================
+// DIALOG BODY
+// ============================================================================
+
+.dialog-body {
+  padding: 32px 24px;
+}
+
+.customer-card-premium {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  padding: 24px;
+  background-color: var(--color-main-bg);
+  border: 1px solid var(--color-card-border);
+  border-radius: var(--radius-lg);
+  position: relative;
+
+  .avatar-area {
+    position: relative;
+
+    .avatar {
+      width: 64px;
+      height: 64px;
+      background-color: var(--color-primary);
+      color: #ffffff;
+      border-radius: var(--radius-md);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+      font-weight: 600;
+
+      &.unknown {
+        background-color: var(--color-status-neutral-bg);
+        color: var(--color-text-secondary);
+      }
+    }
+
+    .verified-icon {
+      position: absolute;
+      bottom: -6px;
+      right: -6px;
+      width: 24px;
+      height: 24px;
+      background-color: #10b981;
+      color: #ffffff;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: 3px solid var(--color-main-bg);
+
+      mat-icon {
+        font-size: 14px;
+        width: 14px;
+        height: 14px;
+      }
+    }
+  }
+
+  .info-area {
+    .name {
+      font-size: 18px;
+      font-weight: 600;
+      color: var(--color-text-primary);
+      margin: 0 0 4px;
+    }
+
+    .email {
+      font-size: 14px;
+      color: var(--color-text-secondary);
+      margin: 0 0 12px;
+    }
+  }
+}
+
+// ============================================================================
+// DIALOG FOOTER
+// ============================================================================
+
+.dialog-footer {
+  padding: 24px;
+  display: flex;
+  gap: 16px;
+  border-top: 1px solid var(--color-card-border);
+}
+
+@keyframes pulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.4);
+  }
+  70% {
+    box-shadow: 0 0 0 10px rgba(16, 185, 129, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(16, 185, 129, 0);
+  }
+}

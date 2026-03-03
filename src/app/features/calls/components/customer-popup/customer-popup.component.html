@@ -1,0 +1,64 @@
+<div class="customer-popup" [@slideUp]>
+  <div class="popup-inner">
+    <!-- Header with Pulse Animation -->
+    <header class="dialog-header">
+      <div class="call-status">
+        <div class="status-indicator">
+          <div class="pulse-dot"></div>
+          <span class="status-label">Anruf wird signalisiert...</span>
+        </div>
+      </div>
+      <div class="caller-id">
+        <h2 class="number">{{ data.callerNumber }}</h2>
+      </div>
+    </header>
+
+    <!-- Customer Card -->
+    <main class="dialog-body">
+      <div class="customer-card-premium" *ngIf="data.customer; else unidentified" [@fadeIn]>
+        <div class="avatar-area">
+          <div class="avatar">{{ data.customer.firstName[0] }}{{ data.customer.lastName[0] }}</div>
+          <div class="verified-icon">
+            <mat-icon>verified</mat-icon>
+          </div>
+        </div>
+        <div class="info-area">
+          <h3 class="name">{{ data.customer.firstName }} {{ data.customer.lastName }}</h3>
+          <p class="email">{{ data.customer.email }}</p>
+          <div class="badge-row">
+            <span class="badge badge-active">Kunde identifiziert</span>
+          </div>
+        </div>
+      </div>
+
+      <ng-template #unidentified>
+        <div class="customer-card-premium unidentified" [@fadeIn]>
+          <div class="avatar-area">
+            <div class="avatar unknown">
+              <mat-icon>person_search</mat-icon>
+            </div>
+          </div>
+          <div class="info-area">
+            <h3 class="name">Unbekannter Anrufer</h3>
+            <p class="email">Keine Daten in der Datenbank gefunden.</p>
+            <div class="badge-row">
+              <span class="badge badge-inactive">Neuer Kontakt</span>
+            </div>
+          </div>
+        </div>
+      </ng-template>
+    </main>
+
+    <!-- Actions -->
+    <footer class="dialog-footer">
+      <button class="btn btn-secondary w-full" (click)="onReject()">
+        <mat-icon>call_end</mat-icon>
+        Ablehnen
+      </button>
+      <button class="btn btn-primary w-full shadow-lg" (click)="onAccept()">
+        <mat-icon>call</mat-icon>
+        Anruf annehmen
+      </button>
+    </footer>
+  </div>
+</div>

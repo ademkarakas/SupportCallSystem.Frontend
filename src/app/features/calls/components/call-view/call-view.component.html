@@ -1,0 +1,215 @@
+<div class="workspace-page page-enter" *ngIf="call()">
+  <!-- Page Header -->
+  <header class="page-header">
+    <div class="header-content">
+      <div class="title-row">
+        <h1 class="page-title">{{ call()?.customerName || 'Unbekannter Kunde' }}</h1>
+        <div class="call-status-badge" [class.live]="isRecording()" [class.ended]="!isRecording()">
+          <span class="pulse" *ngIf="isRecording()"></span>
+          <mat-icon *ngIf="!isRecording()">check_circle</mat-icon>
+          {{ isRecording() ? 'Live-Gespräch' : 'Anruf Beendet' }}
+        </div>
+      </div>
+      <div class="subtitle-row">
+        <span class="info-tag">NFON: {{ call()?.nfonCallId || 'Simuliert' }}</span>
+        <span class="separator">•</span>
+        <app-call-timer
+          [startTime]="call()!.startTime"
+          [endTime]="call()?.endTime"
+        ></app-call-timer>
+      </div>
+    </div>
+    <div class="header-actions">
+      <button
+        class="btn btn-secondary btn-sm"
+        *ngIf="call()?.callerNumber"
+        (click)="
+          router.navigate(['/calls/caller-profile'], {
+            queryParams: { phone: call()!.callerNumber },
+          })
+        "
+        title="Alle Anrufe dieser Nummer anzeigen"
+      >
+        <mat-icon>manage_search</mat-icon>
+        Anrufer-Profil
+      </button>
+      <button class="btn btn-danger-filled" *ngIf="isRecording()" (click)="endCall()">
+        <mat-icon>call_end</mat-icon>
+        Gespräch beenden
+      </button>
+    </div>
+  </header>
+
+  <!-- Workspace Layout -->
+  <div class="workspace-layout">
+    <!-- Main Intelligence Panel -->
+    <div class="card intelligence-panel">
+      <div class="card-header">
+        <div class="flex items-center gap-2">
+          <mat-icon class="color-primary">auto_fix_high</mat-icon>
+          <h3>INTELLIGENTE DOKUMENTATION</h3>
+        </div>
+        <span class="badge badge-active" *ngIf="isRecording()">AI MITSCHRIFT AKTIV</span>
+      </div>
+
+      <div class="panel-body">
+        <!-- AI Consent Workflow -->
+        <div
+          class="banner consent-banner"
+          *ngIf="call()?.consent === 'NotAsked' || call()?.consent === 0"
+        >
+          <div class="banner-content">
+            <div class="icon-box">
+              <mat-icon>privacy_tip</mat-icon>
+            </div>
+            <div class="text-box">
+              <p class="title">KI-Analyse freischalten?</p>
+              <p class="desc">
+                Fragen Sie den Kunden nach seiner Einwilligung zur Gesprächsanalyse.
+              </p>
+            </div>
+          </div>
+          <div class="banner-actions">
+            <button class="btn btn-primary btn-sm" (click)="grantConsent()">
+              <mat-icon>check</mat-icon> Einwilligung erteilt
+            </button>
+            <button class="btn btn-secondary btn-sm" (click)="declineConsent()">
+              <mat-icon>block</mat-icon> Ablehnen
+            </button>
+          </div>
+        </div>
+
+        <!-- AI Documentation Content -->
+        <div
+          class="documentation-content"
+          [class.loading]="!call()?.draftSummary && !isProcessingManual()"
+        >
+          <div class="content-viewport" *ngIf="call()?.draftSummary; else emptyState">
+            <div class="summary-section">
+              <label class="section-label">KI-ZUSAMMENFASSUNG</label>
+              <div class="text-card">
+                <p>{{ call()?.draftSummary }}</p>
+              </div>
+            </div>
+
+            <div class="actions-section" *ngIf="call()?.actionItems?.length">
+              <label class="section-label">NACHFASS-AKTIONEN</label>
+              <ul class="action-list">
+                <li *ngFor="let item of call()?.actionItems">
+                  <mat-icon>task_alt</mat-icon>
+                  <span>{{ item }}</span>
+                </li>
+              </ul>
+            </div>
+          </div>
+
+          <ng-template #emptyState>
+            <div class="ai-empty-state">
+              <!-- Case: Waiting for Consent -->
+              <div
+                *ngIf="call()?.consent === 'NotAsked' || call()?.consent === 0"
+                class="state-box"
+              >
+                <mat-icon>history_edu</mat-icon>
+                <p>KI wartet auf Ihre Freigabe oben...</p>
+              </div>
+
+              <!-- Case: Processing -->
+              <div
+                class="state-box processing"
+                *ngIf="isRecording() && (call()?.consent === 'Granted' || call()?.consent === 1)"
+              >
+                <mat-progress-spinner mode="indeterminate" diameter="48"></mat-progress-spinner>
+                <h3>Gemini 1.5 hört zu...</h3>
+                <p>Das Gespräch wird live dokumentiert.</p>
+              </div>
+
+              <!-- Case: Call Ended, Waiting for AI -->
+              <div
+                class="state-box processing"
+                *ngIf="
+                  !isRecording() &&
+                  (call()?.consent === 'Granted' || call()?.consent === 1) &&
+                  !call()?.draftSummary &&
+                  !isProcessingManual()
+                "
+              >
+                <mat-progress-spinner mode="indeterminate" diameter="48"></mat-progress-spinner>
+                <h3>Finalisierung...</h3>
+                <p>KI-Bericht wird erstellt.</p>
+              </div>
+
+              <!-- Case: Manual AI Tidy Up in progress -->
+              <div class="state-box processing" *ngIf="isProcessingManual()">
+                <mat-progress-spinner mode="indeterminate" diameter="48"></mat-progress-spinner>
+                <h3>KI optimiert Notizen...</h3>
+                <p>Bitte einen Moment Geduld.</p>
+              </div>
+            </div>
+          </ng-template>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right Sidebar: Form Panel -->
+    <div class="card form-panel">
+      <div class="card-header">
+        <h3>Abschluss & Dokumentation</h3>
+      </div>
+
+      <div class="form-container">
+        <form [formGroup]="approvalForm" class="modern-form">
+          <div class="form-group">
+            <label class="field-label">Gespräch einordnen</label>
+            <mat-form-field appearance="outline" class="w-full">
+              <mat-select formControlName="category" placeholder="Kategorie wählen">
+                <mat-option value="TechnicalIssue">Technisches Problem</mat-option>
+                <mat-option value="BillingQuestion">Abrechnung/Rechnung</mat-option>
+                <mat-option value="AccessCredentials">Zugangsdaten</mat-option>
+                <mat-option value="GeneralInquiry">Allgemeine Anfrage</mat-option>
+                <mat-option value="Complaint">Beschwerde</mat-option>
+                <mat-option value="FeatureRequest">Funktionswunsch</mat-option>
+              </mat-select>
+            </mat-form-field>
+          </div>
+
+          <div class="form-group">
+            <div class="flex justify-between items-center mb-2">
+              <label class="field-label">Dokumentation</label>
+              <span class="char-count"
+                >{{ approvalForm.get('summary')?.value?.length || 0 }}/500</span
+              >
+            </div>
+            <mat-form-field appearance="outline" class="w-full">
+              <textarea
+                matInput
+                rows="10"
+                formControlName="summary"
+                placeholder="Was wurde gelöst? Welche nächsten Schritte?"
+              ></textarea>
+            </mat-form-field>
+          </div>
+
+          <div class="form-actions">
+            <button
+              class="btn btn-primary w-full shadow-lg"
+              (click)="onApprove()"
+              [disabled]="!isApprovable() || isSubmitting()"
+            >
+              <mat-icon>{{ isSubmitting() ? 'hourglass_empty' : 'done_all' }}</mat-icon>
+              {{ isSubmitting() ? 'Speichert...' : 'Vorgang abschließen' }}
+            </button>
+            <button
+              class="btn btn-secondary w-full"
+              (click)="tidyUpManualNotes()"
+              [disabled]="!approvalForm.get('summary')?.value || isProcessingManual()"
+            >
+              <mat-icon>auto_fix_high</mat-icon>
+              KI-Notizhilfe
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>

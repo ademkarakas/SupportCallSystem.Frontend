@@ -1,0 +1,177 @@
+<!-- Loading State -->
+<div class="detail-loading" *ngIf="isLoading()">
+  <div class="loading-spinner"></div>
+  <p>Anrufdetails werden geladen…</p>
+</div>
+
+<!-- Call Detail Page -->
+<div class="call-detail-page page-enter" [@fadeIn] *ngIf="!isLoading() && call() as c">
+  <!-- Page Header -->
+  <header class="page-header">
+    <div class="page-header-left">
+      <div class="breadcrumb">
+        <span class="breadcrumb-item">
+          <a routerLink="/dashboard">Dashboard</a>
+        </span>
+        <span class="breadcrumb-item active">Anrufdetails</span>
+      </div>
+      <div class="page-title-row">
+        <h1 class="page-title">{{ c.customerName || 'Unbekannter Kunde' }}</h1>
+        <span class="badge" [ngClass]="getSummaryStatusClass(c.summaryStatus)">
+          {{ getSummaryStatusLabel(c.summaryStatus) }}
+        </span>
+      </div>
+      <p class="page-subtitle">Anruf-ID: {{ c.id }}</p>
+    </div>
+    <div class="page-header-actions">
+      <button class="btn btn-secondary" (click)="goBack()">
+        <mat-icon>arrow_back</mat-icon>
+        Zurück
+      </button>
+      <button
+        class="btn btn-primary"
+        (click)="openInCallView()"
+        *ngIf="c.summaryStatus === 'Draft'"
+      >
+        <mat-icon>edit_note</mat-icon>
+        Im Arbeitsbereich öffnen
+      </button>
+    </div>
+  </header>
+
+  <!-- Content Grid -->
+  <div class="detail-grid">
+    <!-- Left Column: Main Info -->
+    <div class="detail-main">
+      <!-- Meta Card -->
+      <div class="card detail-card">
+        <div class="card-header">
+          <span class="card-title">
+            <mat-icon>info_outline</mat-icon>
+            Anruf-Informationen
+          </span>
+        </div>
+        <div class="card-body meta-grid">
+          <div class="meta-item">
+            <span class="meta-label">Kunde</span>
+            <span class="meta-value">{{ c.customerName || 'Unbekannt' }}</span>
+          </div>
+          <div class="meta-item">
+            <span class="meta-label">Kategorie</span>
+            <span class="badge badge-neutral">{{ c.category || '—' }}</span>
+          </div>
+          <div class="meta-item">
+            <span class="meta-label">KI-Einwilligung</span>
+            <span class="badge" [ngClass]="getConsentClass(c.consent)">
+              {{ getConsentLabel(c.consent) }}
+            </span>
+          </div>
+          <div class="meta-item">
+            <span class="meta-label">Status</span>
+            <span class="badge" [ngClass]="getSummaryStatusClass(c.summaryStatus)">
+              {{ getSummaryStatusLabel(c.summaryStatus) }}
+            </span>
+          </div>
+          <div class="meta-item">
+            <span class="meta-label">Startzeit</span>
+            <span class="meta-value">{{ c.startTime | date: 'dd.MM.yyyy, HH:mm' }}</span>
+          </div>
+          <div class="meta-item">
+            <span class="meta-label">Endzeit</span>
+            <span class="meta-value">{{
+              c.endTime ? (c.endTime | date: 'dd.MM.yyyy, HH:mm') : '—'
+            }}</span>
+          </div>
+          <div class="meta-item">
+            <span class="meta-label">Dauer</span>
+            <span class="meta-value">{{ formatDuration(c.durationSeconds) }}</span>
+          </div>
+          <div class="meta-item" *ngIf="c.nfonCallId">
+            <span class="meta-label">NFON Anruf-ID</span>
+            <span class="meta-value mono">{{ c.nfonCallId }}</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Approved Summary Card -->
+      <div class="card detail-card" *ngIf="c.approvedSummary">
+        <div class="card-header">
+          <span class="card-title">
+            <mat-icon class="icon-success">task_alt</mat-icon>
+            Genehmigte Zusammenfassung
+          </span>
+          <span class="badge badge-active">Genehmigt</span>
+        </div>
+        <div class="card-body">
+          <p class="summary-text">{{ c.approvedSummary }}</p>
+        </div>
+      </div>
+
+      <!-- Draft Summary Card -->
+      <div class="card detail-card" *ngIf="c.draftSummary && !c.approvedSummary">
+        <div class="card-header">
+          <span class="card-title">
+            <mat-icon class="icon-warning">auto_fix_high</mat-icon>
+            KI-Entwurf
+          </span>
+          <span class="badge badge-neutral">Ausstehende Genehmigung</span>
+        </div>
+        <div class="card-body">
+          <p class="summary-text">{{ c.draftSummary }}</p>
+          <div class="draft-hint">
+            <mat-icon>info</mat-icon>
+            <span>Dieser Entwurf wurde noch nicht genehmigt.</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- No Summary State -->
+      <div
+        class="card detail-card empty-summary-card"
+        *ngIf="!c.draftSummary && !c.approvedSummary"
+      >
+        <div class="card-body empty-state-inner">
+          <mat-icon>description</mat-icon>
+          <p>Noch keine Zusammenfassung vorhanden.</p>
+          <button class="btn btn-primary btn-sm" (click)="openInCallView()">
+            <mat-icon>edit_note</mat-icon>
+            Jetzt dokumentieren
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right Column: Action Items -->
+    <div class="detail-sidebar">
+      <div
+        class="card detail-card action-items-card"
+        *ngIf="c.actionItems && c.actionItems.length > 0; else noActions"
+      >
+        <div class="card-header">
+          <span class="card-title">
+            <mat-icon>checklist</mat-icon>
+            Nachfass-Aktionen
+          </span>
+          <span class="badge badge-count">{{ c.actionItems.length }}</span>
+        </div>
+        <div class="card-body">
+          <ul class="action-item-list">
+            <li *ngFor="let item of c.actionItems; let i = index" class="action-item-row">
+              <span class="action-index">{{ i + 1 }}</span>
+              <span class="action-text">{{ item }}</span>
+            </li>
+          </ul>
+        </div>
+      </div>
+
+      <ng-template #noActions>
+        <div class="card detail-card">
+          <div class="card-body empty-state-inner">
+            <mat-icon>checklist</mat-icon>
+            <p>Keine Nachfass-Aktionen.</p>
+          </div>
+        </div>
+      </ng-template>
+    </div>
+  </div>
+</div>

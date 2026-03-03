@@ -1,0 +1,77 @@
+@use 'sass:color';
+
+.reports-page {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xl);
+}
+
+// Page Header uses global .page-header styles from styles.scss
+
+.reports-empty-card {
+  padding: 0;
+
+  .card-body {
+    padding: var(--spacing-2xl);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    gap: var(--spacing-md);
+    min-height: 320px;
+  }
+}
+
+.empty-icon-wrapper {
+  width: 80px;
+  height: 80px;
+  background-color: var(--color-primary-light);
+  border-radius: var(--radius-full);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: var(--spacing-sm);
+
+  mat-icon {
+    font-size: 36px;
+    width: 36px;
+    height: 36px;
+    color: var(--color-primary);
+  }
+}
+
+.empty-title {
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-primary);
+  margin: 0;
+}
+
+.empty-desc {
+  font-size: var(--font-size-base);
+  color: var(--color-text-secondary);
+  max-width: 380px;
+  line-height: 1.6;
+  margin: 0;
+}
+
+.coming-soon-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  margin-top: var(--spacing-sm);
+  padding: 6px 16px;
+  background-color: var(--color-status-neutral-bg);
+  color: var(--color-text-secondary);
+  border-radius: var(--radius-badge);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+
+  mat-icon {
+    font-size: 16px;
+    width: 16px;
+    height: 16px;
+    color: var(--color-text-secondary);
+  }
+}

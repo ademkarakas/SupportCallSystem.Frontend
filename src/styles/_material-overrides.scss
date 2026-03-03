@@ -1,0 +1,487 @@
+// ============================================================================
+// ANGULAR MATERIAL THEME OVERRIDES
+// ============================================================================
+// Overrides Material Design defaults to match our custom design system.
+// Import this file AFTER the Material theme in styles.scss.
+// ============================================================================
+
+// ============================================================================
+// FORM FIELDS (mat-form-field)
+// ============================================================================
+
+.mat-mdc-form-field {
+  width: 100%;
+
+  // Outline appearance — match our radius and border color
+  &.mat-mdc-form-field-type-mat-input,
+  &.mat-mdc-form-field-type-mat-select,
+  &.mat-mdc-form-field-type-mat-textarea {
+    .mdc-notched-outline {
+      .mdc-notched-outline__leading,
+      .mdc-notched-outline__notch,
+      .mdc-notched-outline__trailing {
+        border-color: var(--color-input-border) !important;
+        transition: border-color var(--transition-base);
+      }
+
+      .mdc-notched-outline__leading {
+        border-radius: var(--radius-sm) 0 0 var(--radius-sm) !important;
+      }
+
+      .mdc-notched-outline__trailing {
+        border-radius: 0 var(--radius-sm) var(--radius-sm) 0 !important;
+      }
+    }
+
+    // Focus state — teal border
+    &.mdc-text-field--focused .mdc-notched-outline {
+      .mdc-notched-outline__leading,
+      .mdc-notched-outline__notch,
+      .mdc-notched-outline__trailing {
+        border-color: var(--color-input-focus) !important;
+        border-width: 1.5px !important;
+      }
+    }
+
+    // Error state
+    &.mdc-text-field--invalid .mdc-notched-outline {
+      .mdc-notched-outline__leading,
+      .mdc-notched-outline__notch,
+      .mdc-notched-outline__trailing {
+        border-color: var(--color-danger) !important;
+      }
+    }
+
+    // Input text color
+    .mat-mdc-input-element,
+    .mdc-text-field__input {
+      color: var(--color-text-primary) !important;
+      caret-color: var(--color-primary) !important;
+    }
+
+    // Background
+    .mat-mdc-text-field-wrapper {
+      background-color: var(--color-card-bg) !important;
+    }
+  }
+}
+
+// Label color
+.mat-mdc-form-field .mat-mdc-floating-label,
+.mat-mdc-form-field .mat-mdc-form-field-label {
+  color: var(--color-text-secondary) !important;
+}
+
+// Focused label color
+.mat-mdc-form-field.mat-focused .mat-mdc-floating-label,
+.mat-mdc-form-field.mat-focused .mat-mdc-form-field-label {
+  color: var(--color-primary) !important;
+}
+
+// Error label color
+.mat-mdc-form-field-error {
+  color: var(--color-danger) !important;
+  font-size: var(--font-size-xs) !important;
+}
+
+// Prefix/suffix icons
+.mat-mdc-form-field-icon-prefix mat-icon,
+.mat-mdc-form-field-icon-suffix mat-icon {
+  color: var(--color-text-tertiary);
+}
+
+.mat-mdc-form-field.mat-focused .mat-mdc-form-field-icon-prefix mat-icon,
+.mat-mdc-form-field.mat-focused .mat-mdc-form-field-icon-suffix mat-icon {
+  color: var(--color-primary);
+}
+
+// ============================================================================
+// SELECT (mat-select)
+// ============================================================================
+
+.mat-mdc-select-value {
+  color: var(--color-text-primary) !important;
+}
+
+.mat-mdc-select-placeholder {
+  color: var(--color-text-tertiary) !important;
+}
+
+.mat-mdc-select-arrow {
+  color: var(--color-text-secondary) !important;
+}
+
+// Select panel dropdown
+.mat-mdc-select-panel {
+  background-color: var(--color-card-bg) !important;
+  border: 1px solid var(--color-card-border) !important;
+  border-radius: var(--radius-md) !important;
+  box-shadow: var(--shadow-md) !important;
+}
+
+.mat-mdc-option {
+  color: var(--color-text-primary) !important;
+  font-size: var(--font-size-base) !important;
+
+  &:hover {
+    background-color: var(--color-nav-active-bg) !important;
+  }
+
+  &.mdc-list-item--selected {
+    background-color: var(--color-primary-light) !important;
+    color: var(--color-primary) !important;
+  }
+}
+
+// ============================================================================
+// BUTTONS (mat-button / mat-raised-button)
+// ============================================================================
+
+// Base override — use our font
+.mat-mdc-button,
+.mat-mdc-raised-button,
+.mat-mdc-outlined-button,
+.mat-mdc-icon-button,
+.mat-mdc-fab {
+  font-family: var(--font-family) !important;
+  letter-spacing: 0 !important;
+  border-radius: var(--radius-sm) !important;
+}
+
+// Icon buttons
+.mat-mdc-icon-button {
+  border-radius: var(--radius-full) !important;
+  transition:
+    background-color var(--transition-fast),
+    color var(--transition-fast) !important;
+  color: var(--color-text-secondary) !important;
+
+  &:hover {
+    background-color: var(--color-nav-active-bg) !important;
+    color: var(--color-primary) !important;
+  }
+}
+
+// ============================================================================
+// MENU (mat-menu)
+// ============================================================================
+
+.mat-mdc-menu-panel {
+  background-color: var(--color-card-bg) !important;
+  border: 1px solid var(--color-card-border) !important;
+  border-radius: var(--radius-md) !important;
+  box-shadow: var(--shadow-md) !important;
+  min-width: 180px !important;
+  padding: 4px 0 !important;
+}
+
+.mat-mdc-menu-content {
+  padding: 4px 0 !important;
+}
+
+.mat-mdc-menu-item {
+  min-height: 40px !important;
+  padding: 0 16px !important;
+  color: var(--color-text-primary) !important;
+  font-size: var(--font-size-base) !important;
+
+  .mat-icon {
+    color: var(--color-text-secondary);
+    margin-right: 12px !important;
+    font-size: 20px;
+    width: 20px;
+    height: 20px;
+  }
+
+  &:hover:not([disabled]) {
+    background-color: var(--color-nav-active-bg) !important;
+  }
+}
+
+// ============================================================================
+// DIALOG (mat-dialog)
+// ============================================================================
+
+.mat-mdc-dialog-container {
+  .mdc-dialog__surface {
+    background-color: var(--color-card-bg) !important;
+    border-radius: var(--radius-xl) !important;
+    box-shadow: var(--shadow-xl) !important;
+    border: 1px solid var(--color-card-border) !important;
+  }
+}
+
+.mat-mdc-dialog-title {
+  color: var(--color-text-primary) !important;
+  font-size: var(--font-size-lg) !important;
+  font-weight: var(--font-weight-semibold) !important;
+  padding: 24px 24px 0 !important;
+}
+
+.mat-mdc-dialog-content {
+  color: var(--color-text-secondary) !important;
+  font-size: var(--font-size-base) !important;
+  padding: 16px 24px !important;
+}
+
+.mat-mdc-dialog-actions {
+  padding: 8px 24px 24px !important;
+  gap: 8px !important;
+}
+
+// Customer popup dialog — remove default dialog padding for flush layout
+.customer-popup-dialog {
+  .mdc-dialog__surface {
+    padding: 0 !important;
+    overflow: hidden !important;
+  }
+
+  .mat-mdc-dialog-container {
+    padding: 0 !important;
+  }
+}
+
+// User settings dialog — flush layout with rounded corners
+.user-settings-dialog {
+  .mdc-dialog__surface {
+    padding: 0 !important;
+    overflow: hidden !important;
+    border-radius: var(--radius-lg) !important;
+    box-shadow: var(--shadow-xl) !important;
+  }
+
+  .mat-mdc-dialog-container {
+    padding: 0 !important;
+  }
+}
+
+// ============================================================================
+// TABLE (mat-table)
+// ============================================================================
+
+.mat-mdc-table {
+  background-color: transparent !important;
+  width: 100%;
+}
+
+.mat-mdc-header-row {
+  background-color: var(--color-table-header-bg) !important;
+  height: 44px !important;
+}
+
+.mat-mdc-header-cell {
+  color: var(--color-text-secondary) !important;
+  font-size: var(--font-size-xs) !important;
+  font-weight: var(--font-weight-semibold) !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.05em !important;
+  border-bottom-color: var(--color-table-border) !important;
+  padding: 0 16px !important;
+}
+
+.mat-mdc-row {
+  height: 48px !important;
+  border-bottom-color: var(--color-table-border) !important;
+  transition: background-color var(--transition-fast) !important;
+
+  &:hover {
+    background-color: var(--color-table-row-hover) !important;
+  }
+
+  &:nth-child(even) {
+    background-color: var(--color-table-row-alt) !important;
+
+    &:hover {
+      background-color: var(--color-table-row-hover) !important;
+    }
+  }
+
+  &:last-child td {
+    border-bottom: none !important;
+  }
+}
+
+.mat-mdc-cell {
+  color: var(--color-text-primary) !important;
+  font-size: var(--font-size-base) !important;
+  border-bottom-color: var(--color-table-border) !important;
+  padding: 0 16px !important;
+}
+
+// Sort header arrows
+.mat-sort-header-arrow {
+  color: var(--color-text-tertiary) !important;
+}
+
+.mat-sort-header-container.mat-sort-header-sorted .mat-sort-header-arrow {
+  color: var(--color-primary) !important;
+}
+
+// ============================================================================
+// PAGINATOR (mat-paginator)
+// ============================================================================
+
+.mat-mdc-paginator {
+  background-color: var(--color-pagination-bg) !important;
+  border-top: 1px solid var(--color-table-border) !important;
+  color: var(--color-text-secondary) !important;
+  font-size: var(--font-size-sm) !important;
+}
+
+.mat-mdc-paginator-range-label,
+.mat-mdc-paginator-page-size-label {
+  color: var(--color-text-secondary) !important;
+  font-size: var(--font-size-sm) !important;
+}
+
+.mat-mdc-paginator-navigation-previous,
+.mat-mdc-paginator-navigation-next,
+.mat-mdc-paginator-navigation-first,
+.mat-mdc-paginator-navigation-last {
+  color: var(--color-text-secondary) !important;
+  border: 1px solid var(--color-button-border) !important;
+  border-radius: var(--radius-sm) !important;
+  width: 32px !important;
+  height: 32px !important;
+
+  &:hover:not([disabled]) {
+    background-color: var(--color-nav-active-bg) !important;
+    color: var(--color-primary) !important;
+    border-color: var(--color-primary) !important;
+  }
+
+  &[disabled] {
+    opacity: 0.35 !important;
+  }
+}
+
+.mat-mdc-paginator .mat-mdc-select {
+  .mat-mdc-select-value {
+    color: var(--color-text-primary) !important;
+    font-size: var(--font-size-sm) !important;
+  }
+}
+
+// ============================================================================
+// PROGRESS SPINNER
+// ============================================================================
+
+.mat-mdc-progress-spinner circle {
+  stroke: var(--color-primary) !important;
+}
+
+// ============================================================================
+// DIVIDER
+// ============================================================================
+
+.mat-divider {
+  border-top-color: var(--color-table-border) !important;
+  margin: 0 !important;
+}
+
+// ============================================================================
+// SIDENAV (override Material drawer)
+// ============================================================================
+
+.mat-drawer-container {
+  background-color: var(--color-main-bg) !important;
+}
+
+.mat-drawer-backdrop.mat-drawer-shown {
+  background-color: rgba(0, 0, 0, 0.5) !important;
+}
+
+// ============================================================================
+// SNACKBAR (notifications)
+// ============================================================================
+
+.mat-mdc-snack-bar-container {
+  .mdc-snackbar__surface {
+    border-radius: var(--radius-md) !important;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15) !important;
+  }
+
+  .mat-mdc-snack-bar-label {
+    font-weight: 500 !important;
+    font-size: var(--font-size-sm) !important;
+  }
+
+  // Action button inside snackbar
+  .mat-mdc-button.mat-mdc-snack-bar-action {
+    font-weight: 600 !important;
+    min-width: auto !important;
+  }
+}
+
+// === Success (green) ===
+.success-snackbar {
+  .mdc-snackbar__surface {
+    background-color: #059669 !important;
+  }
+  .mat-mdc-snack-bar-label {
+    color: #ffffff !important;
+  }
+  .mat-mdc-button.mat-mdc-snack-bar-action {
+    color: #d1fae5 !important;
+  }
+}
+
+// === Error (red) ===
+.error-snackbar {
+  .mdc-snackbar__surface {
+    background-color: #ef4444 !important;
+  }
+  .mat-mdc-snack-bar-label {
+    color: #ffffff !important;
+  }
+  .mat-mdc-button.mat-mdc-snack-bar-action {
+    color: #fee2e2 !important;
+  }
+}
+
+// === Info (blue) ===
+.info-snackbar {
+  .mdc-snackbar__surface {
+    background-color: #3b82f6 !important;
+  }
+  .mat-mdc-snack-bar-label {
+    color: #ffffff !important;
+  }
+  .mat-mdc-button.mat-mdc-snack-bar-action {
+    color: #dbeafe !important;
+  }
+}
+
+// === Warning (amber/orange) ===
+.warning-snackbar {
+  .mdc-snackbar__surface {
+    background-color: #d97706 !important;
+  }
+  .mat-mdc-snack-bar-label {
+    color: #ffffff !important;
+  }
+  .mat-mdc-button.mat-mdc-snack-bar-action {
+    color: #fef3c7 !important;
+  }
+}
+
+// ============================================================================
+// CHIP
+// ============================================================================
+
+.mat-mdc-chip {
+  background-color: var(--color-primary-light) !important;
+  color: var(--color-primary) !important;
+  border-radius: var(--radius-badge) !important;
+}
+
+// ============================================================================
+// TOOLTIP
+// ============================================================================
+
+.mat-mdc-tooltip .mdc-tooltip__surface {
+  background-color: var(--color-text-primary) !important;
+  color: var(--color-card-bg) !important;
+  border-radius: var(--radius-sm) !important;
+  font-size: var(--font-size-sm) !important;
+}

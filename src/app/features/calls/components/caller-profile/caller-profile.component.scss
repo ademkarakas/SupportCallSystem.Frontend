@@ -1,0 +1,327 @@
+.caller-profile-page {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: var(--spacing-lg);
+  animation: fadeInUp 0.35s ease-out;
+}
+
+// ── Search card ──────────────────────────────────────────
+.search-card {
+  padding: var(--spacing-md) var(--spacing-lg);
+  margin-bottom: var(--spacing-lg);
+}
+
+.search-row {
+  display: flex;
+  gap: var(--spacing-sm);
+  align-items: center;
+
+  .phone-search {
+    flex: 1;
+  }
+
+  .btn {
+    flex-shrink: 0;
+    height: 40px;
+  }
+}
+
+// ── Stats grid ───────────────────────────────────────────
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--spacing-md);
+  margin-bottom: var(--spacing-lg);
+
+  @media (max-width: 600px) {
+    grid-template-columns: 1fr;
+  }
+}
+
+.stat-card {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-md);
+  padding: var(--spacing-md);
+}
+
+.stat-icon-wrap {
+  width: 44px;
+  height: 44px;
+  border-radius: var(--radius-md);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+
+  mat-icon {
+    font-size: 22px;
+    width: 22px;
+    height: 22px;
+  }
+
+  &.primary {
+    background-color: var(--color-primary-light);
+    color: var(--color-primary);
+  }
+
+  &.teal {
+    background-color: var(--color-brand-light);
+    color: var(--color-brand);
+  }
+
+  &.warning {
+    background-color: var(--color-warning-bg);
+    color: var(--color-warning);
+  }
+}
+
+.stat-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.stat-value {
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-text-primary);
+  line-height: 1;
+
+  &--sm {
+    font-size: var(--font-size-base);
+  }
+}
+
+.stat-label {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+// Skeleton loading
+.skeleton-container {
+  animation: fadeIn 0.2s ease;
+}
+
+// ── Timeline header ───────────────────────────────────────
+.timeline-wrapper {
+  margin-bottom: var(--spacing-xl);
+}
+
+.timeline-header {
+  margin-bottom: var(--spacing-md);
+}
+
+.section-title {
+  font-size: var(--font-size-md);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-primary);
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+
+  mat-icon {
+    color: var(--color-text-secondary);
+    font-size: 20px;
+    width: 20px;
+    height: 20px;
+  }
+
+  .badge {
+    margin-left: var(--spacing-xs);
+    font-size: var(--font-size-xs);
+    font-weight: var(--font-weight-normal);
+    letter-spacing: 0;
+  }
+}
+
+// ── Timeline ──────────────────────────────────────────────
+.timeline {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.timeline-item {
+  display: flex;
+  gap: var(--spacing-md);
+  cursor: pointer;
+
+  &:hover .timeline-card {
+    box-shadow: var(--shadow-md);
+    transform: translateX(3px);
+    border-color: var(--color-brand);
+  }
+
+  &:last-child .spine-line {
+    display: none;
+  }
+}
+
+// Left spine (date column)
+.timeline-spine {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 52px;
+  flex-shrink: 0;
+}
+
+.spine-date {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background-color: var(--color-primary);
+  color: #fff;
+  border-radius: var(--radius-sm);
+  padding: 6px 10px;
+  min-width: 52px;
+  text-align: center;
+  z-index: 1;
+}
+
+.spine-day {
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-bold);
+  line-height: 1;
+}
+
+.spine-month {
+  font-size: var(--font-size-xs);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin-top: 2px;
+  opacity: 0.85;
+}
+
+.spine-year {
+  font-size: 10px;
+  opacity: 0.7;
+  margin-top: 1px;
+}
+
+.spine-line {
+  width: 2px;
+  flex: 1;
+  background-color: var(--color-card-border);
+  min-height: 16px;
+  margin: 0 auto;
+}
+
+// Right call card
+.timeline-card {
+  flex: 1;
+  margin-bottom: var(--spacing-md);
+  padding: var(--spacing-md) var(--spacing-lg);
+  transition:
+    box-shadow var(--transition-fast),
+    transform var(--transition-fast),
+    border-color var(--transition-fast);
+  cursor: pointer;
+}
+
+.call-card-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--spacing-sm);
+  flex-wrap: wrap;
+  margin-bottom: var(--spacing-sm);
+}
+
+.call-meta {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-md);
+  flex-wrap: wrap;
+}
+
+.call-time,
+.call-duration,
+.call-agent {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+}
+
+.meta-icon {
+  font-size: 14px !important;
+  width: 14px !important;
+  height: 14px !important;
+  color: var(--color-text-tertiary);
+}
+
+.call-badges {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  flex-wrap: wrap;
+}
+
+.call-summary {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+  line-height: var(--line-height-relaxed);
+  margin-bottom: var(--spacing-sm);
+
+  &.no-summary {
+    font-style: italic;
+    color: var(--color-text-tertiary);
+  }
+}
+
+.action-items-preview {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: var(--font-size-xs);
+  color: var(--color-brand);
+  margin-bottom: var(--spacing-xs);
+
+  mat-icon {
+    font-size: 14px;
+    width: 14px;
+    height: 14px;
+  }
+}
+
+.detail-link {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-tertiary);
+  margin-top: var(--spacing-xs);
+  transition: color var(--transition-fast);
+
+  mat-icon {
+    font-size: 14px;
+    width: 14px;
+    height: 14px;
+  }
+}
+
+.timeline-item:hover .detail-link {
+  color: var(--color-brand);
+}
+
+// ── Empty / Initial states ────────────────────────────────
+.empty-card {
+  padding: var(--spacing-2xl);
+}
+
+.initial-state {
+  border: 2px dashed var(--color-card-border);
+  background-color: transparent;
+  box-shadow: none;
+
+  &:hover {
+    box-shadow: none;
+  }
+}

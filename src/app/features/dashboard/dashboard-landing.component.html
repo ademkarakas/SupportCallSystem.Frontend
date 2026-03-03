@@ -1,0 +1,147 @@
+<div class="dashboard-landing page-enter" [@fadeIn]>
+  <!-- Page Header -->
+  <header class="page-header">
+    <div class="header-content">
+      <div class="title-row">
+        <h1 *ngIf="auth.currentUser() as user" class="page-title">
+          Willkommen, {{ user.firstName }}
+        </h1>
+        <span class="count-badge" *ngIf="activities().length > 0"
+          >{{ activities().length }} Aktivitäten</span
+        >
+      </div>
+      <p class="subtitle">Hier ist die Übersicht Ihrer heutigen Support-Aktivitäten.</p>
+    </div>
+    <div class="header-actions">
+      <button
+        class="btn btn-secondary mr-2"
+        (click)="loadDashboardData(auth.currentUser()?.id || '')"
+      >
+        <mat-icon>refresh</mat-icon>
+        Aktualisieren
+      </button>
+      <button class="btn btn-primary" (click)="onNewCall()">
+        <mat-icon>add_call</mat-icon>
+        Neuer Anruf
+      </button>
+    </div>
+  </header>
+
+  <!-- Stats Grid -->
+  <div class="stats-grid" [@staggerIn]="3" *ngIf="stats() as s">
+    <!-- Total Calls -->
+    <div class="card stat-card">
+      <div class="stat-header">
+        <span class="label">Gesamtanrufe</span>
+        <mat-icon class="icon calls">call</mat-icon>
+      </div>
+      <div class="stat-body">
+        <span class="value">{{ s.totalCallsToday }}</span>
+        <span
+          class="badge"
+          [ngClass]="s.totalCallsGrowth.startsWith('+') ? 'badge-active' : 'badge-neutral'"
+          >{{ s.totalCallsGrowth }}</span
+        >
+      </div>
+    </div>
+
+    <!-- Avg Duration -->
+    <div class="card stat-card">
+      <div class="stat-header">
+        <span class="label">∅ Dauer</span>
+        <mat-icon class="icon duration">schedule</mat-icon>
+      </div>
+      <div class="stat-body">
+        <span class="value">{{ s.averageDuration }}</span>
+        <span
+          class="badge"
+          [ngClass]="s.durationChange.startsWith('-') ? 'badge-active' : 'badge-inactive'"
+          >{{ s.durationChange }}</span
+        >
+      </div>
+    </div>
+
+    <!-- Resolution Rate -->
+    <div class="card stat-card">
+      <div class="stat-header">
+        <span class="label">Lösungsrate</span>
+        <mat-icon class="icon resolution">task_alt</mat-icon>
+      </div>
+      <div class="stat-body">
+        <span class="value">{{ s.resolutionRatePercentage }}%</span>
+        <span class="badge badge-active">{{ s.resolutionGrowth }}</span>
+      </div>
+    </div>
+
+    <!-- Open Tasks -->
+    <div class="card stat-card">
+      <div class="stat-header">
+        <span class="label">Offene Aufgaben</span>
+        <mat-icon class="icon tasks">assignment_late</mat-icon>
+      </div>
+      <div class="stat-body">
+        <span class="value">{{ s.openTasksCount }}</span>
+        <span class="badge" [ngClass]="s.openTasksCount > 0 ? 'badge-inactive' : 'badge-active'">
+          {{ s.openTasksCount > 0 ? 'Eilig' : 'Erledigt' }}
+        </span>
+      </div>
+    </div>
+  </div>
+
+  <div class="dashboard-grid">
+    <!-- Recent Activity Table -->
+    <div class="data-table-card activity-panel">
+      <div class="panel-header">
+        <h3>Neueste Aktivitäten</h3>
+        <button class="btn btn-text btn-sm" routerLink="/calls/history">
+          Alle ansehen
+          <mat-icon>arrow_forward</mat-icon>
+        </button>
+      </div>
+
+      <div class="table-container">
+        <table class="data-table" *ngIf="activities().length > 0; else noActivities">
+          <thead>
+            <tr>
+              <th>Status</th>
+              <th>Titel</th>
+              <th>Kunde</th>
+              <th>Zeit</th>
+              <th>Kategorie</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr
+              *ngFor="let activity of activities()"
+              [routerLink]="['/calls/detail']"
+              [queryParams]="{ id: activity.callId }"
+              style="cursor: pointer"
+            >
+              <td>
+                <span
+                  class="badge"
+                  [ngClass]="activity.status === 'Approved' ? 'badge-active' : 'badge-inactive'"
+                >
+                  {{ activity.status === 'Approved' ? 'Aktiv' : 'Draft' }}
+                </span>
+              </td>
+              <td class="font-medium">{{ activity.title }}</td>
+              <td>{{ activity.customerName }}</td>
+              <td class="color-text-secondary">{{ activity.relativeTime }}</td>
+              <td>
+                <span class="badge badge-neutral">{{ activity.category }}</span>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <ng-template #noActivities>
+        <div class="empty-state">
+          <mat-icon class="empty-icon">history</mat-icon>
+          <p>Keine aktuellen Aktivitäten vorhanden.</p>
+        </div>
+      </ng-template>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,142 @@
+@use 'sass:color';
+
+.call-history-page {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xl);
+}
+
+// ============================================================================
+// PAGE HEADER
+// ============================================================================
+
+.page-header {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+
+  .header-content {
+    .title-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 4px;
+    }
+
+    .page-title {
+      font-size: var(--font-size-xl);
+      font-weight: var(--font-weight-semibold);
+      color: var(--color-text-primary);
+      margin: 0;
+    }
+
+    .count-badge {
+      background-color: var(--color-status-neutral-bg);
+      color: var(--color-text-secondary);
+      padding: 2px 10px;
+      border-radius: 10px;
+      font-size: 13px;
+    }
+
+    .subtitle {
+      font-size: 14px;
+      color: var(--color-text-secondary);
+      margin: 0;
+    }
+  }
+}
+
+// ============================================================================
+// DATA TABLE OVERRIDES
+// ============================================================================
+
+.data-table-card {
+  background-color: var(--color-card-bg);
+  border: 1px solid var(--color-card-border);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  box-shadow: var(--shadow-sm);
+}
+
+.table-container {
+  overflow-x: auto;
+}
+
+.time-cell {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+
+  .date {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--color-text-primary);
+  }
+
+  .time {
+    font-size: 11px;
+    color: var(--color-text-secondary);
+  }
+}
+
+.summary-cell {
+  max-width: 400px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 13px;
+  color: var(--color-text-secondary);
+}
+
+// ============================================================================
+// EMPTY STATE
+// ============================================================================
+
+.empty-state {
+  padding: 64px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-text-secondary);
+  text-align: center;
+
+  .empty-icon {
+    font-size: 48px;
+    width: 48px;
+    height: 48px;
+    margin-bottom: 16px;
+    opacity: 0.3;
+  }
+
+  p {
+    margin: 0;
+    font-size: 15px;
+  }
+}
+
+// ============================================================================
+// PAGINATOR
+// ============================================================================
+
+.custom-paginator {
+  background: transparent !important;
+  border-top: 1px solid var(--color-table-border);
+
+  ::ng-deep {
+    .mat-mdc-paginator-container {
+      min-height: 52px !important;
+      padding: 0 16px !important;
+    }
+
+    .mat-mdc-paginator-range-label {
+      font-size: 12px;
+      color: var(--color-text-secondary);
+    }
+
+    .mat-mdc-select-value {
+      font-size: 12px;
+      color: var(--color-text-secondary);
+    }
+  }
+}

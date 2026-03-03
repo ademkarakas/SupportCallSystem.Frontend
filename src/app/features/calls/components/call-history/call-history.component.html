@@ -1,0 +1,110 @@
+<div class="call-history-page page-enter">
+  <!-- Page Header -->
+  <header class="page-header">
+    <div class="header-content">
+      <div class="title-row">
+        <h1 class="page-title">Anrufhistorie</h1>
+        <span class="count-badge" *ngIf="dataSource.data.length > 0"
+          >{{ dataSource.data.length }} Einträge</span
+        >
+      </div>
+      <p class="subtitle">
+        Anzeige aller globalen Anrufaufzeichnungen für die aktuelle Support-Sitzung.
+      </p>
+    </div>
+  </header>
+
+  <!-- Data Table Card -->
+  <div class="data-table-card">
+    <div class="table-search">
+      <div class="search-input-wrapper">
+        <mat-icon class="search-icon">search</mat-icon>
+        <input
+          class="search-input"
+          placeholder="Suchen..."
+          (input)="applyFilter($event)"
+          #searchInput
+        />
+      </div>
+    </div>
+    <div class="table-container">
+      <table mat-table [dataSource]="dataSource" matSort class="data-table">
+        <ng-container matColumnDef="startTime">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>Datum & Zeit</th>
+          <td mat-cell *matCellDef="let call">
+            <div class="time-cell">
+              <span class="date">{{ call.startTime | date: 'mediumDate' }}</span>
+              <span class="time">{{ call.startTime | date: 'shortTime' }}</span>
+            </div>
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="customer">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>Kunde</th>
+          <td mat-cell *matCellDef="let call" class="font-medium">
+            {{ call.customerName || 'Manueller Eintrag' }}
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="category">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>Kategorie</th>
+          <td mat-cell *matCellDef="let call">
+            <span class="badge badge-neutral">{{ call.category || 'Unbekannt' }}</span>
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="duration">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>Dauer</th>
+          <td mat-cell *matCellDef="let call" class="color-text-secondary">
+            {{ formatDuration(call.durationSeconds) }}
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="summary">
+          <th mat-header-cell *matHeaderCellDef>Zusammenfassung</th>
+          <td mat-cell *matCellDef="let call" class="summary-cell">
+            {{ call.approvedSummary || 'Keine genehmigte Zusammenfassung' }}
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="actions">
+          <th mat-header-cell *matHeaderCellDef class="text-right">Aktionen</th>
+          <td mat-cell *matCellDef="let call" class="text-right">
+            <div class="action-buttons">
+              <button
+                class="btn btn-icon btn-sm"
+                title="Anrufer-Profil anzeigen"
+                (click)="viewCallerProfile(call.callerNumber, $event)"
+              >
+                <mat-icon>manage_search</mat-icon>
+              </button>
+              <button
+                class="btn btn-icon btn-sm"
+                title="Anruf-Details"
+                [routerLink]="['/calls/detail']"
+                [queryParams]="{ id: call.id }"
+                (click)="$event.stopPropagation()"
+              >
+                <mat-icon>open_in_new</mat-icon>
+              </button>
+            </div>
+          </td>
+        </ng-container>
+
+        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+        <tr mat-row *matRowDef="let row; columns: displayedColumns" class="interactive-row"></tr>
+      </table>
+
+      <mat-paginator
+        [pageSizeOptions]="[15, 30, 50]"
+        showFirstLastButtons
+        class="custom-paginator"
+      ></mat-paginator>
+
+      <div class="empty-state" *ngIf="dataSource.data.length === 0">
+        <mat-icon class="empty-icon">history_toggle_off</mat-icon>
+        <p>Keine Anrufhistorie für diesen Agenten gefunden.</p>
+      </div>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,284 @@
+import { Component, inject, OnInit, OnDestroy, signal } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { ActivatedRoute, Router } from '@angular/router';
+import { MatButtonModule } from '@angular/material/button';
+import { MatIconModule } from '@angular/material/icon';
+import { MatChipsModule } from '@angular/material/chips';
+import { MatProgressBarModule } from '@angular/material/progress-bar';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatSelectModule } from '@angular/material/select';
+import { MatInputModule } from '@angular/material/input';
+import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
+import { Subject, takeUntil, finalize, switchMap, tap, catchError, of } from 'rxjs';
+import { CallApiService, CallRecord } from '../../services/call-api.service';
+import { SignalRService } from '../../../../core/services/signalr.service';
+import { NotificationService } from '../../../../core/services/notification.service';
+import { CallTimerComponent } from '../call-timer/call-timer.component';
+import { AuthService } from '../../../../core/services/auth.service';
+
+@Component({
+  selector: 'app-call-view',
+  standalone: true,
+  imports: [
+    CommonModule,
+    MatButtonModule,
+    MatIconModule,
+    MatChipsModule,
+    MatProgressBarModule,
+    MatProgressSpinnerModule,
+    MatFormFieldModule,
+    MatSelectModule,
+    MatInputModule,
+    ReactiveFormsModule,
+    CallTimerComponent,
+  ],
+  templateUrl: './call-view.component.html',
+  styleUrls: ['./call-view.component.scss'],
+})
+export class CallViewComponent implements OnInit, OnDestroy {
+  route = inject(ActivatedRoute);
+  router = inject(Router);
+  fb = inject(FormBuilder);
+  callApi = inject(CallApiService);
+  signalR = inject(SignalRService);
+  notification = inject(NotificationService);
+  auth = inject(AuthService);
+
+  call = signal<CallRecord | null>(null);
+  isRecording = signal(true);
+  isProcessingManual = signal(false);
+  isSubmitting = signal(false);
+
+  approvalForm = this.fb.group({
+    category: ['', Validators.required],
+    summary: ['', [Validators.required, Validators.maxLength(1000)]],
+  });
+
+  private destroy$ = new Subject<void>();
+
+  ngOnInit() {
+    this.route.queryParams.pipe(takeUntil(this.destroy$)).subscribe((params) => {
+      const id = params['id'];
+      if (id) {
+        this.loadCall(id);
+      }
+    });
+
+    // Listen for AI summary drafts
+    this.signalR.summaryDraft$.pipe(takeUntil(this.destroy$)).subscribe((event) => {
+      console.log('🤖 Received AI Summary Draft notification:', event);
+      
+      const currentCall = this.call();
+      if (event && currentCall && event.callId.toLowerCase() === currentCall.id.toLowerCase()) {
+        console.log('✅ Matching call found, updating UI state');
+        this.isProcessingManual.set(false); // Reset manual processing state
+        this.call.update((c) =>
+          c
+            ? {
+                ...c,
+                draftSummary: event.summary,
+                category: event.category,
+                actionItems: event.actionItems,
+                summaryStatus: 'Draft',
+              }
+            : null,
+        );
+
+        this.approvalForm.patchValue({
+          category: event.category,
+          summary: event.summary,
+        });
+
+        this.notification.showInfo('KI hat einen Entwurf der Zusammenfassung erstellt.');
+      }
+    });
+  }
+
+  private loadCall(id: string) {
+    this.callApi.getCallById(id).subscribe({
+      next: (data) => {
+        if (data && data.id === id) {
+          this.call.set(data);
+          this.isRecording.set(!data.endTime);
+
+          this.approvalForm.patchValue({
+            category: data.category,
+            summary: data.draftSummary || data.approvedSummary || '',
+          });
+
+          // Join the call's SignalR group
+          this.signalR.subscribeToCall(id);
+
+          // REMOVED: Auto-grant consent. 
+          // Now the agent must explicitly ask and click a button.
+        } else {
+          this.notification.showError('Spezifischer Anruf nicht gefunden veya aktif değil.');
+          this.router.navigate(['/dashboard']);
+        }
+      },
+      error: () => {
+        this.notification.showError('Fehler beim Laden der Anrufsession.');
+        this.router.navigate(['/dashboard']);
+      },
+    });
+  }
+
+  grantConsent() {
+    this.recordConsent(true);
+  }
+
+  declineConsent() {
+    this.recordConsent(false);
+  }
+
+  recordConsent(granted: boolean) {
+    const activeCall = this.call();
+    if (!activeCall) return;
+
+    this.callApi.recordConsent(activeCall.id, granted).subscribe({
+      next: () => {
+        const status = granted ? 'Granted' : 'Declined';
+        this.call.update((c) => (c ? { ...c, consent: status } : null));
+        this.notification.showSuccess(`Einwilligung ${granted ? 'erteilt' : 'abgelehnt'}.`);
+        
+        if (granted) {
+          this.notification.showInfo('KI-Analyse ist jetzt für diesen Anruf aktiv.');
+        } else {
+          this.notification.showWarning('KI-Analyse deaktiviert. Bitte manuell dokumentieren.');
+        }
+      },
+    });
+  }
+
+  endCall() {
+    const activeCall = this.call();
+    console.log('🔴 endCall() triggered', { activeCall });
+    
+    if (!activeCall) {
+      console.error('❌ No active call available');
+      return;
+    }
+
+    // Check if consent needs to be recorded first (0=NotAsked, 1=Granted, 2=Declined)
+    const consentValue = activeCall.consent;
+    const isNotAsked = consentValue === 'NotAsked' || consentValue === 0 || consentValue === '0';
+    console.log('📋 Checking consent status:', consentValue, { isNotAsked });
+
+    // Create the consent recording observable (or empty observable if not needed)
+    const consentObs$ = isNotAsked
+      ? this.callApi.recordConsent(activeCall.id, true).pipe(
+          tap(() => {
+            console.log('✅ Consent recorded successfully');
+            this.call.update((c) => (c ? { ...c, consent: 'Granted' } : null));
+          }),
+          catchError((err) => {
+            // If it's a 400 because consent was already granted, we can ignore it
+            if (err.status === 400) {
+              console.warn('⚠️ Consent recording returned 400 - possibly already granted');
+              return of(null);
+            }
+            console.error('❌ Failed to record consent:', err);
+            return of(null);
+          })
+        )
+      : of(null).pipe(
+          tap(() => console.log('✅ Consent already recorded:', consentValue))
+        );
+
+    // Chain: record consent → end call → navigate
+    this.isRecording.set(false); // Set loading state
+    
+    consentObs$
+      .pipe(
+        switchMap(() => {
+          console.log('🛑 Sending endCall request to backend...');
+          return this.callApi.endCall(activeCall.id, new Date());
+        }),
+        finalize(() => {
+          // This runs whether success or error
+          this.isRecording.set(false);
+        }),
+        takeUntil(this.destroy$)
+      )
+      .subscribe({
+        next: () => {
+          // Note: Response is void (no body), which is expected
+          console.log('✅ Call ended successfully on backend (void response is expected)');
+          this.call.update((c) => (c ? { ...c, endTime: new Date() } : null));
+          this.notification.showSuccess('Gespräch beendet. Warte auf KI-Zusammenfassung...');
+        },
+        error: (err) => {
+          console.error('❌ Failed to end call on backend:', err);
+          this.notification.showError('Fehler beim Beenden des Anrufs');
+          this.isRecording.set(true); // Restore recording state on error
+        },
+      });
+  }
+
+  onApprove() {
+    const activeCall = this.call();
+    if (!activeCall || this.approvalForm.invalid) return;
+
+    const { summary, category } = this.approvalForm.getRawValue();
+
+    this.isSubmitting.set(true);
+    this.callApi
+      .approveSummary(
+        activeCall.id,
+        summary!,
+        category!,
+        activeCall.actionItems || [],
+        this.auth.currentUser()?.id || '',
+      )
+      .pipe(finalize(() => this.isSubmitting.set(false)))
+      .subscribe({
+        next: () => {
+          this.notification.showSuccess('Anrufdokumentation abgeschlossen.');
+          this.router.navigate(['/dashboard']);
+        },
+      });
+  }
+
+  tidyUpManualNotes() {
+    const activeCall = this.call();
+    const manualNotes = this.approvalForm.get('summary')?.value;
+    
+    if (!activeCall || !manualNotes || manualNotes.length < 10) {
+      this.notification.showWarning('Bitte geben Sie mindestens 10 Zeichen ein, um sie zu optimieren.');
+      return;
+    }
+
+    this.isProcessingManual.set(true); 
+    this.callApi.tidyUpNotes(activeCall.id, manualNotes).subscribe({
+      next: () => {
+        this.notification.showInfo('KI optimiert Ihre Notizen...');
+      },
+      error: () => {
+        this.notification.showError('KI-Optimierung fehlgeschlagen.');
+        this.isProcessingManual.set(false);
+      }
+    });
+  }
+
+  isApprovable(): boolean {
+    // Can approve if there is an AI draft OR if the user has typed something manually
+    const hasDraft = !!this.call()?.draftSummary;
+    const hasManualEntry = (this.approvalForm.get('summary')?.value?.length || 0) > 10;
+    return hasDraft || hasManualEntry;
+  }
+
+  getStatusMessage(): string {
+    const c = this.call();
+    if (!this.isRecording() && !c?.draftSummary) return 'Warte auf finalen KI-Zusammenfassungsentwurf...';
+    // Consent: 0=NotAsked, 1=Granted, 2=Declined
+    if (c?.consent === 'NotAsked' || c?.consent === 0) return 'Warte auf Kundenzustimmung...';
+    if (c?.consent === 'Declined' || c?.consent === 2) return 'Einwilligung abgelehnt. KI-Verarbeitung deaktiviert.';
+    return 'Höre auf Gesprächsinhalte...';
+  }
+
+  ngOnDestroy() {
+    this.destroy$.next();
+    this.destroy$.complete();
+  }
+}

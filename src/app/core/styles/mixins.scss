@@ -1,0 +1,267 @@
+/**
+ * Premium SCSS Mixins Library
+ * Reusable mixins for consistent premium design patterns
+ */
+
+/* Responsive Breakpoints */
+$mobile: 768px;
+$tablet: 1024px;
+$desktop: 1280px;
+
+@mixin mobile {
+  @media (max-width: #{$mobile}) {
+    @content;
+  }
+}
+
+@mixin tablet {
+  @media (max-width: #{$tablet}) {
+    @content;
+  }
+}
+
+@mixin desktop {
+  @media (min-width: #{$desktop}) {
+    @content;
+  }
+}
+
+/**
+ * Glass Card Mixin
+ * Creates glassmorphic card with blur and shadow
+ * @param {number} $opacity - Background opacity (default: 0.7)
+ * @param {string} $blur - Blur amount (default: 10px)
+ * @param {string} $radius - Border radius (default: var(--radius-md))
+ */
+@mixin glass-card($opacity: 0.7, $blur: 10px, $radius: var(--radius-md)) {
+  background: rgba(255, 255, 255, $opacity);
+  backdrop-filter: blur($blur) saturate(180%);
+  -webkit-backdrop-filter: blur($blur) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: $radius;
+  box-shadow:
+    0 8px 32px 0 rgba(31, 38, 135, 0.15),
+    inset 0 1px 0 0 rgba(255, 255, 255, 0.5);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/**
+ * Glass Card Hover Effect
+ * Adds lift and enhanced shadow on hover
+ */
+@mixin glass-card-hover {
+  &:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 48px 0 rgba(31, 38, 135, 0.25);
+  }
+}
+
+/**
+ * Premium Button Mixin
+ * Creates gradient button with glow effect
+ * @param {string} $gradient - CSS gradient value
+ * @param {string} $shadow-color - RGBA color for shadow
+ */
+@mixin premium-button($gradient: var(--primary-gradient), $shadow-color: rgba(13, 148, 136, 0.4)) {
+  position: relative;
+  background: $gradient;
+  color: white;
+  border: none;
+  border-radius: var(--radius-md);
+  padding: 14px 32px;
+  font-weight: 600;
+  font-size: 16px;
+  cursor: pointer;
+  box-shadow: 0 8px 24px $shadow-color;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+
+  &:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 32px $shadow-color;
+  }
+
+  &:active:not(:disabled) {
+    transform: translateY(0) scale(0.98);
+  }
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+}
+
+/**
+ * Premium Input Mixin
+ * Creates input with glow focus effect
+ */
+@mixin premium-input {
+  padding: 14px 16px;
+  background: rgba(255, 255, 255, 0.9);
+  border: 2px solid rgba(13, 148, 136, 0.1);
+  border-radius: var(--radius-md);
+  font-size: 16px;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+
+  &:focus {
+    outline: none;
+    border-color: #0d9488;
+    box-shadow:
+      0 0 0 4px rgba(13, 148, 136, 0.1),
+      0 8px 16px rgba(13, 148, 136, 0.2);
+  }
+
+  &::placeholder {
+    color: rgba(0, 0, 0, 0.25);
+  }
+}
+
+/**
+ * Skeleton Loading Mixin
+ * Creates shimmer loading effect
+ */
+@mixin skeleton-loader {
+  background: linear-gradient(90deg, #f0f0f0 0px, #f8f8f8 40px, #f0f0f0 80px);
+  background-size: 1000px 100%;
+  animation: shimmer 2s infinite linear;
+  border-radius: var(--radius-sm);
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -1000px 0;
+  }
+  100% {
+    background-position: 1000px 0;
+  }
+}
+
+/**
+ * Soft Shadow Mixin
+ * Multi-layer soft shadows for depth
+ * @param {string} $size - sm, md, lg, or xl
+ */
+@mixin soft-shadow($size: 'md') {
+  @if $size == 'sm' {
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  } @else if $size == 'md' {
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+  } @else if $size == 'lg' {
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.16);
+  } @else if $size == 'xl' {
+    box-shadow: 0 16px 64px rgba(0, 0, 0, 0.2);
+  }
+}
+
+/**
+ * Colored Shadow Mixin
+ * Creates colored glow shadow for emphasis
+ * @param {string} $color - RGB values (e.g., "13, 148, 136")
+ * @param {number} $opacity - Shadow opacity (default: 0.4)
+ */
+@mixin colored-shadow($color, $opacity: 0.4) {
+  box-shadow: 0 8px 24px rgba($color, $opacity);
+
+  &:hover {
+    box-shadow: 0 12px 32px rgba($color, $opacity + 0.1);
+  }
+}
+
+/**
+ * Icon Gradient Background Mixin
+ * Creates circular gradient background for icons
+ * @param {string} $gradient - CSS gradient value
+ */
+@mixin icon-gradient-bg($gradient: var(--primary-gradient)) {
+  width: 56px;
+  height: 56px;
+  border-radius: var(--radius-md);
+  background: $gradient;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  mat-icon {
+    color: white;
+    font-size: 28px;
+    width: 28px;
+    height: 28px;
+  }
+}
+
+/**
+ * Pulse Ring Animation Mixin
+ * Creates expanding ring animation (for avatars, notifications)
+ * @param {string} $color - Ring color
+ * @param {string} $duration - Animation duration (default: 2s)
+ */
+@mixin pulse-ring($color: #0d9488, $duration: 2s) {
+  position: relative;
+
+  &::after,
+  &::before {
+    content: '';
+    position: absolute;
+    inset: -8px;
+    border: 2px solid $color;
+    border-radius: 50%;
+    animation: pulse-ring $duration cubic-bezier(0.215, 0.61, 0.355, 1) infinite;
+  }
+
+  &::before {
+    animation-delay: 0.5s;
+  }
+}
+
+@keyframes pulse-ring {
+  0% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1.3);
+    opacity: 0;
+  }
+}
+
+/**
+ * Truncate Text Mixin
+ * Single-line text truncation with ellipsis
+ */
+@mixin truncate-text {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/**
+ * Multi-line Truncate Mixin
+ * @param {number} $lines - Number of lines to show
+ */
+@mixin truncate-multiline($lines: 2) {
+  display: -webkit-box;
+  -webkit-line-clamp: $lines;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/**
+ * Flexbox Center Mixin
+ * Centers content both horizontally and vertically
+ */
+@mixin flex-center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/**
+ * Absolute Center Mixin
+ * Centers element absolutely within relative parent
+ */
+@mixin absolute-center {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}

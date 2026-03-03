@@ -1,0 +1,307 @@
+@use 'sass:color';
+
+// ============================================================================
+// LOGIN PAGE — Centered card layout (per design spec)
+// ============================================================================
+
+.login-page {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  background-color: var(--color-main-bg);
+  padding: 24px;
+  transition: background-color var(--transition-base);
+}
+
+.login-card {
+  width: 100%;
+  max-width: 400px;
+  background-color: var(--color-card-bg);
+  border: 1px solid var(--color-card-border);
+  border-radius: var(--radius-xl);
+  padding: 40px 36px;
+  box-shadow: var(--shadow-lg);
+  transition:
+    background-color var(--transition-base),
+    border-color var(--transition-base);
+}
+
+// ============================================================================
+// BRAND
+// ============================================================================
+
+.login-brand {
+  text-align: center;
+  margin-bottom: 28px;
+
+  .brand-logo {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 20px;
+    font-weight: 700;
+    margin-bottom: 8px;
+
+    .logo-name {
+      color: var(--color-primary);
+      font-weight: 800;
+    }
+
+    .logo-pipe {
+      color: var(--color-primary);
+      opacity: 0.4;
+      font-weight: 300;
+    }
+
+    .logo-sub {
+      color: var(--color-text-secondary);
+      font-weight: 400;
+    }
+  }
+
+  .brand-title {
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-medium);
+    color: var(--color-text-secondary);
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    margin: 0;
+  }
+}
+
+// ============================================================================
+// HEADER
+// ============================================================================
+
+.login-header {
+  text-align: center;
+  margin-bottom: 28px;
+
+  h2 {
+    font-size: 22px;
+    font-weight: var(--font-weight-semibold);
+    color: var(--color-text-primary);
+    margin: 0 0 6px;
+  }
+
+  p {
+    font-size: var(--font-size-sm);
+    color: var(--color-text-secondary);
+    margin: 0;
+  }
+}
+
+// ============================================================================
+// FORM
+// ============================================================================
+
+.login-form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.login-field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.login-label {
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-secondary);
+  margin-bottom: 4px;
+}
+
+.label-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 4px;
+}
+
+.forgot-link {
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-primary);
+  text-decoration: none;
+  transition: opacity var(--transition-fast);
+
+  &:hover {
+    opacity: 0.8;
+    text-decoration: underline;
+  }
+}
+
+// Underline input with leading icon
+.input-underline-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+
+  .field-icon {
+    position: absolute;
+    left: 0;
+    font-size: 18px;
+    width: 18px;
+    height: 18px;
+    color: var(--color-text-tertiary);
+    pointer-events: none;
+    transition: color var(--transition-fast);
+  }
+
+  &:focus-within .field-icon {
+    color: var(--color-primary);
+  }
+
+  .toggle-password {
+    position: absolute;
+    right: 0;
+    background: none;
+    border: none;
+    color: var(--color-text-tertiary);
+    cursor: pointer;
+    padding: 4px;
+    display: flex;
+    align-items: center;
+    border-radius: var(--radius-xs);
+    transition: color var(--transition-fast);
+
+    mat-icon {
+      font-size: 18px;
+      width: 18px;
+      height: 18px;
+    }
+
+    &:hover {
+      color: var(--color-primary);
+    }
+  }
+}
+
+.input-with-icon {
+  padding-left: 28px;
+  padding-right: 36px; // room for toggle button
+}
+
+.field-error-msg {
+  font-size: var(--font-size-xs);
+  color: var(--color-danger);
+  min-height: 16px;
+}
+
+// ============================================================================
+// OPTIONS ROW (Remember Me)
+// ============================================================================
+
+.login-options {
+  margin: -4px 0;
+}
+
+.custom-checkbox {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  user-select: none;
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+
+  input[type='checkbox'] {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  .checkmark {
+    width: 18px;
+    height: 18px;
+    flex-shrink: 0;
+    border: 1.5px solid var(--color-input-border);
+    border-radius: 4px;
+    position: relative;
+    transition: all var(--transition-fast);
+    background-color: transparent;
+  }
+
+  input:focus-visible + .checkmark {
+    outline: 2px solid var(--color-primary);
+    outline-offset: 2px;
+  }
+
+  input:checked + .checkmark {
+    background-color: var(--color-primary);
+    border-color: var(--color-primary);
+
+    &::after {
+      content: '';
+      position: absolute;
+      left: 4px;
+      top: 1px;
+      width: 5px;
+      height: 9px;
+      border: 2px solid white;
+      border-top: none;
+      border-left: none;
+      transform: rotate(45deg);
+    }
+  }
+
+  .label-text {
+    line-height: 1;
+  }
+}
+
+// ============================================================================
+// SUBMIT BUTTON
+// ============================================================================
+
+.login-submit {
+  margin-top: 8px;
+  height: 44px;
+  font-size: var(--font-size-md);
+  font-weight: var(--font-weight-semibold);
+  letter-spacing: 0.01em;
+  gap: 8px;
+
+  mat-spinner {
+    display: inline-block;
+  }
+}
+
+// ============================================================================
+// FOOTER
+// ============================================================================
+
+.login-footer {
+  margin-top: 28px;
+  padding-top: 20px;
+  border-top: 1px solid var(--color-table-border);
+  text-align: center;
+
+  p {
+    font-size: var(--font-size-xs);
+    color: var(--color-text-secondary);
+    line-height: 1.6;
+    margin: 0 0 4px;
+
+    &.copyright {
+      color: var(--color-text-tertiary);
+      margin: 0;
+    }
+  }
+
+  a {
+    color: var(--color-primary);
+    text-decoration: none;
+    font-weight: var(--font-weight-medium);
+
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+}

@@ -1,0 +1,217 @@
+<a class="skip-to-content" href="#main-content">Zum Hauptinhalt springen</a>
+<div class="app-layout" [class.sidebar-collapsed]="isSidebarCollapsed() && !isMobile()">
+  <!-- Mobile Overlay Backdrop -->
+  <div
+    class="mobile-backdrop"
+    *ngIf="isMobile() && isMobileMenuOpen()"
+    (click)="closeMobileMenu()"
+  ></div>
+
+  <!-- Sidebar -->
+  <aside class="app-sidebar" [class.mobile-open]="isMobile() && isMobileMenuOpen()">
+    <div class="sidebar-header">
+      <div class="logo-area">
+        <div class="logo-brand">
+          <span class="icon">dicom</span>
+          <span class="pipe">|</span>
+          <span class="sub">di-1</span>
+        </div>
+      </div>
+    </div>
+
+    <nav class="sidebar-nav" aria-label="Hauptnavigation">
+      <ul class="nav-list">
+        <li class="nav-item">
+          <a
+            routerLink="/dashboard"
+            routerLinkActive="active"
+            [routerLinkActiveOptions]="{ exact: true }"
+          >
+            <mat-icon>dashboard</mat-icon>
+            <span class="label">Übersicht</span>
+          </a>
+        </li>
+        <li class="nav-item">
+          <a
+            routerLink="/calls"
+            routerLinkActive="active"
+            [routerLinkActiveOptions]="{ exact: true }"
+          >
+            <mat-icon>call</mat-icon>
+            <span class="label">Aktueller Anruf</span>
+          </a>
+        </li>
+        <li class="nav-item">
+          <a routerLink="/calls/history" routerLinkActive="active">
+            <mat-icon>history</mat-icon>
+            <span class="label">Anrufhistorie</span>
+          </a>
+        </li>
+        <li class="nav-item">
+          <a routerLink="/reports" routerLinkActive="active">
+            <mat-icon>bar_chart</mat-icon>
+            <span class="label">Berichte</span>
+          </a>
+        </li>
+      </ul>
+    </nav>
+  </aside>
+
+  <!-- Content Wrapper -->
+  <div class="app-content-wrapper">
+    <!-- Top Header -->
+    <header class="app-header">
+      <div class="header-left">
+        <button mat-icon-button *ngIf="isMobile()" (click)="toggleSidebar()" class="mobile-toggle">
+          <mat-icon>menu</mat-icon>
+        </button>
+        <button
+          mat-icon-button
+          *ngIf="!isMobile()"
+          (click)="toggleSidebar()"
+          class="sidebar-toggle"
+        >
+          <mat-icon>{{ isSidebarCollapsed() ? 'menu_open' : 'menu' }}</mat-icon>
+        </button>
+
+        <!-- Home / Quick Access Button -->
+        <button
+          class="home-btn"
+          (click)="toggleQuickAccess()"
+          [class.active]="quickAccessOpen()"
+          title="Schnellzugriff"
+        >
+          <mat-icon>home</mat-icon>
+        </button>
+
+        <nav class="breadcrumb" aria-label="Breadcrumb">
+          <span class="separator">/</span>
+          <span class="section">Management</span>
+          <span class="separator">/</span>
+          <span class="current" aria-current="page">{{ getHeaderTitle() }}</span>
+        </nav>
+      </div>
+
+      <div class="header-right">
+        <!-- Theme Toggle -->
+        <button
+          class="btn-icon theme-toggle"
+          (click)="toggleTheme()"
+          [title]="theme.isDarkMode() ? 'Light Mode' : 'Dark Mode'"
+        >
+          <mat-icon>{{ theme.isDarkMode() ? 'light_mode' : 'dark_mode' }}</mat-icon>
+        </button>
+
+        <!-- Debug Panel Toggle -->
+        <button
+          class="btn-icon debug-toggle"
+          (click)="toggleDebug()"
+          [title]="debugPanelVisible() ? 'Debug-Panel schließen' : 'Debug-Panel öffnen'"
+          [class.active]="debugPanelVisible()"
+        >
+          <mat-icon>bug_report</mat-icon>
+        </button>
+
+        <!-- Language Selector -->
+        <button class="btn-secondary lang-selector" aria-label="Sprache wechseln">
+          <span class="flag">🇩🇪</span>
+          <span class="code">DE</span>
+          <mat-icon>expand_more</mat-icon>
+        </button>
+
+        <!-- User Menu -->
+        <div class="user-menu" [matMenuTriggerFor]="userMenu" *ngIf="auth.currentUser() as user">
+          <div class="user-avatar">
+            {{ userInitials() }}
+          </div>
+          <span class="user-name">{{ user.firstName }} {{ user.lastName }}</span>
+          <mat-icon class="chevron">expand_more</mat-icon>
+        </div>
+
+        <mat-menu #userMenu="matMenu" class="premium-menu">
+          <div class="menu-header" *ngIf="auth.currentUser() as user">
+            <div class="user-avatar-large">{{ userInitials() }}</div>
+            <div class="user-info">
+              <div class="name">{{ user.firstName }} {{ user.lastName }}</div>
+              <div class="email-sub">{{ user.email || 'agent@dicom.de' }}</div>
+            </div>
+          </div>
+          <mat-divider></mat-divider>
+          <button mat-menu-item id="open-user-settings-btn" (click)="openUserSettings()">
+            <mat-icon>person</mat-icon>
+            <span>Profil-Einstellungen</span>
+          </button>
+          <mat-divider></mat-divider>
+          <button mat-menu-item (click)="logout()" class="logout-btn">
+            <mat-icon color="warn">logout</mat-icon>
+            <span class="warn-text">Abmelden</span>
+          </button>
+        </mat-menu>
+      </div>
+    </header>
+
+    <!-- Main Viewport -->
+    <main class="app-main" id="main-content">
+      <div class="content-body">
+        <router-outlet></router-outlet>
+      </div>
+    </main>
+
+    <!-- Quick Access Body Panel (positioned over main area) -->
+    <div class="qa-body-overlay" *ngIf="quickAccessOpen()" (click)="quickAccessOpen.set(false)">
+      <div class="qa-body-panel" (click)="$event.stopPropagation()">
+        <div class="qa-body-header">
+          <div class="qa-body-title">
+            <mat-icon>grid_view</mat-icon>
+            <span>Schnellzugriff</span>
+          </div>
+          <button class="btn-icon" (click)="quickAccessOpen.set(false)">
+            <mat-icon>close</mat-icon>
+          </button>
+        </div>
+
+        <div class="qa-body-grid">
+          <button class="qa-body-item" (click)="quickAccess('agent')">
+            <div class="qa-body-icon qa-agent">
+              <mat-icon>settings_phone</mat-icon>
+            </div>
+            <span class="qa-body-label">Agent-Profil</span>
+            <span class="qa-body-desc">Profil &amp; Einstellungen</span>
+          </button>
+          <button class="qa-body-item" (click)="quickAccess('kunden')">
+            <div class="qa-body-icon qa-kunden">
+              <mat-icon>contact_page</mat-icon>
+            </div>
+            <span class="qa-body-label">Kunden</span>
+            <span class="qa-body-desc">Anrufhistorie ansehen</span>
+          </button>
+          <button class="qa-body-item" (click)="quickAccess('notizen')">
+            <div class="qa-body-icon qa-notizen">
+              <mat-icon>description</mat-icon>
+            </div>
+            <span class="qa-body-label">Notizen</span>
+            <span class="qa-body-desc">Manuelle Dokumentation</span>
+          </button>
+          <button class="qa-body-item" (click)="quickAccess('hilfe')">
+            <div class="qa-body-icon qa-hilfe">
+              <mat-icon>help_center</mat-icon>
+            </div>
+            <span class="qa-body-label">Hilfe</span>
+            <span class="qa-body-desc">Support &amp; Dokumentation</span>
+          </button>
+        </div>
+
+        <div class="qa-body-footer" [class.connected]="signalR.connectionStatus() === 'connected'">
+          <div class="qa-status-dot"></div>
+          <span>{{
+            signalR.connectionStatus() === 'connected'
+              ? 'System verbunden &amp; bereit'
+              : 'Verbindung wird hergestellt...'
+          }}</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<app-debug-panel [externalControl]="debugPanelVisible"></app-debug-panel>
