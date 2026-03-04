@@ -1,4 +1,4 @@
-import { Component, inject, OnInit, OnDestroy, signal, computed } from '@angular/core';
+import { Component, inject, OnInit, signal, computed, DestroyRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterOutlet, RouterLink, RouterLinkActive, Router } from '@angular/router';
 import { MatListModule } from '@angular/material/list';
@@ -11,7 +11,7 @@ import { AuthService } from '../../core/services/auth.service';
 import { SignalRService, IncomingCallEvent } from '../../core/services/signalr.service';
 import { NotificationService } from '../../core/services/notification.service';
 import { ThemeService } from '../../core/services/theme.service';
-import { Subject, takeUntil } from 'rxjs';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { CustomerPopupComponent } from '../calls/components/customer-popup/customer-popup.component';
 import { CallApiService } from '../calls/services/call-api.service';
 import { DebugPanelComponent } from './debug-panel.component';
@@ -19,7 +19,6 @@ import { UserSettingsDialogComponent } from '../../shared/components/user-settin
 
 @Component({
   selector: 'app-dashboard',
-  standalone: true,
   imports: [
     CommonModule,
     RouterOutlet,
@@ -36,7 +35,8 @@ import { UserSettingsDialogComponent } from '../../shared/components/user-settin
   templateUrl: './main-layout.component.html',
   styleUrls: ['./main-layout.component.scss'],
 })
-export class MainLayoutComponent implements OnInit, OnDestroy {
+export class MainLayoutComponent implements OnInit {
+  private readonly destroyRef = inject(DestroyRef);
   auth = inject(AuthService);
   signalR = inject(SignalRService);
   theme = inject(ThemeService);
@@ -48,7 +48,6 @@ export class MainLayoutComponent implements OnInit, OnDestroy {
   isMobile = signal(window.innerWidth <= 768);
   isSidebarCollapsed = signal(false);
   isMobileMenuOpen = signal(false);
-  private destroy$ = new Subject<void>();
   debugPanelVisible = signal(false);
 
   userInitials = computed(() => {
@@ -86,7 +85,7 @@ export class MainLayoutComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit() {
-    this.signalR.incomingCall$.pipe(takeUntil(this.destroy$)).subscribe((event) => {
+    this.signalR.incomingCall$.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((event) => {
       if (event) {
         this.handleIncomingCall(event);
       }
@@ -162,10 +161,5 @@ export class MainLayoutComponent implements OnInit, OnDestroy {
   logout() {
     this.auth.logout();
     this.signalR.stopConnection();
-  }
-
-  ngOnDestroy() {
-    this.destroy$.next();
-    this.destroy$.complete();
   }
 }

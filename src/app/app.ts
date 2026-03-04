@@ -5,7 +5,6 @@ import { AuthService } from './core/services/auth.service';
 
 @Component({
   selector: 'app-root',
-  standalone: true,
   imports: [RouterOutlet],
   template: `<router-outlet></router-outlet>`,
 })
@@ -27,10 +26,10 @@ export class App implements OnInit {
     effect(() => {
       const status = this.signalR.connectionStatus();
       const user = this.auth.currentUser();
-      
+
       if (status === 'connected') {
         // Use user extension or default '1001' for testing
-        const extension = user?.extension || '1001'; 
+        const extension = user?.extension || '1001';
         this.signalR.registerAgent(extension);
       }
     });

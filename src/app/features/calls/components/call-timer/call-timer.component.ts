@@ -1,10 +1,9 @@
 import { Component, OnInit, OnDestroy, signal, computed, effect, input } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { MatIcon } from "@angular/material/icon";
+import { MatIcon } from '@angular/material/icon';
 
 @Component({
   selector: 'app-call-timer',
-  standalone: true,
   imports: [CommonModule, MatIcon],
   templateUrl: './call-timer.component.html',
   styleUrls: ['./call-timer.component.scss'],
@@ -31,11 +30,11 @@ export class CallTimerComponent implements OnInit, OnDestroy {
     effect(() => {
       const start = this.startTime();
       const end = this.endTime();
-      
+
       // Reset timer whenever startTime changes (new call)
-      this.stopTimer(); 
+      this.stopTimer();
       this.secondsElapsed.set(0);
-      
+
       if (end) {
         this.isActive.set(false);
         this.secondsElapsed.set(

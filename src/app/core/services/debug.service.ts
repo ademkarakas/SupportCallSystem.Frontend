@@ -8,8 +8,8 @@ import { AuthService } from './auth.service';
   providedIn: 'root',
 })
 export class DebugService {
-  private http = inject(HttpClient);
-  private auth = inject(AuthService);
+  readonly http = inject(HttpClient);
+  readonly auth = inject(AuthService);
 
   simulateIncomingCall(phoneNumber: string = '+4915123456789') {
     const user = this.auth.currentUser();
@@ -25,21 +25,19 @@ export class DebugService {
     };
 
     // Sample transcript for AI summary generation
-    const sampleTranscript = `Agent: Hello, thank you for calling customer support. This is Marcus speaking. How can I assist you today?
-Customer: Hi Marcus, I'm calling because I can't log into my account. It keeps saying my password is incorrect, but I'm sure it's right.
-Agent: I'm sorry to hear you're having trouble. I'd be happy to help you regain access. Let me verify your identity first. Could you please provide the email address associated with your account?
-Customer: It's john.smith@email.com.
-Agent: Thank you, John. Let me look that up... I found your account. I see the last login was three days ago. Before we reset your password, could you answer a security question? What was the name of your first pet?
-Customer: It was Fluffy, a golden retriever.
-Agent: Perfect, that matches our records. Now, let's reset your password. I'm sending a password reset link to your email. You should receive it in the next minute.
-Customer: Got it! I received the email.
-Agent: Great! Click on the link, and you'll be taken to a page where you can create a new password. Make sure it's at least 12 characters with a mix of uppercase, lowercase, numbers, and special characters.
-Customer: Okay, I'm doing that now... All set! I've created a new password.
-Agent: Excellent! Try logging in with your new password and let me know if it works.
-Customer: Yes, it worked! I'm logged in now. Thank you so much for your help!
-Agent: You're very welcome! Is there anything else I can help you with today?
-Customer: No, that was everything. Thanks again!
-Agent: My pleasure. Thank you for contacting us, and have a great day!`;
+    const sampleTranscript = `Agent: Guten Tag, Service Hotline. Mein Name ist Markus. Wie kann ich Ihnen helfen?
+Kunde: Hallo Markus, ich habe ein Problem mit meiner Internetverbindung. Sie ist seit heute Morgen sehr langsam.
+Agent: Das tut mir leid zu hören. Lassen Sie mich das für Sie überprüfen. Können Sie mir bitte Ihre Kundennummer geben?
+Kunde: Ja, die ist K-12345678.
+Agent: Vielen Dank. Einen Moment bitte... Ich sehe hier in unserem System, dass es in Ihrer Region tatsächlich eine technische Störung gibt. Unser Technik-Team arbeitet bereits daran.
+Kunde: Oh, okay. Wann wird das Problem voraussichtlich behoben sein?
+Agent: Die Störung sollte bis heute Abend um 18 Uhr behoben sein. Ich trage Sie in unsere Benachrichtigungsliste ein, sodass Sie eine SMS erhalten, sobald alles wieder funktioniert.
+Kunde: Das klingt gut. Bekomme ich eine Gutschrift für die Ausfallzeit?
+Agent: Ja, natürlich. Wir werden die Ausfallzeit automatisch berechnen und Ihnen auf Ihrer nächsten Rechnung gutschreiben. Das sind etwa 8 Stunden.
+Kunde: Perfekt! Vielen Dank für Ihre Hilfe.
+Agent: Gern geschehen! Gibt es noch etwas, womit ich Ihnen helfen kann?
+Kunde: Nein, das war alles. Auf Wiederhören!
+Agent: Auf Wiederhören und einen schönen Tag noch!`;
 
     console.log('🔔 Simulating incoming call:', { callId, phoneNumber, extension });
 
@@ -51,25 +49,30 @@ Agent: My pleasure. Thank you for contacting us, and have a great day!`;
         return timer(2500).pipe(
           switchMap(() => {
             console.log('📝 Populating transcript for call:', callId);
-            return this.http.post(`${environment.apiUrl}/api/test/populate-transcript`, {
-              callId: callId,
-              transcript: sampleTranscript
-            }).pipe(
-              retry({ count: 5, delay: 1000 }), // Retry up to 5 times with 1s delay if it fails
-              catchError((err) => {
-                console.warn('⚠️ Failed to populate transcript (may be production or timing issue):', err);
-                // Don't fail the whole operation if transcript population fails
-                return of(null);
+            return this.http
+              .post(`${environment.apiUrl}/api/test/populate-transcript`, {
+                callId: callId,
+                transcript: sampleTranscript,
               })
-            );
-          })
+              .pipe(
+                retry({ count: 5, delay: 1000 }), // Retry up to 5 times with 1s delay if it fails
+                catchError((err) => {
+                  console.warn(
+                    '⚠️ Failed to populate transcript (may be production or timing issue):',
+                    err,
+                  );
+                  // Don't fail the whole operation if transcript population fails
+                  return of(null);
+                }),
+              );
+          }),
         );
       }),
       tap(() => console.log('✅ Incoming call simulation completed:', callId)),
       catchError((err) => {
         console.error('❌ Failed to simulate incoming call:', err);
         throw err;
-      })
+      }),
     );
   }
 

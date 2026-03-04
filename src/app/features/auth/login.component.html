@@ -32,10 +32,16 @@
             autocomplete="username"
           />
         </div>
-        <div class="field-error-msg" *ngIf="loginForm.get('email')?.touched">
-          <span *ngIf="loginForm.get('email')?.hasError('required')">E-Mail ist erforderlich</span>
-          <span *ngIf="loginForm.get('email')?.hasError('email')">Ungültiges E-Mail-Format</span>
-        </div>
+        @if (loginForm.get('email')?.touched) {
+          <div class="field-error-msg">
+            @if (loginForm.get('email')?.hasError('required')) {
+              <span>E-Mail ist erforderlich</span>
+            }
+            @if (loginForm.get('email')?.hasError('email')) {
+              <span>Ungültiges E-Mail-Format</span>
+            }
+          </div>
+        }
       </div>
 
       <!-- Password Field -->
@@ -63,11 +69,13 @@
             <mat-icon>{{ hidePassword() ? 'visibility' : 'visibility_off' }}</mat-icon>
           </button>
         </div>
-        <div class="field-error-msg" *ngIf="loginForm.get('password')?.touched">
-          <span *ngIf="loginForm.get('password')?.hasError('required')"
-            >Passwort ist erforderlich</span
-          >
-        </div>
+        @if (loginForm.get('password')?.touched) {
+          <div class="field-error-msg">
+            @if (loginForm.get('password')?.hasError('required')) {
+              <span>Passwort ist erforderlich</span>
+            }
+          </div>
+        }
       </div>
 
       <!-- Remember Me -->
@@ -85,11 +93,13 @@
         class="btn btn-primary btn-block login-submit"
         [disabled]="loginForm.invalid || isLoading()"
       >
-        <ng-container *ngIf="!isLoading()">
+        @if (!isLoading()) {
           Anmelden
           <mat-icon>arrow_forward</mat-icon>
-        </ng-container>
-        <mat-spinner diameter="22" *ngIf="isLoading()"></mat-spinner>
+        }
+        @if (isLoading()) {
+          <mat-spinner diameter="22"></mat-spinner>
+        }
       </button>
     </form>
 

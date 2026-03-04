@@ -33,6 +33,17 @@
         <mat-icon>person_search</mat-icon>
         Anrufer-Profil
       </button>
+      <button
+        class="btn btn-sm"
+        [class.btn-success]="!audioCapture.isCaptureActive"
+        [class.btn-secondary]="audioCapture.isCaptureActive"
+        *ngIf="isRecording()"
+        (click)="toggleMicrophone()"
+        title="{{ audioCapture.isCaptureActive ? 'Mikrofon deaktivieren' : 'Mikrofon aktivieren' }}"
+      >
+        <mat-icon>{{ audioCapture.isCaptureActive ? 'mic' : 'mic_off' }}</mat-icon>
+        {{ audioCapture.isCaptureActive ? 'Mikrofon Aktiv' : 'Mikrofon Starten' }}
+      </button>
       <button class="btn btn-danger-filled" *ngIf="isRecording()" (click)="endCall()">
         <mat-icon>call_end</mat-icon>
         Gespräch beenden
@@ -85,6 +96,17 @@
           [class.loading]="!call()?.draftSummary && !isProcessingManual()"
         >
           <div class="content-viewport" *ngIf="call()?.draftSummary; else emptyState">
+            <!-- Live Transcript Section -->
+            <div class="summary-section" *ngIf="transcript()">
+              <label class="section-label">
+                <mat-icon class="inline-icon">transcribe</mat-icon>
+                LIVE-TRANSKRIPTION
+              </label>
+              <div class="text-card transcript-card">
+                <p>{{ transcript() }}</p>
+              </div>
+            </div>
+
             <div class="summary-section">
               <label class="section-label">KI-ZUSAMMENFASSUNG</label>
               <div class="text-card">

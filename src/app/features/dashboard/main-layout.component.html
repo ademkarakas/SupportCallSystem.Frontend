@@ -1,11 +1,9 @@
 <a class="skip-to-content" href="#main-content">Zum Hauptinhalt springen</a>
 <div class="app-layout" [class.sidebar-collapsed]="isSidebarCollapsed() && !isMobile()">
   <!-- Mobile Overlay Backdrop -->
-  <div
-    class="mobile-backdrop"
-    *ngIf="isMobile() && isMobileMenuOpen()"
-    (click)="closeMobileMenu()"
-  ></div>
+  @if (isMobile() && isMobileMenuOpen()) {
+    <div class="mobile-backdrop" (click)="closeMobileMenu()"></div>
+  }
 
   <!-- Sidebar -->
   <aside class="app-sidebar" [class.mobile-open]="isMobile() && isMobileMenuOpen()">
@@ -62,17 +60,16 @@
     <!-- Top Header -->
     <header class="app-header">
       <div class="header-left">
-        <button mat-icon-button *ngIf="isMobile()" (click)="toggleSidebar()" class="mobile-toggle">
-          <mat-icon>menu</mat-icon>
-        </button>
-        <button
-          mat-icon-button
-          *ngIf="!isMobile()"
-          (click)="toggleSidebar()"
-          class="sidebar-toggle"
-        >
-          <mat-icon>{{ isSidebarCollapsed() ? 'menu_open' : 'menu' }}</mat-icon>
-        </button>
+        @if (isMobile()) {
+          <button mat-icon-button (click)="toggleSidebar()" class="mobile-toggle">
+            <mat-icon>menu</mat-icon>
+          </button>
+        }
+        @if (!isMobile()) {
+          <button mat-icon-button (click)="toggleSidebar()" class="sidebar-toggle">
+            <mat-icon>{{ isSidebarCollapsed() ? 'menu_open' : 'menu' }}</mat-icon>
+          </button>
+        }
 
         <!-- Home / Quick Access Button -->
         <button
@@ -111,22 +108,26 @@
         </button>
 
         <!-- User Menu -->
-        <div class="user-menu" [matMenuTriggerFor]="userMenu" *ngIf="auth.currentUser() as user">
-          <div class="user-avatar">
-            {{ userInitials() }}
+        @if (auth.currentUser(); as user) {
+          <div class="user-menu" [matMenuTriggerFor]="userMenu">
+            <div class="user-avatar">
+              {{ userInitials() }}
+            </div>
+            <span class="user-name">{{ user.firstName }} {{ user.lastName }}</span>
+            <mat-icon class="chevron">expand_more</mat-icon>
           </div>
-          <span class="user-name">{{ user.firstName }} {{ user.lastName }}</span>
-          <mat-icon class="chevron">expand_more</mat-icon>
-        </div>
+        }
 
         <mat-menu #userMenu="matMenu" class="premium-menu">
-          <div class="menu-header" *ngIf="auth.currentUser() as user">
-            <div class="user-avatar-large">{{ userInitials() }}</div>
-            <div class="user-info">
-              <div class="name">{{ user.firstName }} {{ user.lastName }}</div>
-              <div class="email-sub">{{ user.email || 'agent@dicom.de' }}</div>
+          @if (auth.currentUser(); as user) {
+            <div class="menu-header">
+              <div class="user-avatar-large">{{ userInitials() }}</div>
+              <div class="user-info">
+                <div class="name">{{ user.firstName }} {{ user.lastName }}</div>
+                <div class="email-sub">{{ user.email || 'agent@dicom.de' }}</div>
+              </div>
             </div>
-          </div>
+          }
           <mat-divider></mat-divider>
           <button mat-menu-item id="open-user-settings-btn" (click)="openUserSettings()">
             <mat-icon>person</mat-icon>

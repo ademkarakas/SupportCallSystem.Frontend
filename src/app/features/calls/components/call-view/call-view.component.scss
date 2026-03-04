@@ -226,6 +226,27 @@
     color: var(--color-text-primary);
     font-size: 15px;
   }
+
+  &.transcript-card {
+    background-color: var(--color-status-info-bg, #e8f4fd);
+    border-left: 3px solid var(--color-brand);
+
+    p {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      white-space: pre-wrap;
+      word-wrap: break-word;
+      max-height: 200px;
+      overflow-y: auto;
+    }
+  }
+}
+
+.inline-icon {
+  font-size: 18px;
+  width: 18px;
+  height: 18px;
+  vertical-align: middle;
+  margin-right: 4px;
 }
 
 .action-list {

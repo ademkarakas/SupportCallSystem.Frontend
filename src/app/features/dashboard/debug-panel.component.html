@@ -1,38 +1,41 @@
-<div class="debug-panel premium-card" *ngIf="externalControl()()">
-  <div class="panel-header">
-    <div class="flex items-center gap-2">
-      <mat-icon class="color-primary">terminal</mat-icon>
-      <span class="panel-title">E2E Flow Simulator</span>
-    </div>
-    <button class="btn-icon-sm" (click)="externalControl().set(false)">
-      <mat-icon>close</mat-icon>
-    </button>
-  </div>
-
-  <div class="panel-content">
-    <div class="debug-section">
-      <label class="section-label">Webhooks</label>
-      <button class="btn btn-primary w-full" (click)="triggerCall()">
-        <mat-icon>phone_callback</mat-icon>
-        Incoming Call
+@if (externalControl()()) {
+  <div class="debug-panel premium-card">
+    <div class="panel-header">
+      <div class="flex items-center gap-2">
+        <mat-icon class="color-primary">terminal</mat-icon>
+        <span class="panel-title">E2E Flow Simulator</span>
+      </div>
+      <button class="btn-icon-sm" (click)="externalControl().set(false)">
+        <mat-icon>close</mat-icon>
       </button>
     </div>
 
-    <div class="debug-section mt-4">
-      <label class="section-label">AI Intelligence</label>
-      <button
-        class="btn btn-secondary w-full"
-        (click)="triggerSummary()"
-        [disabled]="!activeCallId()"
-      >
-        <mat-icon>auto_awesome</mat-icon>
-        AI Draft Ready
-      </button>
-      <p class="status-tip" *ngIf="!activeCallId()">
-        <mat-icon>info</mat-icon>
-        Join an active call first
-      </p>
+    <div class="panel-content">
+      <div class="debug-section">
+        <label class="section-label">Webhooks</label>
+        <button class="btn btn-primary w-full" (click)="triggerCall()">
+          <mat-icon>phone_callback</mat-icon>
+          Incoming Call
+        </button>
+      </div>
+
+      <div class="debug-section mt-4">
+        <label class="section-label">AI Intelligence</label>
+        <button
+          class="btn btn-secondary w-full"
+          (click)="triggerSummary()"
+          [disabled]="!activeCallId()"
+        >
+          <mat-icon>auto_awesome</mat-icon>
+          AI Draft Ready
+        </button>
+        @if (!activeCallId()) {
+          <p class="status-tip">
+            <mat-icon>info</mat-icon>
+            Join an active call first
+          </p>
+        }
+      </div>
     </div>
   </div>
-</div>
-
+}

@@ -1,4 +1,4 @@
-import { Component, inject, OnInit, ViewChild, AfterViewInit, HostListener } from '@angular/core';
+import { Component, inject, OnInit, viewChild, AfterViewInit, HostListener } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatTableModule, MatTableDataSource } from '@angular/material/table';
 import { MatIconModule } from '@angular/material/icon';
@@ -14,7 +14,6 @@ import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 
 @Component({
   selector: 'app-call-history',
-  standalone: true,
   imports: [
     CommonModule,
     RouterModule,
@@ -46,8 +45,8 @@ export class CallHistoryComponent implements OnInit, AfterViewInit {
     'actions',
   ];
 
-  @ViewChild(MatPaginator) paginator!: MatPaginator;
-  @ViewChild(MatSort) sort!: MatSort;
+  paginator = viewChild.required(MatPaginator);
+  sort = viewChild.required(MatSort);
 
   // Mobile detection
   isMobile = false;
@@ -78,8 +77,8 @@ export class CallHistoryComponent implements OnInit, AfterViewInit {
   }
 
   ngAfterViewInit() {
-    this.dataSource.paginator = this.paginator;
-    this.dataSource.sort = this.sort;
+    this.dataSource.paginator = this.paginator();
+    this.dataSource.sort = this.sort();
   }
 
   applyFilter(event: Event) {

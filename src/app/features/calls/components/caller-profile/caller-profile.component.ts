@@ -9,7 +9,6 @@ import { NotificationService } from '../../../../core/services/notification.serv
 
 @Component({
   selector: 'app-caller-profile',
-  standalone: true,
   imports: [CommonModule, RouterModule, FormsModule, MatIconModule, MatButtonModule],
   templateUrl: './caller-profile.component.html',
   styleUrls: ['./caller-profile.component.scss'],

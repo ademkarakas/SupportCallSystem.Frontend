@@ -1,6 +1,7 @@
 <div class="call-timer" [class.active]="isActive()">
   <mat-icon>timer</mat-icon>
   <span class="timer-value">{{ formattedTime() }}</span>
-  <span class="status-indicator" *ngIf="isActive()">LIVE</span>
+  @if (isActive()) {
+    <span class="status-indicator">LIVE</span>
+  }
 </div>
-

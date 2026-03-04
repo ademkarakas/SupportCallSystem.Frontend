@@ -10,7 +10,6 @@ import { fadeIn, staggerIn } from '../../core/animations/animations';
 
 @Component({
   selector: 'app-dashboard-landing',
-  standalone: true,
   imports: [CommonModule, MatIconModule, MatButtonModule, RouterLink],
   templateUrl: './dashboard-landing.component.html',
   styleUrls: ['./dashboard-landing.component.scss'],

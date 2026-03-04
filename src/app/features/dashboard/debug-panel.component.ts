@@ -10,7 +10,6 @@ import { first } from 'rxjs';
 
 @Component({
   selector: 'app-debug-panel',
-  standalone: true,
   imports: [CommonModule, MatButtonModule, MatIconModule, MatFormFieldModule, MatInputModule],
   templateUrl: './debug-panel.component.html',
   styleUrls: ['./debug-panel.component.scss'],

@@ -12,7 +12,6 @@ import { MatInputModule } from '@angular/material/input';
 
 @Component({
   selector: 'app-call-detail',
-  standalone: true,
   imports: [
     CommonModule,
     MatIconModule,
@@ -115,7 +114,7 @@ export class CallDetailComponent implements OnInit {
   }
 
   openInCallView() {
-    this.router.navigate(['/calls/view'], { queryParams: { id: this.callId() } });
+    this.router.navigate(['/calls'], { queryParams: { id: this.callId() } });
   }
 
   getConsentLabel(consent: number | string): string {

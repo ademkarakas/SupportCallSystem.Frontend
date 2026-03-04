@@ -1,4 +1,4 @@
-import { Component, Input, computed, signal } from '@angular/core';
+import { Component, input, computed, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
 /**
@@ -10,7 +10,6 @@ import { CommonModule } from '@angular/common';
  */
 @Component({
   selector: 'app-user-avatar',
-  standalone: true,
   imports: [CommonModule],
   template: `
     <div
@@ -20,12 +19,11 @@ import { CommonModule } from '@angular/common';
       [style.color]="textColor()"
       [attr.aria-label]="ariaLabel()"
     >
-      <ng-container *ngIf="!imageUrl(); else imageTemplate">
+      @if (displayImageUrl()) {
+        <img [src]="displayImageUrl()" [alt]="ariaLabel()" (error)="onImageError()" />
+      } @else {
         {{ initials() }}
-      </ng-container>
-      <ng-template #imageTemplate>
-        <img [src]="imageUrl()" [alt]="ariaLabel()" (error)="onImageError()" />
-      </ng-template>
+      }
     </div>
   `,
   styles: [
@@ -82,41 +80,51 @@ import { CommonModule } from '@angular/common';
 })
 export class UserAvatarComponent {
   /** First name of the user */
-  @Input() firstName: string = '';
+  firstName = input<string>('');
 
   /** Last name of the user */
-  @Input() lastName: string = '';
+  lastName = input<string>('');
 
   /** Optional image URL (if provided, shows image instead of initials) */
-  @Input() imageUrl = signal<string | null>(null);
+  imageUrl = input<string | null>(null);
 
   /** Size variant */
-  @Input() size = signal<'sm' | 'md' | 'lg' | 'xl' | '2xl'>('md');
+  size = input<'sm' | 'md' | 'lg' | 'xl' | '2xl'>('md');
 
   /** Custom background color (defaults to primary theme color) */
-  @Input() backgroundColor = signal<string>('var(--color-primary)');
+  backgroundColor = input<string>('var(--color-primary)');
 
   /** Custom text color (defaults to button primary text color) */
-  @Input() textColor = signal<string>('var(--color-button-primary-text)');
+  textColor = input<string>('var(--color-button-primary-text)');
+
+  /** Internal signal for tracking image load errors */
+  private readonly hasImageError = signal(false);
+
+  /** Computed URL to display - null if image had an error */
+  displayImageUrl = computed(() => {
+    return this.hasImageError() ? null : this.imageUrl();
+  });
 
   /** Computed initials from first and last name */
   initials = computed(() => {
-    const first = this.firstName?.trim()?.[0] || '';
-    const last = this.lastName?.trim()?.[0] || '';
+    const first = this.firstName()?.trim()?.[0] || '';
+    const last = this.lastName()?.trim()?.[0] || '';
     const result = (first + last).toUpperCase();
     return result || '?';
   });
 
   /** Aria label for accessibility */
   ariaLabel = computed(() => {
-    if (this.firstName || this.lastName) {
-      return `${this.firstName} ${this.lastName}`.trim();
+    const first = this.firstName();
+    const last = this.lastName();
+    if (first || last) {
+      return `${first} ${last}`.trim();
     }
     return 'User avatar';
   });
 
   /** Handle image load error - fallback to initials */
   onImageError(): void {
-    this.imageUrl.set(null);
+    this.hasImageError.set(true);
   }
 }

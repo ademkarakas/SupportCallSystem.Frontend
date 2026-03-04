@@ -17,23 +17,39 @@ export interface SummaryDraftEvent {
   actionItems: string[];
 }
 
+export interface TranscriptUpdatedEvent {
+  callId: string;
+  text: string;
+  timestamp: Date;
+}
+
+export interface TranscriptionErrorEvent {
+  callId: string;
+  error: string;
+  details: string;
+}
+
 @Injectable({
   providedIn: 'root',
 })
 export class SignalRService {
   private hubConnection!: signalR.HubConnection;
 
-  // State using Signals for UI updates
   public connectionStatus = signal<
     'disconnected' | 'connecting' | 'connected' | 'reconnecting' | 'error'
   >('disconnected');
 
-  // Event streams using Subjects
-  private incomingCallSubject = new BehaviorSubject<IncomingCallEvent | null>(null);
+  readonly incomingCallSubject = new BehaviorSubject<IncomingCallEvent | null>(null);
   public incomingCall$ = this.incomingCallSubject.asObservable();
 
-  private summaryDraftSubject = new Subject<SummaryDraftEvent>();
+  readonly summaryDraftSubject = new Subject<SummaryDraftEvent>();
   public summaryDraft$ = this.summaryDraftSubject.asObservable();
+
+  readonly transcriptUpdatedSubject = new Subject<TranscriptUpdatedEvent>();
+  public transcriptUpdated$ = this.transcriptUpdatedSubject.asObservable();
+
+  readonly transcriptionErrorSubject = new Subject<TranscriptionErrorEvent>();
+  public transcriptionError$ = this.transcriptionErrorSubject.asObservable();
 
   constructor() {}
 
@@ -77,13 +93,23 @@ export class SignalRService {
 
   private registerOnServerEvents(): void {
     this.hubConnection.on('IncomingCall', (data: IncomingCallEvent) => {
-      console.log('📞 SignalR IncomingCall received:', data);
+      console.log('SignalR IncomingCall received:', data);
       this.incomingCallSubject.next(data);
     });
 
     this.hubConnection.on('SummaryDraftReady', (data: SummaryDraftEvent) => {
-      console.log('✍️ SignalR SummaryDraftReady received:', data);
+      console.log('SignalR SummaryDraftReady received:', data);
       this.summaryDraftSubject.next(data);
+    });
+
+    this.hubConnection.on('TranscriptUpdated', (data: TranscriptUpdatedEvent) => {
+      console.log('SignalR TranscriptUpdated received:', data);
+      this.transcriptUpdatedSubject.next(data);
+    });
+
+    this.hubConnection.on('TranscriptionError', (data: TranscriptionErrorEvent) => {
+      console.error('SignalR TranscriptionError received:', data);
+      this.transcriptionErrorSubject.next(data);
     });
   }
 
@@ -100,6 +126,17 @@ export class SignalRService {
         console.log(`Registered agent extension: ${extension}`);
       } catch (err) {
         console.error(`Failed to register agent: ${err}`);
+      }
+    }
+  }
+
+  public async streamAudio(callId: string, audioChunk: ArrayBuffer): Promise<void> {
+    if (this.hubConnection?.state === signalR.HubConnectionState.Connected) {
+      try {
+        const uint8Array = new Uint8Array(audioChunk);
+        await this.hubConnection.invoke('StreamAudio', callId, Array.from(uint8Array));
+      } catch (err) {
+        console.error(`Failed to stream audio: ${err}`);
       }
     }
   }

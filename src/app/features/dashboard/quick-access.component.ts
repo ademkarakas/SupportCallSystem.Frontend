@@ -1,6 +1,6 @@
 import { Component, inject, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Router, RouterLink } from '@angular/router';
+import { Router } from '@angular/router';
 import { MatIconModule } from '@angular/material/icon';
 import { NotificationService } from '../../core/services/notification.service';
 import { CallApiService, CallRecord } from '../calls/services/call-api.service';
@@ -8,8 +8,7 @@ import { AuthService } from '../../core/services/auth.service';
 
 @Component({
   selector: 'app-quick-access',
-  standalone: true,
-  imports: [CommonModule, MatIconModule, RouterLink],
+  imports: [CommonModule, MatIconModule],
   templateUrl: './quick-access.component.html',
   styleUrls: ['./quick-access.component.scss'],
 })

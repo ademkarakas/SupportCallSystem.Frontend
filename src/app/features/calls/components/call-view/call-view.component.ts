@@ -16,10 +16,10 @@ import { SignalRService } from '../../../../core/services/signalr.service';
 import { NotificationService } from '../../../../core/services/notification.service';
 import { CallTimerComponent } from '../call-timer/call-timer.component';
 import { AuthService } from '../../../../core/services/auth.service';
+import { AudioCaptureService } from '../../../../core/services/audio-capture.service';
 
 @Component({
   selector: 'app-call-view',
-  standalone: true,
   imports: [
     CommonModule,
     MatButtonModule,
@@ -44,18 +44,20 @@ export class CallViewComponent implements OnInit, OnDestroy {
   signalR = inject(SignalRService);
   notification = inject(NotificationService);
   auth = inject(AuthService);
+  audioCapture = inject(AudioCaptureService);
 
   call = signal<CallRecord | null>(null);
   isRecording = signal(true);
   isProcessingManual = signal(false);
   isSubmitting = signal(false);
+  transcript = signal<string>('');
 
   approvalForm = this.fb.group({
     category: ['', Validators.required],
     summary: ['', [Validators.required, Validators.maxLength(1000)]],
   });
 
-  private destroy$ = new Subject<void>();
+  readonly destroy$ = new Subject<void>();
 
   ngOnInit() {
     this.route.queryParams.pipe(takeUntil(this.destroy$)).subscribe((params) => {
@@ -68,7 +70,7 @@ export class CallViewComponent implements OnInit, OnDestroy {
     // Listen for AI summary drafts
     this.signalR.summaryDraft$.pipe(takeUntil(this.destroy$)).subscribe((event) => {
       console.log('🤖 Received AI Summary Draft notification:', event);
-      
+
       const currentCall = this.call();
       if (event && currentCall && event.callId.toLowerCase() === currentCall.id.toLowerCase()) {
         console.log('✅ Matching call found, updating UI state');
@@ -93,6 +95,23 @@ export class CallViewComponent implements OnInit, OnDestroy {
         this.notification.showInfo('KI hat einen Entwurf der Zusammenfassung erstellt.');
       }
     });
+
+    // Listen for real-time transcripts
+    this.signalR.transcriptUpdated$.pipe(takeUntil(this.destroy$)).subscribe((event) => {
+      const currentCall = this.call();
+      if (event?.callId.toLowerCase() === currentCall?.id.toLowerCase()) {
+        this.transcript.update((current) => current + event.text + ' ');
+      }
+    });
+
+    // Listen for transcription errors
+    this.signalR.transcriptionError$.pipe(takeUntil(this.destroy$)).subscribe((event) => {
+      const currentCall = this.call();
+      if (event?.callId.toLowerCase() === currentCall?.id.toLowerCase()) {
+        console.error('Transcription error:', event);
+        this.notification.showError(`Transkriptionsfehler: ${event.error}`);
+      }
+    });
   }
 
   private loadCall(id: string) {
@@ -110,7 +129,7 @@ export class CallViewComponent implements OnInit, OnDestroy {
           // Join the call's SignalR group
           this.signalR.subscribeToCall(id);
 
-          // REMOVED: Auto-grant consent. 
+          // REMOVED: Auto-grant consent.
           // Now the agent must explicitly ask and click a button.
         } else {
           this.notification.showError('Spezifischer Anruf nicht gefunden veya aktif değil.');
@@ -141,7 +160,7 @@ export class CallViewComponent implements OnInit, OnDestroy {
         const status = granted ? 'Granted' : 'Declined';
         this.call.update((c) => (c ? { ...c, consent: status } : null));
         this.notification.showSuccess(`Einwilligung ${granted ? 'erteilt' : 'abgelehnt'}.`);
-        
+
         if (granted) {
           this.notification.showInfo('KI-Analyse ist jetzt für diesen Anruf aktiv.');
         } else {
@@ -154,7 +173,7 @@ export class CallViewComponent implements OnInit, OnDestroy {
   endCall() {
     const activeCall = this.call();
     console.log('🔴 endCall() triggered', { activeCall });
-    
+
     if (!activeCall) {
       console.error('❌ No active call available');
       return;
@@ -180,15 +199,13 @@ export class CallViewComponent implements OnInit, OnDestroy {
             }
             console.error('❌ Failed to record consent:', err);
             return of(null);
-          })
+          }),
         )
-      : of(null).pipe(
-          tap(() => console.log('✅ Consent already recorded:', consentValue))
-        );
+      : of(null).pipe(tap(() => console.log('✅ Consent already recorded:', consentValue)));
 
     // Chain: record consent → end call → navigate
     this.isRecording.set(false); // Set loading state
-    
+
     consentObs$
       .pipe(
         switchMap(() => {
@@ -199,7 +216,7 @@ export class CallViewComponent implements OnInit, OnDestroy {
           // This runs whether success or error
           this.isRecording.set(false);
         }),
-        takeUntil(this.destroy$)
+        takeUntil(this.destroy$),
       )
       .subscribe({
         next: () => {
@@ -243,13 +260,15 @@ export class CallViewComponent implements OnInit, OnDestroy {
   tidyUpManualNotes() {
     const activeCall = this.call();
     const manualNotes = this.approvalForm.get('summary')?.value;
-    
+
     if (!activeCall || !manualNotes || manualNotes.length < 10) {
-      this.notification.showWarning('Bitte geben Sie mindestens 10 Zeichen ein, um sie zu optimieren.');
+      this.notification.showWarning(
+        'Bitte geben Sie mindestens 10 Zeichen ein, um sie zu optimieren.',
+      );
       return;
     }
 
-    this.isProcessingManual.set(true); 
+    this.isProcessingManual.set(true);
     this.callApi.tidyUpNotes(activeCall.id, manualNotes).subscribe({
       next: () => {
         this.notification.showInfo('KI optimiert Ihre Notizen...');
@@ -257,7 +276,7 @@ export class CallViewComponent implements OnInit, OnDestroy {
       error: () => {
         this.notification.showError('KI-Optimierung fehlgeschlagen.');
         this.isProcessingManual.set(false);
-      }
+      },
     });
   }
 
@@ -268,16 +287,46 @@ export class CallViewComponent implements OnInit, OnDestroy {
     return hasDraft || hasManualEntry;
   }
 
+  toggleMicrophone() {
+    const activeCall = this.call();
+    if (!activeCall) {
+      this.notification.showError('Kein aktiver Anruf');
+      return;
+    }
+
+    if (this.audioCapture.isCaptureActive) {
+      this.audioCapture.stopCapture();
+      this.notification.showInfo('Mikrofon deaktiviert');
+    } else {
+      this.audioCapture
+        .startCapture(activeCall.id)
+        .then(() => {
+          this.notification.showSuccess('Mikrofon aktiviert - Transkription läuft');
+        })
+        .catch((err) => {
+          console.error('Microphone access error:', err);
+          this.notification.showError('Mikrofonzugriff verweigert');
+        });
+    }
+  }
+
   getStatusMessage(): string {
     const c = this.call();
-    if (!this.isRecording() && !c?.draftSummary) return 'Warte auf finalen KI-Zusammenfassungsentwurf...';
+    if (!this.isRecording() && !c?.draftSummary)
+      return 'Warte auf finalen KI-Zusammenfassungsentwurf...';
     // Consent: 0=NotAsked, 1=Granted, 2=Declined
     if (c?.consent === 'NotAsked' || c?.consent === 0) return 'Warte auf Kundenzustimmung...';
-    if (c?.consent === 'Declined' || c?.consent === 2) return 'Einwilligung abgelehnt. KI-Verarbeitung deaktiviert.';
+    if (c?.consent === 'Declined' || c?.consent === 2)
+      return 'Einwilligung abgelehnt. KI-Verarbeitung deaktiviert.';
     return 'Höre auf Gesprächsinhalte...';
   }
 
   ngOnDestroy() {
+    // Stop audio capture if active
+    if (this.audioCapture.isCaptureActive) {
+      this.audioCapture.stopCapture();
+    }
+
     this.destroy$.next();
     this.destroy$.complete();
   }

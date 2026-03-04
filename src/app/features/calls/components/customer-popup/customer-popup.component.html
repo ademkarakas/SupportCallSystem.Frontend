@@ -15,23 +15,25 @@
 
     <!-- Customer Card -->
     <main class="dialog-body">
-      <div class="customer-card-premium" *ngIf="data.customer; else unidentified" [@fadeIn]>
-        <div class="avatar-area">
-          <div class="avatar">{{ data.customer.firstName[0] }}{{ data.customer.lastName[0] }}</div>
-          <div class="verified-icon">
-            <mat-icon>verified</mat-icon>
+      @if (data.customer) {
+        <div class="customer-card-premium" [@fadeIn]>
+          <div class="avatar-area">
+            <div class="avatar">
+              {{ data.customer.firstName[0] }}{{ data.customer.lastName[0] }}
+            </div>
+            <div class="verified-icon">
+              <mat-icon>verified</mat-icon>
+            </div>
+          </div>
+          <div class="info-area">
+            <h3 class="name">{{ data.customer.firstName }} {{ data.customer.lastName }}</h3>
+            <p class="email">{{ data.customer.email }}</p>
+            <div class="badge-row">
+              <span class="badge badge-active">Kunde identifiziert</span>
+            </div>
           </div>
         </div>
-        <div class="info-area">
-          <h3 class="name">{{ data.customer.firstName }} {{ data.customer.lastName }}</h3>
-          <p class="email">{{ data.customer.email }}</p>
-          <div class="badge-row">
-            <span class="badge badge-active">Kunde identifiziert</span>
-          </div>
-        </div>
-      </div>
-
-      <ng-template #unidentified>
+      } @else {
         <div class="customer-card-premium unidentified" [@fadeIn]>
           <div class="avatar-area">
             <div class="avatar unknown">
@@ -46,7 +48,7 @@
             </div>
           </div>
         </div>
-      </ng-template>
+      }
     </main>
 
     <!-- Actions -->

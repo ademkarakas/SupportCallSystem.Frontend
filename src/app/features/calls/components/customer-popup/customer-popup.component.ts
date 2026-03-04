@@ -8,7 +8,6 @@ import { slideUp, fadeIn } from '../../../../core/animations/animations';
 
 @Component({
   selector: 'app-customer-popup',
-  standalone: true,
   imports: [CommonModule, MatDialogModule, MatButtonModule, MatIconModule],
   templateUrl: './customer-popup.component.html',
   styleUrls: ['./customer-popup.component.scss'],
