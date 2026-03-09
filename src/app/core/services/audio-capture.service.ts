@@ -115,9 +115,14 @@ export class AudioCaptureService {
       };
 
       source.connect(this.processor);
-      // NOTE: We intentionally DO NOT connect to destination to avoid echo/feedback
-      // ScriptProcessorNode will still process audio without destination connection
-      // this.processor.connect(this.audioContext.destination); // REMOVED - causes echo
+      // Connect through a silent GainNode (gain=0) to destination.
+      // This is REQUIRED: Chrome/Chromium will NOT fire onaudioprocess unless
+      // the processor node is part of a fully connected audio graph.
+      // GainNode with gain=0 ensures no audible output (no echo/feedback).
+      const silentGain = this.audioContext.createGain();
+      silentGain.gain.value = 0;
+      this.processor.connect(silentGain);
+      silentGain.connect(this.audioContext.destination);
 
       this.isCapturing = true;
       this.currentCallId = callId;

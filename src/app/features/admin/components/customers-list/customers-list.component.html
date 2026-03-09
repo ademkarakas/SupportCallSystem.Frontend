@@ -19,15 +19,13 @@
   <div class="filters-bar">
     <mat-form-field appearance="outline" class="search-field">
       <mat-label>Suche (Name, Telefon, Firma...)</mat-label>
+      <mat-icon matPrefix>search</mat-icon>
       <input
         matInput
         [ngModel]="search"
         (ngModelChange)="onSearchInput($event)"
         (keydown)="onSearchKeydown($event)"
       />
-      <button mat-icon-button matSuffix (click)="onSearch()">
-        <mat-icon>search</mat-icon>
-      </button>
     </mat-form-field>
 
     <div class="deleted-toggle">
