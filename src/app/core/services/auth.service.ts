@@ -10,6 +10,7 @@ export interface User {
   firstName: string;
   lastName: string;
   extension: string;
+  roles: string[];
 }
 
 export interface AuthResponse {
@@ -55,12 +56,56 @@ export class AuthService {
     return this._token();
   }
 
+  public updateProfile(data: {
+    userId: string;
+    firstName: string;
+    lastName: string;
+    email: string;
+    extension: string;
+  }): Observable<User> {
+    return this.http.put<User>(`${environment.apiUrl}/api/auth/profile`, data).pipe(
+      tap((updatedUser) => {
+        this._currentUser.set(updatedUser);
+        sessionStorage.setItem(this.USER_KEY, JSON.stringify(updatedUser));
+      }),
+    );
+  }
+
+  public changePassword(data: {
+    userId: string;
+    currentPassword: string;
+    newPassword: string;
+  }): Observable<void> {
+    return this.http.post<void>(`${environment.apiUrl}/api/auth/change-password`, data);
+  }
+
+  public isAdmin(): boolean {
+    const roles = this.currentUser()?.roles ?? [];
+    return roles.includes('SystemAdmin') || roles.includes('UserAdmin');
+  }
+
   private setSession(authResponse: AuthResponse): void {
+    const roles = this.extractRolesFromToken(authResponse.token);
+    const userWithRoles: User = { ...authResponse.user, roles };
+
     sessionStorage.setItem(this.TOKEN_KEY, authResponse.token);
-    sessionStorage.setItem(this.USER_KEY, JSON.stringify(authResponse.user));
+    sessionStorage.setItem(this.USER_KEY, JSON.stringify(userWithRoles));
 
     this._token.set(authResponse.token);
-    this._currentUser.set(authResponse.user);
+    this._currentUser.set(userWithRoles);
+  }
+
+  private extractRolesFromToken(token: string): string[] {
+    try {
+      const payload = token.split('.')[1];
+      const decoded = JSON.parse(atob(payload));
+      const roleClaim = 'http://schemas.microsoft.com/ws/2008/06/identity/claims/role';
+      const roles = decoded[roleClaim];
+      if (!roles) return [];
+      return Array.isArray(roles) ? roles : [roles];
+    } catch {
+      return [];
+    }
   }
 
   private loadTokenFromStorage(): string | null {

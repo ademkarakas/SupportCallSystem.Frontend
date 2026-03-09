@@ -11,7 +11,7 @@ export class DebugService {
   readonly http = inject(HttpClient);
   readonly auth = inject(AuthService);
 
-  simulateIncomingCall(phoneNumber: string = '+4915123456789') {
+  simulateIncomingCall(phoneNumber: string = '+4915123456789', injectMockTranscript = false) {
     const user = this.auth.currentUser();
     const extension = user?.extension || '1001';
 
@@ -45,10 +45,14 @@ Agent: Auf Wiederhören und einen schönen Tag noch!`;
     return this.http.post(`${environment.apiUrl}/api/webhooks/nfon/incoming-call`, payload).pipe(
       switchMap(() => {
         console.log('✅ Webhook call created successfully:', callId);
+        if (!injectMockTranscript) {
+          console.log('🎤 Real microphone mode — skipping mock transcript injection');
+          return of(null);
+        }
         // Wait 2500ms to give the user time to click "Accept"
         return timer(2500).pipe(
           switchMap(() => {
-            console.log('📝 Populating transcript for call:', callId);
+            console.log('📝 Populating mock transcript for call:', callId);
             return this.http
               .post(`${environment.apiUrl}/api/test/populate-transcript`, {
                 callId: callId,

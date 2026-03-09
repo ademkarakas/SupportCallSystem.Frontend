@@ -173,65 +173,155 @@
       </div>
     </div>
 
-    <!-- Right Sidebar: Form Panel -->
-    <div class="card form-panel">
-      <div class="card-header">
-        <h3>Abschluss & Dokumentation</h3>
-      </div>
-
-      <div class="form-container">
-        <form [formGroup]="approvalForm" class="modern-form">
-          <div class="form-group">
-            <label class="field-label">Gespräch einordnen</label>
-            <mat-form-field appearance="outline" class="w-full custom-category-select">
-              <mat-select formControlName="category" placeholder="Kategorie wählen">
-                <mat-option value="TechnicalIssue">Technisches Problem</mat-option>
-                <mat-option value="BillingQuestion">Abrechnung/Rechnung</mat-option>
-                <mat-option value="AccessCredentials">Zugangsdaten</mat-option>
-                <mat-option value="GeneralInquiry">Allgemeine Anfrage</mat-option>
-                <mat-option value="Complaint">Beschwerde</mat-option>
-                <mat-option value="FeatureRequest">Funktionswunsch</mat-option>
-              </mat-select>
-            </mat-form-field>
-          </div>
-
-          <div class="form-group documentation-field-container">
-            <div class="flex justify-between items-center mb-2">
-              <label class="field-label">Dokumentation</label>
-              <span class="char-count"
-                >{{ approvalForm.get('summary')?.value?.length || 0 }}/500</span
-              >
+    <!-- Right Sidebar: Customer Context + Form Panel -->
+    <div class="right-sidebar">
+      <!-- Customer Context Panel -->
+      @if (call()?.customerId) {
+        <div class="card customer-context-panel">
+          <div class="card-header" (click)="toggleCustomerPanel()">
+            <div class="flex items-center gap-2">
+              <mat-icon class="color-primary">person</mat-icon>
+              <h3>Kundenkontext</h3>
             </div>
-            <mat-form-field appearance="outline" class="w-full">
-              <textarea
-                matInput
-                rows="10"
-                formControlName="summary"
-                placeholder="Was wurde gelöst? Welche nächsten Schritte?"
-              ></textarea>
-            </mat-form-field>
+            <mat-icon class="toggle-icon">{{
+              customerPanelOpen() ? 'expand_less' : 'expand_more'
+            }}</mat-icon>
           </div>
+          @if (customerPanelOpen()) {
+            <div class="customer-context-body">
+              @if (customerHistory()) {
+                <div class="customer-info-brief">
+                  <div class="info-item">
+                    <strong>{{ customerHistory()!.fullName }}</strong>
+                  </div>
+                  <div class="info-item">
+                    <mat-icon>phone</mat-icon> {{ customerHistory()!.phoneNumber }}
+                  </div>
+                  @if (customerHistory()!.company) {
+                    <div class="info-item">
+                      <mat-icon>business</mat-icon> {{ customerHistory()!.company }}
+                    </div>
+                  }
+                  @if (customerHistory()!.notes) {
+                    <div class="info-item notes">
+                      <mat-icon>note</mat-icon> {{ customerHistory()!.notes }}
+                    </div>
+                  }
+                </div>
+                @if (customerHistory()!.recentCalls.length > 0) {
+                  <div class="previous-calls">
+                    <label class="section-label"
+                      >VORHERIGE ANRUFE ({{ customerHistory()!.recentCalls.length }})</label
+                    >
+                    @for (
+                      prevCall of customerHistory()!.recentCalls.slice(0, 5);
+                      track prevCall.id
+                    ) {
+                      <div class="prev-call-item">
+                        <div class="prev-call-header">
+                          <span class="prev-call-date">{{
+                            prevCall.startTime | date: 'dd.MM.yy HH:mm'
+                          }}</span>
+                          <span class="prev-call-cat">{{
+                            getCategoryLabel(prevCall.category)
+                          }}</span>
+                        </div>
+                        @if (prevCall.summary) {
+                          <p class="prev-call-summary">{{ prevCall.summary }}</p>
+                        }
+                      </div>
+                    }
+                  </div>
+                } @else {
+                  <p class="no-history">Erster Anruf dieses Kunden.</p>
+                }
+              } @else {
+                <div class="loading-context">
+                  <mat-progress-bar mode="indeterminate"></mat-progress-bar>
+                </div>
+              }
+            </div>
+          }
+        </div>
+      } @else if (isRecording()) {
+        <!-- No customer linked - show link option -->
+        <div class="card customer-context-panel">
+          <div class="card-header">
+            <div class="flex items-center gap-2">
+              <mat-icon>person_add</mat-icon>
+              <h3>Kein Kunde verknüpft</h3>
+            </div>
+          </div>
+          <div class="customer-context-body">
+            <p class="no-customer-hint">
+              Dieser Anruf ist keinem Kunden zugeordnet. Sie können nach dem Gespräch über das
+              Anrufer-Profil einen Kunden verknüpfen.
+            </p>
+          </div>
+        </div>
+      }
 
-          <div class="form-actions">
-            <button
-              class="btn btn-primary w-full shadow-lg"
-              (click)="onApprove()"
-              [disabled]="!isApprovable() || isSubmitting()"
-            >
-              <mat-icon>{{ isSubmitting() ? 'hourglass_empty' : 'done_all' }}</mat-icon>
-              {{ isSubmitting() ? 'Speichert...' : 'Vorgang abschließen' }}
-            </button>
-            <button
-              class="btn btn-secondary w-full"
-              (click)="tidyUpManualNotes()"
-              [disabled]="!approvalForm.get('summary')?.value || isProcessingManual()"
-            >
-              <mat-icon>auto_fix_high</mat-icon>
-              KI-Notizhilfe
-            </button>
-          </div>
-        </form>
+      <!-- Existing Form Panel -->
+      <div class="card form-panel">
+        <div class="card-header">
+          <h3>Abschluss & Dokumentation</h3>
+        </div>
+
+        <div class="form-container">
+          <form [formGroup]="approvalForm" class="modern-form">
+            <div class="form-group">
+              <label class="field-label">Gespräch einordnen</label>
+              <mat-form-field appearance="outline" class="w-full custom-category-select">
+                <mat-select formControlName="category" placeholder="Kategorie wählen">
+                  <mat-option value="TechnicalIssue">Technisches Problem</mat-option>
+                  <mat-option value="BillingQuestion">Abrechnung/Rechnung</mat-option>
+                  <mat-option value="AccessCredentials">Zugangsdaten</mat-option>
+                  <mat-option value="GeneralInquiry">Allgemeine Anfrage</mat-option>
+                  <mat-option value="Complaint">Beschwerde</mat-option>
+                  <mat-option value="FeatureRequest">Funktionswunsch</mat-option>
+                </mat-select>
+              </mat-form-field>
+            </div>
+
+            <div class="form-group documentation-field-container">
+              <div class="flex justify-between items-center mb-2">
+                <label class="field-label">Dokumentation</label>
+                <span class="char-count"
+                  >{{ approvalForm.get('summary')?.value?.length || 0 }}/500</span
+                >
+              </div>
+              <mat-form-field appearance="outline" class="w-full">
+                <textarea
+                  matInput
+                  rows="10"
+                  formControlName="summary"
+                  placeholder="Was wurde gelöst? Welche nächsten Schritte?"
+                ></textarea>
+              </mat-form-field>
+            </div>
+
+            <div class="form-actions">
+              <button
+                class="btn btn-primary w-full shadow-lg"
+                (click)="onApprove()"
+                [disabled]="!isApprovable() || isSubmitting()"
+              >
+                <mat-icon>{{ isSubmitting() ? 'hourglass_empty' : 'done_all' }}</mat-icon>
+                {{ isSubmitting() ? 'Speichert...' : 'Vorgang abschließen' }}
+              </button>
+              <button
+                class="btn btn-secondary w-full"
+                (click)="tidyUpManualNotes()"
+                [disabled]="!approvalForm.get('summary')?.value || isProcessingManual()"
+              >
+                <mat-icon>auto_fix_high</mat-icon>
+                KI-Notizhilfe
+              </button>
+            </div>
+          </form>
+        </div>
       </div>
     </div>
+    <!-- /right-sidebar -->
   </div>
 </div>

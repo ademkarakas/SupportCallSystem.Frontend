@@ -1,0 +1,170 @@
+<div class="activity-page page-enter">
+  <!-- Header -->
+  <header class="page-header">
+    <div class="header-content">
+      <div class="title-row">
+        <div class="title-icon-badge">
+          <mat-icon>analytics</mat-icon>
+        </div>
+        <div>
+          <h1 class="page-title">Mitarbeiter-Aktivität</h1>
+          <p class="subtitle">Leistungsübersicht der letzten 30 Tage</p>
+        </div>
+      </div>
+    </div>
+    <button class="refresh-btn" (click)="loadActivity()" title="Aktualisieren">
+      <mat-icon>refresh</mat-icon>
+      <span>Aktualisieren</span>
+    </button>
+  </header>
+
+  @if (isLoading()) {
+    <div class="loading-state">
+      <mat-icon class="spinner">sync</mat-icon>
+      <p>Aktivitätsdaten werden geladen…</p>
+    </div>
+  } @else {
+    <!-- Summary Bar -->
+    @if (activityData()) {
+      <div class="summary-bar">
+        <div class="summary-item">
+          <div class="summary-icon si-blue"><mat-icon>call</mat-icon></div>
+          <div class="summary-text">
+            <span class="summary-value">{{ activityData()!.totalCalls }}</span>
+            <span class="summary-label">Gesamt-Anrufe</span>
+          </div>
+        </div>
+        <div class="summary-item">
+          <div class="summary-icon si-green"><mat-icon>people</mat-icon></div>
+          <div class="summary-text">
+            <span class="summary-value">{{ activityData()!.totalUniqueCustomers }}</span>
+            <span class="summary-label">Einzigartige Kunden</span>
+          </div>
+        </div>
+        <div class="summary-item">
+          <div class="summary-icon si-orange"><mat-icon>timer</mat-icon></div>
+          <div class="summary-text">
+            <span class="summary-value">{{
+              formatDuration(activityData()!.averageDurationSeconds)
+            }}</span>
+            <span class="summary-label">Ø Gesprächsdauer</span>
+          </div>
+        </div>
+        <div class="summary-item">
+          <div class="summary-icon si-purple"><mat-icon>group</mat-icon></div>
+          <div class="summary-text">
+            <span class="summary-value">{{ agents().length }}</span>
+            <span class="summary-label">Aktive Agenten</span>
+          </div>
+        </div>
+      </div>
+    }
+
+    <!-- Agent Split View: List + Panel -->
+    <div class="agent-split-view" [class.panel-open]="isPanelOpen()">
+      <!-- Left: Scrollable Agent List -->
+      <div class="agent-list-section">
+        @for (agent of agents(); track agent.agentId) {
+          <button
+            type="button"
+            class="agent-list-row"
+            [class.selected]="selectedAgent()?.agentId === agent.agentId"
+            (click)="onAgentClick(agent)"
+          >
+            <div class="agent-avatar">{{ agent.agentName.split(' ').map(n => n[0]).join('') }}</div>
+            <div class="agent-list-meta">
+              <span class="agent-list-name">{{ agent.agentName }}</span>
+              <span class="agent-list-stat"
+                >{{ agent.totalCalls }} Anrufe · Ø
+                {{ formatDuration(agent.averageDurationSeconds) }}</span
+              >
+            </div>
+            <mat-icon class="row-chevron">chevron_right</mat-icon>
+          </button>
+        } @empty {
+          <div class="list-empty-state">
+            <mat-icon>insights</mat-icon>
+            <p>Keine Aktivitätsdaten für diesen Zeitraum.</p>
+          </div>
+        }
+      </div>
+
+      <!-- Right: Detail Panel -->
+      <div class="agent-panel-section" [class.visible]="isPanelOpen()">
+        @if (selectedAgent(); as agent) {
+          <div class="panel-card">
+            <!-- Panel Header -->
+            <div class="panel-header">
+              <div class="panel-avatar">
+                {{ agent.agentName.split(' ').map(n => n[0]).join('') }}
+              </div>
+              <div class="panel-title-block">
+                <h3 class="panel-agent-name">{{ agent.agentName }}</h3>
+                <span class="panel-agent-sub">{{ agent.totalCalls }} Anrufe</span>
+              </div>
+              <button class="panel-close-btn" (click)="onPanelClose()" title="Schließen">
+                <mat-icon>close</mat-icon>
+              </button>
+            </div>
+
+            <!-- Panel Body -->
+            <div class="panel-body">
+              <!-- Stats Row -->
+              <div class="stats-row">
+                <div class="stat-chip">
+                  <mat-icon class="chip-icon ci-blue">people_outline</mat-icon>
+                  <div class="chip-text">
+                    <span class="chip-value">{{ agent.uniqueCustomers }}</span>
+                    <span class="chip-label">Kunden</span>
+                  </div>
+                </div>
+                <div class="stat-chip">
+                  <mat-icon class="chip-icon ci-green">schedule</mat-icon>
+                  <div class="chip-text">
+                    <span class="chip-value">{{
+                      formatDuration(agent.averageDurationSeconds)
+                    }}</span>
+                    <span class="chip-label">Ø Dauer</span>
+                  </div>
+                </div>
+                <div class="stat-chip">
+                  <mat-icon class="chip-icon ci-purple">verified</mat-icon>
+                  <div class="chip-text">
+                    <span class="chip-value">{{ formatPercent(agent.consentRate) }}</span>
+                    <span class="chip-label">Einwilligung</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Category Breakdown -->
+              @if (getCategoryEntries(agent.categoryBreakdown).length > 0) {
+                <div class="category-section">
+                  <p class="category-title">Kategorien</p>
+                  <div class="category-list">
+                    @for (cat of getCategoryEntries(agent.categoryBreakdown); track cat.key) {
+                      <div class="category-row">
+                        <span class="category-name">{{ getCategoryLabel(cat.key) }}</span>
+                        <div class="category-bar-wrap">
+                          <div
+                            class="category-bar"
+                            [style.width.%]="(cat.value / agent.totalCalls) * 100"
+                          ></div>
+                        </div>
+                        <span class="category-count">{{ cat.value }}</span>
+                      </div>
+                    }
+                  </div>
+                </div>
+              }
+            </div>
+          </div>
+        } @else {
+          <div class="panel-placeholder">
+            <mat-icon>person_search</mat-icon>
+            <p>Mitarbeiter aus der Liste auswählen</p>
+          </div>
+        }
+      </div>
+    </div>
+  }
+</div>

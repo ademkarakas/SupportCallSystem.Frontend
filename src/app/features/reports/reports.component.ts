@@ -1,11 +1,234 @@
-import { Component } from '@angular/core';
+import { Component, OnInit, inject, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import { MatIconModule } from '@angular/material/icon';
+import { MatButtonModule } from '@angular/material/button';
+import { MatSelectModule } from '@angular/material/select';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
+import { BaseChartDirective } from 'ng2-charts';
+import { ChartData, ChartOptions } from 'chart.js';
+import { AuthService } from '../../core/services/auth.service';
+import { NotificationService } from '../../core/services/notification.service';
+import { ReportsService, ReportsData, AgentInfo } from './reports.service';
+import { fadeIn } from '../../core/animations/animations';
+
+type Preset = '7d' | '30d' | '90d';
 
 @Component({
   selector: 'app-reports',
-  imports: [CommonModule, MatIconModule],
+  imports: [
+    CommonModule,
+    FormsModule,
+    MatIconModule,
+    MatButtonModule,
+    MatSelectModule,
+    MatFormFieldModule,
+    MatInputModule,
+    BaseChartDirective,
+  ],
   templateUrl: './reports.component.html',
   styleUrls: ['./reports.component.scss'],
+  animations: [fadeIn],
 })
-export class ReportsComponent {}
+export class ReportsComponent implements OnInit {
+  private readonly auth = inject(AuthService);
+  private readonly reportsService = inject(ReportsService);
+  private readonly notification = inject(NotificationService);
+
+  readonly isAdmin = this.auth.isAdmin();
+
+  isLoading = signal(false);
+  reportData = signal<ReportsData | null>(null);
+  agents = signal<AgentInfo[]>([]);
+  selectedAgentId = signal<string | null>(null);
+  activePreset = signal<Preset>('30d');
+
+  dateFrom = signal<Date>(this.defaultFrom(30));
+  dateTo = signal<Date>(new Date());
+
+  // Expose formatted dates for input binding
+  dateFromStr = computed(() => this.toInputDate(this.dateFrom()));
+  dateToStr = computed(() => this.toInputDate(this.dateTo()));
+
+  // ---- Chart: Line — daily call trend ----
+  lineChartData = computed<ChartData<'line'>>(() => {
+    const data = this.reportData();
+    if (!data) return { datasets: [] };
+    return {
+      labels: data.dailyCallCounts.map((d) => d.date),
+      datasets: [
+        {
+          data: data.dailyCallCounts.map((d) => d.count),
+          label: 'Anrufe',
+          fill: true,
+          tension: 0.4,
+          borderColor: '#3b82f6',
+          backgroundColor: 'rgba(59,130,246,0.12)',
+          pointBackgroundColor: '#3b82f6',
+        },
+      ],
+    };
+  });
+
+  lineChartOptions: ChartOptions<'line'> = {
+    responsive: true,
+    plugins: { legend: { display: false } },
+    scales: { y: { beginAtZero: true, ticks: { precision: 0 } } },
+  };
+
+  // ---- Chart: Doughnut — category distribution ----
+  doughnutChartData = computed<ChartData<'doughnut'>>(() => {
+    const data = this.reportData();
+    if (!data) return { datasets: [] };
+    return {
+      labels: data.categoryStats.map((c) => this.translateCategory(c.category)),
+      datasets: [
+        {
+          data: data.categoryStats.map((c) => c.count),
+          backgroundColor: [
+            '#3b82f6',
+            '#10b981',
+            '#f59e0b',
+            '#ef4444',
+            '#8b5cf6',
+            '#06b6d4',
+            '#f97316',
+          ],
+        },
+      ],
+    };
+  });
+
+  doughnutChartOptions: ChartOptions<'doughnut'> = {
+    responsive: true,
+    plugins: { legend: { position: 'right' } },
+  };
+
+  // ---- Chart: Bar — summary status ----
+  barChartData = computed<ChartData<'bar'>>(() => {
+    const data = this.reportData();
+    if (!data) return { datasets: [] };
+    const b = data.summaryStatusBreakdown;
+    return {
+      labels: ['Kein Entwurf', 'Entwurf', 'Genehmigt'],
+      datasets: [
+        {
+          data: [b.none, b.draft, b.approved],
+          backgroundColor: ['#94a3b8', '#f59e0b', '#10b981'],
+          borderRadius: 4,
+        },
+      ],
+    };
+  });
+
+  barChartOptions: ChartOptions<'bar'> = {
+    responsive: true,
+    plugins: { legend: { display: false } },
+    scales: { y: { beginAtZero: true, ticks: { precision: 0 } } },
+  };
+
+  ngOnInit(): void {
+    if (this.isAdmin) {
+      this.reportsService.getAgents().subscribe({
+        next: (agents) => this.agents.set(agents),
+        error: () => this.notification.showError('Agent-Liste konnte nicht geladen werden.'),
+      });
+    }
+    this.loadData();
+  }
+
+  onPreset(preset: Preset): void {
+    this.activePreset.set(preset);
+    const presetDays: Record<Preset, number> = { '7d': 7, '30d': 30, '90d': 90 };
+    const days = presetDays[preset];
+    this.dateFrom.set(this.defaultFrom(days));
+    this.dateTo.set(new Date());
+    this.loadData();
+  }
+
+  onDateFromChange(value: string): void {
+    if (value) {
+      this.dateFrom.set(new Date(value));
+      this.activePreset.set('30d'); // reset preset label
+    }
+  }
+
+  onDateToChange(value: string): void {
+    if (value) {
+      this.dateTo.set(new Date(value));
+      this.activePreset.set('30d');
+    }
+  }
+
+  onAgentChange(id: string | null): void {
+    this.selectedAgentId.set(id);
+    this.loadData();
+  }
+
+  onRefresh(): void {
+    this.loadData();
+  }
+
+  onExport(): void {
+    this.reportsService
+      .exportReports(this.dateFrom(), this.dateTo(), this.selectedAgentId())
+      .subscribe({
+        next: (blob) => {
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = `berichte_${this.toInputDate(this.dateFrom())}_${this.toInputDate(this.dateTo())}.csv`;
+          a.click();
+          URL.revokeObjectURL(url);
+        },
+        error: () => this.notification.showError('Export fehlgeschlagen.'),
+      });
+  }
+
+  formatDuration(seconds: number): string {
+    const m = Math.floor(seconds / 60);
+    const s = Math.round(seconds % 60);
+    return `${m}:${s.toString().padStart(2, '0')}`;
+  }
+
+  // ---- helpers ----
+  private loadData(): void {
+    this.isLoading.set(true);
+    this.reportsService
+      .getReportsData(this.dateFrom(), this.dateTo(), this.selectedAgentId())
+      .subscribe({
+        next: (data) => {
+          this.reportData.set(data);
+          this.isLoading.set(false);
+        },
+        error: () => {
+          this.notification.showError('Berichtsdaten konnten nicht geladen werden.');
+          this.isLoading.set(false);
+        },
+      });
+  }
+
+  private defaultFrom(days: number): Date {
+    const d = new Date();
+    d.setDate(d.getDate() - days);
+    return d;
+  }
+
+  private toInputDate(d: Date): string {
+    return d.toISOString().split('T')[0];
+  }
+
+  private translateCategory(cat: string): string {
+    const map: Record<string, string> = {
+      Unknown: 'Unbekannt',
+      TechnicalIssue: 'Technisches Problem',
+      BillingQuestion: 'Rechnungsfrage',
+      AccessCredentials: 'Zugangsdaten',
+      GeneralInquiry: 'Allgemeine Anfrage',
+      Complaint: 'Beschwerde',
+      FeatureRequest: 'Feature-Wunsch',
+    };
+    return map[cat] ?? cat;
+  }
+}

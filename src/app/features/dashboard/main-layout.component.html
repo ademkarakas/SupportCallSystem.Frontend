@@ -9,10 +9,12 @@
   <aside class="app-sidebar" [class.mobile-open]="isMobile() && isMobileMenuOpen()">
     <div class="sidebar-header">
       <div class="logo-area">
-        <div class="logo-brand">
-          <span class="icon">dicom</span>
-          <span class="pipe">|</span>
-          <span class="sub">di-1</span>
+        <div class="logo-brandd">
+          <img
+            src="assets/logo-dione-erp.svg"
+            alt="Dione ERP"
+            class="logo-image"
+          />
         </div>
       </div>
     </div>
@@ -51,6 +53,27 @@
             <span class="label">Berichte</span>
           </a>
         </li>
+        @if (auth.isAdmin()) {
+          <li class="nav-divider"></li>
+          <li class="nav-item">
+            <a routerLink="/admin/users" routerLinkActive="active">
+              <mat-icon>group</mat-icon>
+              <span class="label">Benutzer</span>
+            </a>
+          </li>
+          <li class="nav-item">
+            <a routerLink="/admin/customers" routerLinkActive="active">
+              <mat-icon>people</mat-icon>
+              <span class="label">Kunden</span>
+            </a>
+          </li>
+          <li class="nav-item">
+            <a routerLink="/admin/activity" routerLinkActive="active">
+              <mat-icon>analytics</mat-icon>
+              <span class="label">Aktivität</span>
+            </a>
+          </li>
+        }
       </ul>
     </nav>
   </aside>

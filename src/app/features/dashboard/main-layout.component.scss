@@ -110,6 +110,13 @@
   padding: 0 $spacing-2;
 }
 
+.nav-divider {
+  height: 1px;
+  background: var(--color-border);
+  margin: $spacing-2 $spacing-4;
+  list-style: none;
+}
+
 .nav-item {
   a {
     height: var(--nav-item-height);
@@ -449,6 +456,12 @@
     background-color: rgba(59, 130, 246, 0.12);
     mat-icon {
       color: var(--color-info);
+    }
+  }
+  &.qa-admin {
+    background-color: rgba(168, 85, 247, 0.12);
+    mat-icon {
+      color: #a855f7;
     }
   }
 }

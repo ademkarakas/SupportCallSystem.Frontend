@@ -2,13 +2,15 @@ import { Component, inject, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { MatIconModule } from '@angular/material/icon';
+import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { NotificationService } from '../../core/services/notification.service';
 import { CallApiService, CallRecord } from '../calls/services/call-api.service';
 import { AuthService } from '../../core/services/auth.service';
+import { UserSettingsDialogComponent } from '../../shared/components/user-settings-dialog/user-settings-dialog.component';
 
 @Component({
   selector: 'app-quick-access',
-  imports: [CommonModule, MatIconModule],
+  imports: [CommonModule, MatIconModule, MatDialogModule],
   templateUrl: './quick-access.component.html',
   styleUrls: ['./quick-access.component.scss'],
 })
@@ -17,9 +19,12 @@ export class QuickAccessComponent implements OnInit {
   notification = inject(NotificationService);
   callApi = inject(CallApiService);
   auth = inject(AuthService);
+  dialog = inject(MatDialog);
 
   recentCalls = signal<CallRecord[]>([]);
   isLoading = signal(true);
+
+  isAdmin = this.auth.isAdmin.bind(this.auth);
 
   ngOnInit() {
     this.loadRecentCalls();
@@ -31,7 +36,6 @@ export class QuickAccessComponent implements OnInit {
 
     this.callApi.getHistoryByAgent(user.id).subscribe({
       next: (calls) => {
-        // Get the 5 most recent calls
         this.recentCalls.set(calls.slice(0, 5));
         this.isLoading.set(false);
       },
@@ -44,22 +48,24 @@ export class QuickAccessComponent implements OnInit {
   quickAccess(type: string) {
     switch (type) {
       case 'agent':
-        this.notification.showInfo('Agent-Profil wird geladen...');
+        this.dialog.open(UserSettingsDialogComponent, {
+          width: '600px',
+          maxWidth: '96vw',
+          maxHeight: '94vh',
+          panelClass: 'user-settings-dialog',
+        });
         break;
       case 'kunden':
-        this.router.navigate(['/calls/history'], { queryParams: { view: 'all' } });
+        this.router.navigate(['/calls/caller-profile']);
         break;
       case 'notizen':
-        this.notification.showInfo('Manuelle Notizen-Funktion wird vorbereitet...');
+        this.router.navigate(['/calls/history']);
         break;
       case 'hilfe':
         window.open('https://google.com', '_blank');
         break;
-      case 'reports':
-        this.router.navigate(['/reports']);
-        break;
-      case 'settings':
-        this.notification.showInfo('Einstellungen werden geladen...');
+      case 'admin':
+        this.router.navigate(['/admin']);
         break;
     }
   }

@@ -13,9 +13,17 @@
     <div class="panel-content">
       <div class="debug-section">
         <label class="section-label">Webhooks</label>
-        <button class="btn btn-primary w-full" (click)="triggerCall()">
+        <button class="btn btn-primary w-full" (click)="triggerCall()" [disabled]="isLoading()">
+          <mat-icon>mic</mat-icon>
+          Incoming Call (Real Mic)
+        </button>
+        <button
+          class="btn btn-secondary w-full mt-2"
+          (click)="triggerCallWithMockData()"
+          [disabled]="isLoading()"
+        >
           <mat-icon>phone_callback</mat-icon>
-          Incoming Call
+          Incoming Call (Demo / Mock Data)
         </button>
       </div>
 

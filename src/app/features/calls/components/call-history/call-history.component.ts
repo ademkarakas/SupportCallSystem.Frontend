@@ -37,9 +37,9 @@ export class CallHistoryComponent implements OnInit, AfterViewInit {
 
   dataSource = new MatTableDataSource<CallRecord>([]);
   displayedColumns: string[] = [
-    'startTime',
     'customer',
     'category',
+    'startTime',
     'duration',
     'summary',
     'actions',

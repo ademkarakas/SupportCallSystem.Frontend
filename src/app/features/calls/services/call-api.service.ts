@@ -1,7 +1,8 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../../../environments/environment';
+import { AuthService } from '../../../core/services/auth.service';
 
 export interface CallRecord {
   id: string;
@@ -33,8 +34,9 @@ export interface UpdateCallDto {
 })
 export class CallApiService {
   private readonly baseUrl = `${environment.apiUrl}/api/calls`;
+  private readonly authService = inject(AuthService);
 
-  constructor(private http: HttpClient) {}
+  constructor(private readonly http: HttpClient) {}
 
   public getActiveCall(agentId: string): Observable<CallRecord | null> {
     return this.http.get<CallRecord | null>(`${this.baseUrl}/active/${agentId}`);
@@ -71,8 +73,8 @@ export class CallApiService {
   public recordConsent(callId: string, consentGiven: boolean): Observable<void> {
     return this.http.post<void>(`${this.baseUrl}/${callId}/consent`, {
       consentGiven,
-      consentType: 'AiProcessing', // Map to enum on backend
-      userId: 'system', // Should be current user
+      consentType: 'AiProcessing',
+      userId: this.authService.currentUser()?.id ?? '',
     });
   }
 
@@ -101,6 +103,10 @@ export class CallApiService {
 
   public getDashboardStats(agentId: string): Observable<DashboardStats> {
     return this.http.get<DashboardStats>(`${this.baseUrl}/stats/${agentId}`);
+  }
+
+  public linkCustomerToCall(callId: string, customerId: string): Observable<void> {
+    return this.http.post<void>(`${this.baseUrl}/${callId}/customer`, { customerId });
   }
 
   public getRecentActivities(agentId: string, count: number = 5): Observable<RecentActivity[]> {

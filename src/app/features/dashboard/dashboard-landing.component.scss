@@ -14,7 +14,7 @@
 .page-header {
   display: flex;
   justify-content: space-between;
-  align-items: flex-start;
+  align-items: center;
 
   .header-content {
     .title-row {
@@ -44,6 +44,13 @@
       color: var(--color-text-secondary);
       margin: 0;
     }
+  }
+
+  .header-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-shrink: 0;
   }
 }
 

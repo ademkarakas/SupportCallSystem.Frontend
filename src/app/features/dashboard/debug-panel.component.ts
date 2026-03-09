@@ -29,7 +29,15 @@ export class DebugPanelComponent {
   }
 
   triggerCall() {
-    const request = this.debugSvc.simulateIncomingCall();
+    this.runSimulation(false);
+  }
+
+  triggerCallWithMockData() {
+    this.runSimulation(true);
+  }
+
+  private runSimulation(injectMockTranscript: boolean) {
+    const request = this.debugSvc.simulateIncomingCall('+4915123456789', injectMockTranscript);
 
     if (!request) {
       return;

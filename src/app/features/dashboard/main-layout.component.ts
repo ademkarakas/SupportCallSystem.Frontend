@@ -136,6 +136,9 @@ export class MainLayoutComponent implements OnInit {
 
   getHeaderTitle(): string {
     const url = this.router.url;
+    if (url.includes('/admin/activity')) return 'Mitarbeiter-Aktivität';
+    if (url.includes('/admin/customers')) return 'Kundenverwaltung';
+    if (url.includes('/admin/users')) return 'Benutzerverwaltung';
     if (url.includes('/dashboard')) return 'Systemübersicht';
     if (url.includes('/calls/history')) return 'Anrufhistorie';
     if (url.includes('/calls')) return 'Aktiver Call Workspace';

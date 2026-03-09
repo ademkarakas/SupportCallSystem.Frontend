@@ -10,13 +10,14 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatSelectModule } from '@angular/material/select';
 import { MatInputModule } from '@angular/material/input';
 import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
-import { Subject, takeUntil, finalize, switchMap, tap, catchError, of } from 'rxjs';
+import { Subject, takeUntil, finalize, switchMap, tap, catchError, of, from } from 'rxjs';
 import { CallApiService, CallRecord } from '../../services/call-api.service';
 import { SignalRService } from '../../../../core/services/signalr.service';
 import { NotificationService } from '../../../../core/services/notification.service';
 import { CallTimerComponent } from '../call-timer/call-timer.component';
 import { AuthService } from '../../../../core/services/auth.service';
 import { AudioCaptureService } from '../../../../core/services/audio-capture.service';
+import { AdminApiService, CustomerWithHistoryDto } from '../../../admin/services/admin-api.service';
 
 @Component({
   selector: 'app-call-view',
@@ -45,12 +46,15 @@ export class CallViewComponent implements OnInit, OnDestroy {
   notification = inject(NotificationService);
   auth = inject(AuthService);
   audioCapture = inject(AudioCaptureService);
+  adminApi = inject(AdminApiService);
 
   call = signal<CallRecord | null>(null);
   isRecording = signal(true);
   isProcessingManual = signal(false);
   isSubmitting = signal(false);
   transcript = signal<string>('');
+  customerHistory = signal<CustomerWithHistoryDto | null>(null);
+  customerPanelOpen = signal(true);
 
   approvalForm = this.fb.group({
     category: ['', Validators.required],
@@ -129,8 +133,27 @@ export class CallViewComponent implements OnInit, OnDestroy {
           // Join the call's SignalR group
           this.signalR.subscribeToCall(id);
 
-          // REMOVED: Auto-grant consent.
-          // Now the agent must explicitly ask and click a button.
+          // Load customer context if a customer is linked
+          if (data.customerId) {
+            this.loadCustomerContext(data.customerId);
+          }
+
+          // Auto-start microphone if call is active (not ended)
+          if (!data.endTime && !this.audioCapture.isCaptureActive) {
+            console.log('🎤 Auto-starting microphone for active call...');
+            this.audioCapture
+              .startCapture(data.id)
+              .then(() => {
+                console.log('✅ Microphone auto-started successfully');
+                this.notification.showSuccess('Mikrofon aktiviert - Transkription läuft');
+              })
+              .catch((err) => {
+                console.error('❌ Failed to auto-start microphone:', err);
+                this.notification.showError(
+                  'Mikrofonzugriff verweigert. Bitte manuell aktivieren.',
+                );
+              });
+          }
         } else {
           this.notification.showError('Spezifischer Anruf nicht gefunden veya aktif değil.');
           this.router.navigate(['/dashboard']);
@@ -172,10 +195,8 @@ export class CallViewComponent implements OnInit, OnDestroy {
 
   endCall() {
     const activeCall = this.call();
-    console.log('🔴 endCall() triggered', { activeCall });
 
     if (!activeCall) {
-      console.error('❌ No active call available');
       return;
     }
 
@@ -206,8 +227,19 @@ export class CallViewComponent implements OnInit, OnDestroy {
     // Chain: record consent → end call → navigate
     this.isRecording.set(false); // Set loading state
 
+    // Stop audio capture FIRST, before finalizing transcription
+    if (this.audioCapture.isCaptureActive) {
+      this.audioCapture.stopCapture();
+    }
+
     consentObs$
       .pipe(
+        // Finalize Vosk transcription first to flush remaining text
+        switchMap(() => {
+          console.log('🏁 Finalizing Vosk transcription...');
+          return from(this.signalR.finalizeCall(activeCall.id));
+        }),
+        // Then end the call on backend (may trigger AI summary)
         switchMap(() => {
           console.log('🛑 Sending endCall request to backend...');
           return this.callApi.endCall(activeCall.id, new Date());
@@ -319,6 +351,31 @@ export class CallViewComponent implements OnInit, OnDestroy {
     if (c?.consent === 'Declined' || c?.consent === 2)
       return 'Einwilligung abgelehnt. KI-Verarbeitung deaktiviert.';
     return 'Höre auf Gesprächsinhalte...';
+  }
+
+  private loadCustomerContext(customerId: string) {
+    this.adminApi.getCustomerWithHistory(customerId).subscribe({
+      next: (data) => this.customerHistory.set(data),
+      error: () => {
+        /* silently fail - customer context is optional */
+      },
+    });
+  }
+
+  toggleCustomerPanel() {
+    this.customerPanelOpen.update((v) => !v);
+  }
+
+  getCategoryLabel(category: string): string {
+    const map: Record<string, string> = {
+      TechnicalIssue: 'Technisch',
+      BillingQuestion: 'Abrechnung',
+      AccessCredentials: 'Zugangsdaten',
+      GeneralInquiry: 'Allgemein',
+      Complaint: 'Beschwerde',
+      FeatureRequest: 'Feature',
+    };
+    return map[category] ?? category ?? 'Unbekannt';
   }
 
   ngOnDestroy() {

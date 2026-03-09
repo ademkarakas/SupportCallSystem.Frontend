@@ -1,0 +1,105 @@
+<div class="admin-page page-enter">
+  <header class="page-header">
+    <div class="header-content">
+      <div class="title-row">
+        <mat-icon class="title-icon">people</mat-icon>
+        <h1 class="page-title">Kundenverwaltung</h1>
+      </div>
+      <p class="subtitle">{{ totalCount() }} Kunden insgesamt</p>
+    </div>
+    <div class="header-actions">
+      <button class="btn btn-primary btn-sm" (click)="createCustomer()">
+        <mat-icon>add</mat-icon>
+        <span>Neu</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- Search & Filters -->
+  <div class="filters-bar">
+    <mat-form-field appearance="outline" class="search-field">
+      <mat-label>Suche (Name, Telefon, Firma...)</mat-label>
+      <input
+        matInput
+        [ngModel]="search"
+        (ngModelChange)="onSearchInput($event)"
+        (keydown)="onSearchKeydown($event)"
+      />
+      <button mat-icon-button matSuffix (click)="onSearch()">
+        <mat-icon>search</mat-icon>
+      </button>
+    </mat-form-field>
+
+    <div class="deleted-toggle">
+      <mat-checkbox [(ngModel)]="includeDeleted" (change)="onIncludeDeletedChange()">
+        Gelöschte anzeigen
+      </mat-checkbox>
+    </div>
+  </div>
+
+  <div class="content-container">
+    @if (isLoading()) {
+      <div class="loading-state">
+        <mat-icon class="spinner">sync</mat-icon>
+        <p>Kunden werden geladen...</p>
+      </div>
+    } @else {
+      <div class="table-container">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Telefon</th>
+              <th>Firma</th>
+              <th>Anrufe</th>
+              <th>Tags</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (customer of customers(); track customer.id) {
+              <tr
+                [class.deleted-row]="customer.isDeleted"
+                class="clickable-row"
+                (click)="viewCustomer(customer)"
+                (keydown.enter)="viewCustomer(customer)"
+                tabindex="0"
+              >
+                <td>
+                  {{ customer.fullName }}
+                  @if (customer.isDeleted) {
+                    <span class="deleted-badge">gelöscht</span>
+                  }
+                </td>
+                <td>{{ customer.phoneNumber }}</td>
+                <td>{{ customer.company || '—' }}</td>
+                <td>{{ customer.totalCallCount }}</td>
+                <td>
+                  @for (tag of customer.tags; track tag) {
+                    <span class="tag-chip">{{ tag }}</span>
+                  }
+                </td>
+              </tr>
+            } @empty {
+              <tr>
+                <td colspan="5" class="empty-state">Keine Kunden gefunden.</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Pagination -->
+      @if (totalPages() > 1) {
+        <div class="pagination">
+          <button mat-icon-button [disabled]="page <= 1" (click)="prevPage()">
+            <mat-icon>chevron_left</mat-icon>
+          </button>
+          <span class="page-info">Seite {{ page }} von {{ totalPages() }}</span>
+          <button mat-icon-button [disabled]="page >= totalPages()" (click)="nextPage()">
+            <mat-icon>chevron_right</mat-icon>
+          </button>
+        </div>
+      }
+    }
+  </div>
+</div>

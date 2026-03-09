@@ -5,6 +5,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import { CallApiService, CallRecord, UpdateCallDto } from '../../services/call-api.service';
 import { NotificationService } from '../../../../core/services/notification.service';
+import { AuthService } from '../../../../core/services/auth.service';
 import { fadeIn } from '../../../../core/animations/animations';
 import { FormsModule } from '@angular/forms';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -30,6 +31,7 @@ export class CallDetailComponent implements OnInit {
   router = inject(Router);
   callApi = inject(CallApiService);
   notification = inject(NotificationService);
+  auth = inject(AuthService);
 
   call = signal<CallRecord | null>(null);
   isLoading = signal(true);
@@ -185,7 +187,7 @@ export class CallDetailComponent implements OnInit {
         currentCall.draftSummary,
         currentCall.category || '',
         currentCall.actionItems || [],
-        'current-user-id', // Replace with actual user ID from auth service
+        this.auth.currentUser()?.id ?? '',
       )
       .subscribe({
         next: () => {

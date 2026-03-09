@@ -125,14 +125,27 @@ export class UserSettingsDialogComponent implements OnInit {
       return;
     }
 
+    const user = this.currentUser();
+    if (!user) return;
+
     this.isSaving.set(true);
 
-    // TODO: Wire up to backend profile update endpoint when available.
-    // For now, update the local session user and show success.
-    setTimeout(() => {
-      this.isSaving.set(false);
-      this.notification.showSuccess('Profil erfolgreich aktualisiert');
-    }, 800);
+    this.auth
+      .updateProfile({
+        userId: user.id,
+        ...this.profileForm.value,
+      })
+      .subscribe({
+        next: () => {
+          this.isSaving.set(false);
+          this.notification.showSuccess('Profil erfolgreich aktualisiert');
+          this.dialogRef.close();
+        },
+        error: () => {
+          this.isSaving.set(false);
+          this.notification.showError('Fehler beim Aktualisieren des Profils');
+        },
+      });
   }
 
   /** Saves the new password. */
@@ -142,14 +155,30 @@ export class UserSettingsDialogComponent implements OnInit {
       return;
     }
 
+    const user = this.currentUser();
+    if (!user) return;
+
     this.isSaving.set(true);
 
-    // TODO: Wire up to backend password change endpoint when available.
-    setTimeout(() => {
-      this.isSaving.set(false);
-      this.passwordForm.reset();
-      this.notification.showSuccess('Passwort erfolgreich geändert');
-    }, 800);
+    this.auth
+      .changePassword({
+        userId: user.id,
+        currentPassword: this.passwordForm.value.currentPassword,
+        newPassword: this.passwordForm.value.newPassword,
+      })
+      .subscribe({
+        next: () => {
+          this.isSaving.set(false);
+          this.passwordForm.reset();
+          this.notification.showSuccess('Passwort erfolgreich geändert');
+        },
+        error: () => {
+          this.isSaving.set(false);
+          this.notification.showError(
+            'Fehler beim Ändern des Passworts. Bitte aktuelles Passwort prüfen.',
+          );
+        },
+      });
   }
 
   /** Returns a validation error message for a form control. */

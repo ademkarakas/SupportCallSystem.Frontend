@@ -1,0 +1,166 @@
+<div class="edit-page page-enter">
+  <!-- Top bar -->
+  <div class="top-bar">
+    <button class="btn btn-ghost back-btn" (click)="goBack()">
+      <mat-icon>arrow_back</mat-icon>
+      <span>Zurück</span>
+    </button>
+
+    <div class="top-bar-center">
+      <h1 class="page-title">{{ pageTitle }}</h1>
+      @if (!isNew() && userId()) {
+        <span class="page-subtitle">{{ editForm.get('email')?.value }}</span>
+      }
+    </div>
+
+    <div class="top-bar-actions">
+      @if (!isNew()) {
+        <button class="btn btn-danger btn-sm" (click)="deleteUser()" [disabled]="isDeleting()">
+          <mat-icon>delete</mat-icon>
+          <span>Löschen</span>
+        </button>
+      }
+      <button class="btn btn-secondary btn-sm" (click)="reset()" [disabled]="!isNew() && !isDirty()">
+        <mat-icon>restart_alt</mat-icon>
+        <span>Zurücksetzen</span>
+      </button>
+      <button class="btn btn-primary btn-sm" (click)="save()" [disabled]="isSaving() || (!isNew() && !isDirty())">
+        <mat-icon>save</mat-icon>
+        <span>{{ isSaving() ? 'Speichern...' : 'Speichern' }}</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Loading -->
+  @if (isLoading()) {
+    <div class="loading-state">
+      <mat-icon class="spinner">sync</mat-icon>
+      <p>Lade Benutzerdaten...</p>
+    </div>
+  }
+
+  <!-- NEW FORM -->
+  @if (!isLoading() && isNew()) {
+    <div class="form-card">
+      <div class="form-card-header">
+        <mat-icon>person_add</mat-icon>
+        <span>Neuen Benutzer anlegen</span>
+      </div>
+      <form [formGroup]="createForm" class="form-grid" (ngSubmit)="save()">
+        <div class="form-field" [class.has-error]="isInvalid('create','userName')">
+          <label for="c-userName">Benutzername <span class="required">*</span></label>
+          <div class="input-wrap">
+            <input id="c-userName" formControlName="userName" type="text" placeholder="max.mustermann" />
+          </div>
+          @if (isInvalid('create','userName')) {
+            <span class="error-msg">Benutzername ist erforderlich</span>
+          }
+        </div>
+
+        <div class="form-field" [class.has-error]="isInvalid('create','email')">
+          <label for="c-email">E-Mail-Adresse <span class="required">*</span></label>
+          <div class="input-wrap">
+            <input id="c-email" formControlName="email" type="email" placeholder="max@firma.de" />
+          </div>
+          @if (isInvalid('create','email')) {
+            <span class="error-msg">Gültige E-Mail-Adresse eingeben</span>
+          }
+        </div>
+
+        <div class="form-field" [class.has-error]="isInvalid('create','password')">
+          <label for="c-password">Passwort <span class="required">*</span></label>
+          <div class="input-wrap">
+            <input id="c-password" formControlName="password" type="password" placeholder="Mindestens 6 Zeichen" />
+          </div>
+          @if (isInvalid('create','password')) {
+            <span class="error-msg">Passwort muss mindestens 6 Zeichen haben</span>
+          }
+        </div>
+
+        <div class="form-field">
+          <label for="c-extension">Nebenstelle</label>
+          <div class="input-wrap">
+            <input id="c-extension" formControlName="extension" type="text" placeholder="z. B. 123" />
+          </div>
+        </div>
+
+        <div class="form-field" [class.has-error]="isInvalid('create','role')">
+          <label for="c-role">Rolle <span class="required">*</span></label>
+          <div class="input-wrap">
+            <select id="c-role" formControlName="role">
+              <option value="Agent">Agent</option>
+              <option value="UserAdmin">User-Administrator</option>
+              <option value="SystemAdmin">System-Administrator</option>
+            </select>
+          </div>
+        </div>
+      </form>
+    </div>
+  }
+
+  <!-- EDIT FORM -->
+  @if (!isLoading() && !isNew()) {
+    <div class="form-card">
+      <div class="form-card-header">
+        <mat-icon>manage_accounts</mat-icon>
+        <span>Benutzerdaten bearbeiten</span>
+      </div>
+      <form [formGroup]="editForm" class="form-grid" (ngSubmit)="save()">
+        <div class="form-field" [class.has-error]="isInvalid('edit','firstName')">
+          <label for="e-firstName">Vorname <span class="required">*</span></label>
+          <div class="input-wrap">
+            <input id="e-firstName" formControlName="firstName" type="text" placeholder="Max" />
+          </div>
+          @if (isInvalid('edit','firstName')) {
+            <span class="error-msg">Vorname ist erforderlich</span>
+          }
+        </div>
+
+        <div class="form-field" [class.has-error]="isInvalid('edit','lastName')">
+          <label for="e-lastName">Nachname <span class="required">*</span></label>
+          <div class="input-wrap">
+            <input id="e-lastName" formControlName="lastName" type="text" placeholder="Mustermann" />
+          </div>
+          @if (isInvalid('edit','lastName')) {
+            <span class="error-msg">Nachname ist erforderlich</span>
+          }
+        </div>
+
+        <div class="form-field" [class.has-error]="isInvalid('edit','email')">
+          <label for="e-email">E-Mail-Adresse <span class="required">*</span></label>
+          <div class="input-wrap">
+            <input id="e-email" formControlName="email" type="email" placeholder="max@firma.de" />
+          </div>
+          @if (isInvalid('edit','email')) {
+            <span class="error-msg">Gültige E-Mail-Adresse eingeben</span>
+          }
+        </div>
+
+        <div class="form-field">
+          <label for="e-extension">Nebenstelle</label>
+          <div class="input-wrap">
+            <input id="e-extension" formControlName="extension" type="text" placeholder="z. B. 123" />
+          </div>
+        </div>
+
+        <div class="form-field full-width" [class.has-error]="isInvalid('edit','role')">
+          <label for="e-role">Rolle <span class="required">*</span></label>
+          <div class="input-wrap">
+            <select id="e-role" formControlName="role">
+              <option value="Agent">Agent</option>
+              <option value="UserAdmin">User-Administrator</option>
+              <option value="SystemAdmin">System-Administrator</option>
+            </select>
+          </div>
+        </div>
+      </form>
+
+      @if (lastModified()) {
+        <div class="form-footer">
+          <mat-icon>schedule</mat-icon>
+          <span>Zuletzt bearbeitet: {{ lastModified() }}</span>
+        </div>
+      }
+    </div>
+  }
+</div>

@@ -1,0 +1,62 @@
+<div class="admin-page page-enter">
+  <header class="page-header">
+    <div class="header-content">
+      <div class="title-row">
+        <mat-icon class="title-icon">group</mat-icon>
+        <h1 class="page-title">Benutzerverwaltung</h1>
+      </div>
+      <p class="subtitle">Benutzer anzeigen, bearbeiten und verwalten</p>
+    </div>
+    <div class="header-actions">
+      <button class="btn btn-primary btn-sm" (click)="createUser()">
+        <mat-icon>add</mat-icon>
+        <span>Neu</span>
+      </button>
+    </div>
+  </header>
+
+  <div class="content-container">
+    @if (isLoading()) {
+      <div class="loading-state">
+        <mat-icon class="spinner">sync</mat-icon>
+        <p>Benutzer werden geladen...</p>
+      </div>
+    } @else {
+      <div class="table-container">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>E-Mail</th>
+              <th>Nebenstelle</th>
+              <th>Rolle</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (user of users(); track user.id) {
+              <tr class="clickable-row" (click)="editUser(user)" (keydown.enter)="editUser(user)" tabindex="0">
+                <td class="name-cell">
+                  <div class="user-avatar-small" [ngClass]="getRoleBadgeClass(user.roles)">
+                    {{ (user.firstName[0] || '') + (user.lastName[0] || '') }}
+                  </div>
+                  <span>{{ user.firstName }} {{ user.lastName }}</span>
+                </td>
+                <td>{{ user.email }}</td>
+                <td>{{ user.extension || '—' }}</td>
+                <td>
+                  <span class="role-badge" [ngClass]="getRoleBadgeClass(user.roles)">
+                    {{ getRoleLabel(user.roles) }}
+                  </span>
+                </td>
+              </tr>
+            } @empty {
+              <tr>
+                <td colspan="4" class="empty-state">Keine Benutzer gefunden.</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+  </div>
+</div>

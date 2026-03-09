@@ -1,0 +1,286 @@
+<div class="edit-page page-enter">
+  <!-- Top bar -->
+  <div class="top-bar">
+    <button class="btn btn-ghost back-btn" (click)="goBack()">
+      <mat-icon>arrow_back</mat-icon>
+      <span>Zurück</span>
+    </button>
+
+    <div class="top-bar-center">
+      <h1 class="page-title">{{ pageTitle }}</h1>
+      @if (!isNew() && customerId()) {
+        <span class="page-subtitle"
+          >{{ editForm.get('firstName')?.value }} {{ editForm.get('lastName')?.value }}</span
+        >
+      }
+    </div>
+
+    <div class="top-bar-actions">
+      @if (!isNew()) {
+        <button class="btn btn-danger btn-sm" (click)="deleteCustomer()" [disabled]="isDeleting()">
+          <mat-icon>delete</mat-icon>
+          <span>Löschen</span>
+        </button>
+      }
+      <button
+        class="btn btn-secondary btn-sm"
+        (click)="reset()"
+        [disabled]="!isNew() && !isDirty()"
+      >
+        <mat-icon>restart_alt</mat-icon>
+        <span>Zurücksetzen</span>
+      </button>
+      <button
+        class="btn btn-primary btn-sm"
+        (click)="save()"
+        [disabled]="isSaving() || (!isNew() && !isDirty())"
+      >
+        <mat-icon>save</mat-icon>
+        <span>{{ isSaving() ? 'Speichern...' : 'Speichern' }}</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Loading -->
+  @if (isLoading()) {
+    <div class="loading-state">
+      <mat-icon class="spinner">sync</mat-icon>
+      <p>Lade Kundendaten...</p>
+    </div>
+  }
+
+  <!-- NEW FORM -->
+  @if (!isLoading() && isNew()) {
+    <div class="form-card">
+      <div class="form-card-header">
+        <mat-icon>person_add</mat-icon>
+        <span>Neuen Kunden anlegen</span>
+      </div>
+      <form [formGroup]="createForm" class="form-grid" (ngSubmit)="save()">
+        <div class="form-field" [class.has-error]="isInvalid('create', 'firstName')">
+          <label for="c-firstName">Vorname <span class="required">*</span></label>
+          <div class="input-wrap">
+            <input id="c-firstName" formControlName="firstName" type="text" placeholder="Max" />
+          </div>
+          @if (isInvalid('create', 'firstName')) {
+            <span class="error-msg">Vorname ist erforderlich</span>
+          }
+        </div>
+
+        <div class="form-field" [class.has-error]="isInvalid('create', 'lastName')">
+          <label for="c-lastName">Nachname <span class="required">*</span></label>
+          <div class="input-wrap">
+            <input
+              id="c-lastName"
+              formControlName="lastName"
+              type="text"
+              placeholder="Mustermann"
+            />
+          </div>
+          @if (isInvalid('create', 'lastName')) {
+            <span class="error-msg">Nachname ist erforderlich</span>
+          }
+        </div>
+
+        <div class="form-field" [class.has-error]="isInvalid('create', 'phoneNumber')">
+          <label for="c-phoneNumber">Telefonnummer <span class="required">*</span></label>
+          <div class="input-wrap">
+            <input
+              id="c-phoneNumber"
+              formControlName="phoneNumber"
+              type="tel"
+              placeholder="+49 123 456789"
+            />
+          </div>
+          @if (isInvalid('create', 'phoneNumber')) {
+            <span class="error-msg">Telefonnummer ist erforderlich</span>
+          }
+        </div>
+
+        <div class="form-field" [class.has-error]="isInvalid('create', 'email')">
+          <label for="c-email">E-Mail-Adresse</label>
+          <div class="input-wrap">
+            <input id="c-email" formControlName="email" type="email" placeholder="max@firma.de" />
+          </div>
+          @if (isInvalid('create', 'email')) {
+            <span class="error-msg">Gültige E-Mail-Adresse eingeben</span>
+          }
+        </div>
+
+        <div class="form-field full-width">
+          <label for="c-company">Firma</label>
+          <div class="input-wrap">
+            <input
+              id="c-company"
+              formControlName="company"
+              type="text"
+              placeholder="Musterfirma GmbH"
+            />
+          </div>
+        </div>
+      </form>
+    </div>
+  }
+
+  <!-- EDIT FORM -->
+  @if (!isLoading() && !isNew()) {
+    <div class="form-card form-card--narrow">
+      <div class="form-card-header">
+        <mat-icon>manage_accounts</mat-icon>
+        <span>Kundendaten bearbeiten</span>
+      </div>
+      <form [formGroup]="editForm" class="form-grid" (ngSubmit)="save()">
+        <div class="form-field" [class.has-error]="isInvalid('edit', 'firstName')">
+          <label for="e-firstName">Vorname <span class="required">*</span></label>
+          <div class="input-wrap">
+            <input id="e-firstName" formControlName="firstName" type="text" placeholder="Max" />
+          </div>
+          @if (isInvalid('edit', 'firstName')) {
+            <span class="error-msg">Vorname ist erforderlich</span>
+          }
+        </div>
+
+        <div class="form-field" [class.has-error]="isInvalid('edit', 'lastName')">
+          <label for="e-lastName">Nachname <span class="required">*</span></label>
+          <div class="input-wrap">
+            <input
+              id="e-lastName"
+              formControlName="lastName"
+              type="text"
+              placeholder="Mustermann"
+            />
+          </div>
+          @if (isInvalid('edit', 'lastName')) {
+            <span class="error-msg">Nachname ist erforderlich</span>
+          }
+        </div>
+
+        <div class="form-field" [class.has-error]="isInvalid('edit', 'email')">
+          <label for="e-email">E-Mail-Adresse</label>
+          <div class="input-wrap">
+            <input id="e-email" formControlName="email" type="email" placeholder="max@firma.de" />
+          </div>
+          @if (isInvalid('edit', 'email')) {
+            <span class="error-msg">Gültige E-Mail-Adresse eingeben</span>
+          }
+        </div>
+
+        <div class="form-field">
+          <label for="e-phone">Telefonnummer</label>
+          <div class="input-wrap input-wrap--readonly">
+            <input id="e-phone" [value]="customerPhone()" type="tel" readonly />
+          </div>
+        </div>
+
+        <div class="form-field full-width">
+          <label for="e-company">Firma</label>
+          <div class="input-wrap">
+            <input
+              id="e-company"
+              formControlName="company"
+              type="text"
+              placeholder="Musterfirma GmbH"
+            />
+          </div>
+        </div>
+      </form>
+    </div>
+
+    <!-- Call History -->
+    <div class="history-split-view" [class.panel-open]="isPanelOpen()">
+      <!-- List column -->
+      <div class="history-list-section form-card">
+        <div class="form-card-header">
+          <mat-icon>history</mat-icon>
+          <span>Anrufhistorie ({{ callHistory().length }})</span>
+        </div>
+
+        @if (isHistoryLoading()) {
+          <div class="history-loading">
+            <mat-icon class="spinner">sync</mat-icon>
+            <span>Lade Anrufhistorie...</span>
+          </div>
+        } @else if (callHistory().length === 0) {
+          <div class="history-empty">
+            <mat-icon>phone_missed</mat-icon>
+            <span>Keine Anrufe vorhanden</span>
+          </div>
+        } @else {
+          <div class="history-list">
+            @for (call of callHistory(); track call.id) {
+              <button
+                class="history-list-row"
+                [class.selected]="selectedCall()?.id === call.id"
+                (click)="onCallClick(call)"
+              >
+                <div class="call-row-left">
+                  <span class="call-date">{{ call.startTime | date: 'dd.MM.yyyy HH:mm' }}</span>
+                  <span class="call-agent">{{ call.agentName || '—' }}</span>
+                </div>
+                <div class="call-row-right">
+                  <span class="call-category">{{ getCategoryLabel(call.category) }}</span>
+                  <span class="call-duration">{{ formatDuration(call.durationSeconds) }}</span>
+                </div>
+                <mat-icon class="call-row-arrow">chevron_right</mat-icon>
+              </button>
+            }
+          </div>
+        }
+      </div>
+
+      <!-- Detail panel -->
+      <div class="history-panel-section" [class.visible]="isPanelOpen()">
+        @if (selectedCall(); as call) {
+          <div class="panel-card">
+            <div class="panel-header">
+              <div class="panel-header-info">
+                <span class="panel-title">Anrufdetails</span>
+                <span class="panel-subtitle">{{ call.startTime | date: 'dd.MM.yyyy, HH:mm' }}</span>
+              </div>
+              <button class="btn btn-ghost close-panel-btn" (click)="closePanel()">
+                <mat-icon>close</mat-icon>
+              </button>
+            </div>
+
+            <div class="panel-body">
+              <div class="panel-row">
+                <span class="panel-label">Agent</span>
+                <span class="panel-value">{{ call.agentName || '—' }}</span>
+              </div>
+              <div class="panel-row">
+                <span class="panel-label">Kategorie</span>
+                <span class="panel-value">{{ getCategoryLabel(call.category) }}</span>
+              </div>
+              <div class="panel-row">
+                <span class="panel-label">Dauer</span>
+                <span class="panel-value">{{ formatDuration(call.durationSeconds) }}</span>
+              </div>
+              <div class="panel-row">
+                <span class="panel-label">Status</span>
+                <span class="panel-value">{{ call.summaryStatus }}</span>
+              </div>
+
+              @if (call.summary) {
+                <div class="panel-section">
+                  <p class="panel-section-title">Zusammenfassung</p>
+                  <p class="panel-summary-text">{{ call.summary }}</p>
+                </div>
+              }
+
+              @if (call.actionItems && call.actionItems.length > 0) {
+                <div class="panel-section">
+                  <p class="panel-section-title">Aktionspunkte</p>
+                  <ul class="panel-action-list">
+                    @for (item of call.actionItems; track item) {
+                      <li>{{ item }}</li>
+                    }
+                  </ul>
+                </div>
+              }
+            </div>
+          </div>
+        }
+      </div>
+    </div>
+  }
+</div>
