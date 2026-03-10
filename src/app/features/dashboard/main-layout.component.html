@@ -10,11 +10,7 @@
     <div class="sidebar-header">
       <div class="logo-area">
         <div class="logo-brandd">
-          <img
-            src="assets/logo-dione-erp.svg"
-            alt="Dione ERP"
-            class="logo-image"
-          />
+          <img src="assets/logo-dione-erp.svg" alt="Dione ERP" class="logo-image" />
         </div>
       </div>
     </div>
@@ -53,6 +49,12 @@
             <span class="label">Berichte</span>
           </a>
         </li>
+        <li class="nav-item">
+          <a routerLink="/notifications" routerLinkActive="active">
+            <mat-icon>notifications</mat-icon>
+            <span class="label">Benachrichtigungen</span>
+          </a>
+        </li>
         @if (auth.isAdmin()) {
           <li class="nav-divider"></li>
           <li class="nav-item">
@@ -73,7 +75,26 @@
               <span class="label">Aktivität</span>
             </a>
           </li>
+          <li class="nav-item">
+            <a routerLink="/admin/live" routerLinkActive="active">
+              <mat-icon>sensors</mat-icon>
+              <span class="label">Live Dashboard</span>
+            </a>
+          </li>
+          <li class="nav-item">
+            <a routerLink="/admin/audit-log" routerLinkActive="active">
+              <mat-icon>security</mat-icon>
+              <span class="label">Audit Log</span>
+            </a>
+          </li>
         }
+        <li class="nav-divider"></li>
+        <li class="nav-item">
+          <a routerLink="/settings/security" routerLinkActive="active">
+            <mat-icon>verified_user</mat-icon>
+            <span class="label">2FA Sicherheit</span>
+          </a>
+        </li>
       </ul>
     </nav>
   </aside>
@@ -111,6 +132,9 @@
       </div>
 
       <div class="header-right">
+        <!-- Notification Bell -->
+        <app-notification-bell></app-notification-bell>
+
         <!-- Theme Toggle -->
         <button
           class="btn-icon theme-toggle"

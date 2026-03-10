@@ -49,4 +49,16 @@ export const ADMIN_ROUTES: Routes = [
         (m) => m.AgentActivityComponent,
       ),
   },
+  {
+    path: 'live',
+    loadComponent: () =>
+      import('./components/live-dashboard/live-dashboard.component').then(
+        (m) => m.LiveDashboardComponent,
+      ),
+  },
+  {
+    path: 'audit-log',
+    loadComponent: () =>
+      import('./components/audit-log/audit-log.component').then((m) => m.AuditLogComponent),
+  },
 ];

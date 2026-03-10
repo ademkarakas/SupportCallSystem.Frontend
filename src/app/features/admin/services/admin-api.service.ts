@@ -54,6 +54,16 @@ export interface AgentActivityDto {
   averageDurationSeconds: number;
 }
 
+export interface ActiveCallDto {
+  id: string;
+  callerNumber: string | null;
+  customerName: string | null;
+  customerId: string | null;
+  agentUserId: string;
+  startTime: string;
+  elapsedSeconds: number;
+}
+
 export interface CustomerWithHistoryDto {
   id: string;
   firstName: string;
@@ -78,6 +88,16 @@ export interface CallHistoryItemDto {
   actionItems: string[] | null;
   handledByUserId?: string;
   agentName?: string;
+}
+
+export interface AuditLogDto {
+  id: string;
+  action: string;
+  entityType: string;
+  entityId: string | null;
+  userId: string | null;
+  timestamp: string;
+  details: string | null;
 }
 
 @Injectable({
@@ -179,5 +199,33 @@ export class AdminApiService {
     const fromDate = from ?? new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString();
     let params = new HttpParams().set('from', fromDate).set('to', toDate);
     return this.http.get<AgentActivityDto>(`${this.apiUrl}/api/calls/agent-activity`, { params });
+  }
+
+  // ── Live Dashboard ──
+
+  getActiveCalls(): Observable<ActiveCallDto[]> {
+    return this.http.get<ActiveCallDto[]>(`${this.apiUrl}/api/calls/active-all`);
+  }
+
+  // ── Audit Log ──
+
+  getAuditLogs(params?: {
+    page?: number;
+    pageSize?: number;
+    userId?: string;
+    action?: string;
+    entityType?: string;
+    from?: string;
+    to?: string;
+  }): Observable<AuditLogDto[]> {
+    let httpParams = new HttpParams()
+      .set('page', params?.page ?? 1)
+      .set('pageSize', params?.pageSize ?? 100);
+    if (params?.userId) httpParams = httpParams.set('userId', params.userId);
+    if (params?.action) httpParams = httpParams.set('action', params.action);
+    if (params?.entityType) httpParams = httpParams.set('entityType', params.entityType);
+    if (params?.from) httpParams = httpParams.set('from', params.from);
+    if (params?.to) httpParams = httpParams.set('to', params.to);
+    return this.http.get<AuditLogDto[]>(`${this.apiUrl}/api/audit`, { params: httpParams });
   }
 }

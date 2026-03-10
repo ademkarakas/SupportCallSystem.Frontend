@@ -1,0 +1,25 @@
+<div class="timeout-dialog">
+  <div class="dialog-icon">
+    <mat-icon>schedule</mat-icon>
+  </div>
+
+  <h2>Sitzung läuft ab</h2>
+
+  <p>Sie werden in Kürze automatisch abgemeldet.</p>
+
+  <div class="countdown">
+    <span class="count">{{ minutesLeft }}:{{ secondsLeft }}</span>
+    <span class="count-label">verbleibend</span>
+  </div>
+
+  <div class="dialog-actions">
+    <button mat-raised-button color="primary" (click)="stayLoggedIn()">
+      <mat-icon>refresh</mat-icon>
+      Angemeldet bleiben
+    </button>
+    <button mat-button (click)="logout()">
+      <mat-icon>logout</mat-icon>
+      Abmelden
+    </button>
+  </div>
+</div>

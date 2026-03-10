@@ -1,0 +1,63 @@
+<button class="bell-btn" [matMenuTriggerFor]="notifMenu" matTooltip="Benachrichtigungen">
+  @if (inbox.unreadCount() > 0) {
+    <mat-icon
+      [matBadge]="inbox.unreadCount() > 99 ? '99+' : inbox.unreadCount()"
+      matBadgeColor="warn"
+      matBadgeSize="small"
+      >notifications</mat-icon
+    >
+  } @else {
+    <mat-icon>notifications_none</mat-icon>
+  }
+</button>
+
+<mat-menu #notifMenu="matMenu" class="notif-menu-panel" xPosition="before">
+  <!-- Header -->
+  <div class="notif-header" (click)="$event.stopPropagation()" (keydown)="$event.stopPropagation()">
+    <span class="notif-header-title">Benachrichtigungen</span>
+    @if (inbox.unreadCount() > 0) {
+      <button class="notif-mark-all" (click)="markAllRead()">Alle gelesen</button>
+    }
+  </div>
+
+  <!-- List -->
+  @if (preview().length === 0) {
+    <div
+      class="notif-empty"
+      (click)="$event.stopPropagation()"
+      (keydown)="$event.stopPropagation()"
+    >
+      <mat-icon>notifications_off</mat-icon>
+      <span>Keine Benachrichtigungen</span>
+    </div>
+  }
+
+  @for (notif of preview(); track notif.id) {
+    <button class="notif-item" [class.unread]="!notif.read" (click)="onItemClick(notif)">
+      <div class="notif-icon-wrap" [ngClass]="colorClassFor(notif.type)">
+        <mat-icon>{{ iconFor(notif.type) }}</mat-icon>
+      </div>
+      <div class="notif-content">
+        <span class="notif-title">{{ notif.title }}</span>
+        <span class="notif-message">{{ notif.message }}</span>
+        <span class="notif-time">{{ relativeTime(notif.timestamp) }}</span>
+      </div>
+      <button
+        class="notif-dismiss-btn"
+        (click)="dismiss(notif, $event)"
+        title="Entfernen"
+        type="button"
+        tabindex="-1"
+      >
+        <mat-icon>close</mat-icon>
+      </button>
+    </button>
+  }
+
+  <!-- Footer -->
+  <div class="notif-footer" (click)="$event.stopPropagation()" (keydown)="$event.stopPropagation()">
+    <button class="btn btn-secondary btn-sm notif-view-all" (click)="openInbox()">
+      Alle anzeigen
+    </button>
+  </div>
+</mat-menu>

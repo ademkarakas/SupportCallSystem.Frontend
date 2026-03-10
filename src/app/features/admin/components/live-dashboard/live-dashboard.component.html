@@ -1,0 +1,202 @@
+<div class="admin-page page-enter">
+  <!-- Page Header -->
+  <header class="page-header">
+    <div class="header-content">
+      <div class="title-row">
+        <div class="title-icon">
+          <mat-icon>sensors</mat-icon>
+        </div>
+        <div>
+          <h1>Live Dashboard</h1>
+          <p class="subtitle">Echtzeit-Übersicht · Aktive Anrufe &amp; Agentenstatus</p>
+        </div>
+      </div>
+      <div class="header-actions">
+        <span class="last-updated" *ngIf="lastRefreshed()">
+          Aktualisiert: {{ lastRefreshed() | date: 'HH:mm:ss' }}
+        </span>
+        <button mat-stroked-button (click)="loadData()" [disabled]="isLoading()">
+          <mat-icon>refresh</mat-icon>
+          Aktualisieren
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- KPI Bar -->
+  <div class="kpi-bar">
+    <div class="kpi-card">
+      <div class="kpi-icon calls">
+        <mat-icon>phone_in_talk</mat-icon>
+      </div>
+      <div class="kpi-body">
+        <span class="kpi-value">{{ activeCalls().length }}</span>
+        <span class="kpi-label">Aktive Anrufe</span>
+      </div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-icon busy">
+        <mat-icon>headset_mic</mat-icon>
+      </div>
+      <div class="kpi-body">
+        <span class="kpi-value">{{ busyCount() }}</span>
+        <span class="kpi-label">Beschäftigte Agenten</span>
+      </div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-icon available">
+        <mat-icon>check_circle</mat-icon>
+      </div>
+      <div class="kpi-body">
+        <span class="kpi-value">{{ availableCount() }}</span>
+        <span class="kpi-label">Verfügbare Agenten</span>
+      </div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-icon queue">
+        <mat-icon>queue</mat-icon>
+      </div>
+      <div class="kpi-body">
+        <span class="kpi-value">{{ callQueue().length }}</span>
+        <span class="kpi-label">Warteschlange</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Dashboard Grid: Active Calls (left) + Queue (right) -->
+  <div class="dashboard-grid">
+    <!-- Active Calls Table -->
+    <div class="content-container">
+      <div class="section-header">
+        <mat-icon>phone_in_talk</mat-icon>
+        <span>Aktive Anrufe</span>
+        <span class="count-badge">{{ activeCalls().length }}</span>
+      </div>
+
+      <div class="table-container">
+        <div *ngIf="isLoading()" class="loading-overlay">
+          <span>Laden…</span>
+        </div>
+
+        <table class="data-table" *ngIf="!isLoading()">
+          <thead>
+            <tr>
+              <th>Anrufer</th>
+              <th>Kunde</th>
+              <th>Agent</th>
+              <th>Dauer</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let call of activeCalls()">
+              <td>
+                <div class="caller-cell">
+                  <span class="live-dot"></span>
+                  <span class="caller-number">{{ call.callerNumber }}</span>
+                </div>
+              </td>
+              <td>
+                <span *ngIf="call.customerName" class="customer-name">{{ call.customerName }}</span>
+                <span *ngIf="!call.customerName" class="no-customer">Unbekannt</span>
+              </td>
+              <td>
+                <span class="agent-id">{{ agentDisplayName(call.agentUserId) }}</span>
+              </td>
+              <td>
+                <span class="duration-badge">{{ elapsedLabel(call.startTime) }}</span>
+              </td>
+            </tr>
+            <tr *ngIf="activeCalls().length === 0">
+              <td colspan="4" class="empty-row">
+                <mat-icon>phone_disabled</mat-icon>
+                <span>Keine aktiven Anrufe</span>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Call Queue -->
+    <div class="content-container queue-panel">
+      <div class="section-header">
+        <mat-icon>queue</mat-icon>
+        <span>Warteschlange</span>
+        <span class="count-badge">{{ callQueue().length }}</span>
+      </div>
+
+      <div class="queue-list">
+        <div *ngFor="let item of callQueue()" class="queue-item">
+          <div class="queue-icon">
+            <mat-icon>phone</mat-icon>
+          </div>
+          <div class="queue-body">
+            <span class="queue-caller">{{ item.callerNumber }}</span>
+            <span *ngIf="item.customerName" class="queue-customer">{{ item.customerName }}</span>
+            <span class="queue-wait">{{ queueWaitLabel(item.arrivedAt) }}</span>
+          </div>
+        </div>
+        <div *ngIf="callQueue().length === 0" class="queue-empty">
+          <mat-icon>done_all</mat-icon>
+          <span>Warteschlange ist leer</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Agent Status Table -->
+  <div class="content-container">
+    <div class="section-header">
+      <mat-icon>groups</mat-icon>
+      <span>Agenten-Status</span>
+    </div>
+
+    <div class="table-container">
+      <table class="data-table" *ngIf="!isLoading()">
+        <thead>
+          <tr>
+            <th>Agent</th>
+            <th>E-Mail</th>
+            <th>Durchwahl</th>
+            <th>Status</th>
+            <th>Aktiver Anruf seit</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let row of agentRows()">
+            <td>
+              <div class="agent-cell">
+                <div class="agent-avatar">{{ row.name | slice: 0 : 1 }}</div>
+                <span class="agent-name">{{ row.name }}</span>
+              </div>
+            </td>
+            <td class="agent-email">{{ row.email }}</td>
+            <td class="agent-ext">{{ row.extension || '—' }}</td>
+            <td>
+              <span class="status-badge" [class]="row.status">
+                <span class="status-dot" [class]="row.status"></span>
+                {{ row.status === 'busy' ? 'Beschäftigt' : 'Verfügbar' }}
+              </span>
+            </td>
+            <td>
+              <span *ngIf="row.activeCallSince" class="call-since">
+                {{ elapsedLabel(row.activeCallSince.toISOString()) }}
+              </span>
+              <span *ngIf="!row.activeCallSince" class="no-value">—</span>
+            </td>
+          </tr>
+          <tr *ngIf="agentRows().length === 0">
+            <td colspan="5" class="empty-row">
+              <mat-icon>person_off</mat-icon>
+              <span>Keine Agenten gefunden</span>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div *ngIf="isLoading()" class="loading-overlay">
+        <span>Laden…</span>
+      </div>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,109 @@
+<div class="audit-page">
+  <div class="page-header">
+    <div class="header-left">
+      <mat-icon class="page-icon">security</mat-icon>
+      <div>
+        <h1>Audit Log</h1>
+        <p>Überblick aller sicherheitsrelevanten Aktionen im System</p>
+      </div>
+    </div>
+    <button class="btn btn-secondary" (click)="loadLogs()" [disabled]="isLoading()">
+      <mat-icon>refresh</mat-icon>
+      Aktualisieren
+    </button>
+  </div>
+
+  <!-- Filters -->
+  <div class="filter-bar">
+    <div class="action-chips">
+      @for (f of ACTION_FILTERS; track f) {
+        <button class="chip" [class.active]="activeFilter() === f" (click)="setFilter(f)">
+          {{ f }}
+        </button>
+      }
+    </div>
+
+    <form [formGroup]="filterForm" (ngSubmit)="loadLogs()" class="filter-form">
+      <input
+        type="text"
+        formControlName="userId"
+        placeholder="Benutzer-ID filtern"
+        class="filter-input"
+      />
+      <input type="date" formControlName="from" class="filter-input narrow" title="Von Datum" />
+      <input type="date" formControlName="to" class="filter-input narrow" title="Bis Datum" />
+      <button type="submit" class="btn btn-primary" [disabled]="isLoading()">
+        <mat-icon>search</mat-icon>
+        Suchen
+      </button>
+    </form>
+  </div>
+
+  <!-- Table -->
+  @if (isLoading()) {
+    <div class="loading-state">
+      <mat-spinner diameter="48"></mat-spinner>
+    </div>
+  } @else if (filteredEntries().length === 0) {
+    <div class="empty-state">
+      <mat-icon>policy</mat-icon>
+      <p>Keine Einträge gefunden</p>
+    </div>
+  } @else {
+    <div class="table-wrapper">
+      <table class="audit-table">
+        <thead>
+          <tr>
+            <th>Zeitstempel</th>
+            <th>Aktion</th>
+            <th>Entität</th>
+            <th>Benutzer-ID</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (entry of filteredEntries(); track entry.id) {
+            <tr
+              class="audit-row"
+              [class.expanded]="expandedId() === entry.id"
+              (click)="toggleExpand(entry.id)"
+              (keydown.enter)="toggleExpand(entry.id)"
+              (keydown.space)="toggleExpand(entry.id)"
+              tabindex="0"
+            >
+              <td class="ts-cell">{{ formatTimestamp(entry.timestamp) }}</td>
+              <td>
+                <span class="action-badge" [class]="getActionClass(entry.action)">
+                  {{ entry.action }}
+                </span>
+              </td>
+              <td class="entity-cell">
+                <span>{{ entry.entityType }}</span>
+                @if (entry.entityId) {
+                  <span class="entity-id" [matTooltip]="entry.entityId">
+                    {{ entry.entityId | slice: 0 : 8 }}…
+                  </span>
+                }
+              </td>
+              <td class="user-cell">
+                {{ entry.userId ? (entry.userId | slice: 0 : 12) + '…' : '—' }}
+              </td>
+              <td class="chevron-cell">
+                <mat-icon>{{ expandedId() === entry.id ? 'expand_less' : 'expand_more' }}</mat-icon>
+              </td>
+            </tr>
+            @if (expandedId() === entry.id && entry.details) {
+              <tr class="detail-row">
+                <td colspan="5">
+                  <div class="detail-content"><strong>Details:</strong> {{ entry.details }}</div>
+                </td>
+              </tr>
+            }
+          }
+        </tbody>
+      </table>
+    </div>
+
+    <div class="table-footer">{{ filteredEntries().length }} Einträge</div>
+  }
+</div>

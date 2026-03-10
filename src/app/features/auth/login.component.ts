@@ -6,7 +6,7 @@ import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { Router, ActivatedRoute } from '@angular/router';
+import { Router, ActivatedRoute, RouterModule } from '@angular/router';
 import { AuthService } from '../../core/services/auth.service';
 import { NotificationService } from '../../core/services/notification.service';
 import { finalize } from 'rxjs';
@@ -22,6 +22,7 @@ import { fadeIn, slideIn } from '../../core/animations/animations';
     MatButtonModule,
     MatIconModule,
     MatProgressSpinnerModule,
+    RouterModule,
   ],
   templateUrl: './login.component.html',
   styleUrls: ['./login.component.scss'],
@@ -61,13 +62,18 @@ export class LoginComponent {
       .login({ email: email!, password: password! })
       .pipe(finalize(() => this.isLoading.set(false)))
       .subscribe({
-        next: () => {
-          this.notificationService.showSuccess('Login successful');
-          const returnUrl = this.route.snapshot.queryParams['returnUrl'] || '/dashboard';
-          this.router.navigateByUrl(returnUrl);
+        next: (response) => {
+          if ('requiresTwoFactor' in response && response.requiresTwoFactor) {
+            this.router.navigate(['/two-factor-verify'], {
+              queryParams: { userId: response.pendingUserId },
+            });
+          } else {
+            this.notificationService.showSuccess('Login successful');
+            const returnUrl = this.route.snapshot.queryParams['returnUrl'] || '/dashboard';
+            this.router.navigateByUrl(returnUrl);
+          }
         },
         error: (err) => {
-          // Error handler in interceptor shows the snackbar
           console.error('Login error', err);
         },
       });

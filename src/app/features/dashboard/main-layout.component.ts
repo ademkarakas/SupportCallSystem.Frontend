@@ -16,6 +16,8 @@ import { CustomerPopupComponent } from '../calls/components/customer-popup/custo
 import { CallApiService } from '../calls/services/call-api.service';
 import { DebugPanelComponent } from './debug-panel.component';
 import { UserSettingsDialogComponent } from '../../shared/components/user-settings-dialog/user-settings-dialog.component';
+import { NotificationBellComponent } from '../../shared/components/notification-bell/notification-bell.component';
+import { SessionTimeoutService } from '../../core/services/session-timeout.service';
 
 @Component({
   selector: 'app-dashboard',
@@ -31,12 +33,14 @@ import { UserSettingsDialogComponent } from '../../shared/components/user-settin
     MatDialogModule,
     MatMenuModule,
     DebugPanelComponent,
+    NotificationBellComponent,
   ],
   templateUrl: './main-layout.component.html',
   styleUrls: ['./main-layout.component.scss'],
 })
 export class MainLayoutComponent implements OnInit {
   private readonly destroyRef = inject(DestroyRef);
+  private readonly _sessionTimeout = inject(SessionTimeoutService); // activates idle detection
   auth = inject(AuthService);
   signalR = inject(SignalRService);
   theme = inject(ThemeService);
@@ -136,13 +140,17 @@ export class MainLayoutComponent implements OnInit {
 
   getHeaderTitle(): string {
     const url = this.router.url;
+    if (url.includes('/admin/live')) return 'Live Dashboard';
     if (url.includes('/admin/activity')) return 'Mitarbeiter-Aktivität';
     if (url.includes('/admin/customers')) return 'Kundenverwaltung';
     if (url.includes('/admin/users')) return 'Benutzerverwaltung';
+    if (url.includes('/admin/audit-log')) return 'Audit Log';
+    if (url.includes('/settings/security')) return '2FA Sicherheit';
     if (url.includes('/dashboard')) return 'Systemübersicht';
     if (url.includes('/calls/history')) return 'Anrufhistorie';
     if (url.includes('/calls')) return 'Aktiver Call Workspace';
     if (url.includes('/reports')) return 'Analyse & Berichte';
+    if (url.includes('/notifications')) return 'Benachrichtigungen';
     return 'Management System';
   }
 

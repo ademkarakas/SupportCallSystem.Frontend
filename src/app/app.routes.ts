@@ -8,6 +8,21 @@ export const routes: Routes = [
     loadComponent: () => import('./features/auth/login.component').then((m) => m.LoginComponent),
   },
   {
+    path: 'forgot-password',
+    loadComponent: () =>
+      import('./features/auth/forgot-password.component').then((m) => m.ForgotPasswordComponent),
+  },
+  {
+    path: 'reset-password',
+    loadComponent: () =>
+      import('./features/auth/reset-password.component').then((m) => m.ResetPasswordComponent),
+  },
+  {
+    path: 'two-factor-verify',
+    loadComponent: () =>
+      import('./features/auth/two-factor-verify.component').then((m) => m.TwoFactorVerifyComponent),
+  },
+  {
     path: '',
     canActivate: [authGuard],
     loadComponent: () =>
@@ -35,9 +50,23 @@ export const routes: Routes = [
           import('./features/reports/reports.component').then((m) => m.ReportsComponent),
       },
       {
+        path: 'notifications',
+        loadComponent: () =>
+          import('./features/notifications/notification-inbox.component').then(
+            (m) => m.NotificationInboxComponent,
+          ),
+      },
+      {
         path: 'admin',
         canActivate: [adminGuard],
         loadChildren: () => import('./features/admin/admin.routes').then((m) => m.ADMIN_ROUTES),
+      },
+      {
+        path: 'settings/security',
+        loadComponent: () =>
+          import('./features/auth/two-factor-setup.component').then(
+            (m) => m.TwoFactorSetupComponent,
+          ),
       },
       {
         path: '',

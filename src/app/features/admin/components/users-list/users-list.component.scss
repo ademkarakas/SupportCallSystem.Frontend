@@ -109,8 +109,12 @@
 
   tbody tr {
     cursor: default;
-    &.clickable-row { cursor: pointer; }
-    &:hover { background: var(--color-table-row-hover); }
+    &.clickable-row {
+      cursor: pointer;
+    }
+    &:hover {
+      background: var(--color-table-row-hover);
+    }
   }
 
   .name-cell {
@@ -132,9 +136,18 @@
   flex-shrink: 0;
   letter-spacing: 0.02em;
 
-  &.badge-admin    { background: #fff0eb; color: #e8590c; }
-  &.badge-useradmin { background: #fff4e0; color: #c07a00; }
-  &.badge-agent    { background: #e8f4fd; color: #0078d4; }
+  &.badge-admin {
+    background: #fff0eb;
+    color: #e8590c;
+  }
+  &.badge-useradmin {
+    background: #fff4e0;
+    color: #c07a00;
+  }
+  &.badge-agent {
+    background: #e8f4fd;
+    color: #0078d4;
+  }
 }
 
 .role-badge {

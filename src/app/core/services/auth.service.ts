@@ -18,6 +18,20 @@ export interface AuthResponse {
   user: User;
 }
 
+export interface TwoFactorRequiredResponse {
+  requiresTwoFactor: true;
+  pendingUserId: string;
+}
+
+export type LoginResponse = AuthResponse | TwoFactorRequiredResponse;
+
+export interface TwoFactorSetupInfo {
+  sharedKey: string;
+  authenticatorUri: string;
+  qrCodeSvg: string;
+  isEnabled: boolean;
+}
+
 @Injectable({
   providedIn: 'root',
 })
@@ -37,10 +51,12 @@ export class AuthService {
     private router: Router,
   ) {}
 
-  public login(credentials: { email: string; password: any }): Observable<AuthResponse> {
-    return this.http.post<AuthResponse>(`${environment.apiUrl}/api/auth/login`, credentials).pipe(
+  public login(credentials: { email: string; password: any }): Observable<LoginResponse> {
+    return this.http.post<LoginResponse>(`${environment.apiUrl}/api/auth/login`, credentials).pipe(
       tap((response) => {
-        this.setSession(response);
+        if ('token' in response) {
+          this.setSession(response as unknown as AuthResponse);
+        }
       }),
     );
   }
@@ -77,6 +93,40 @@ export class AuthService {
     newPassword: string;
   }): Observable<void> {
     return this.http.post<void>(`${environment.apiUrl}/api/auth/change-password`, data);
+  }
+
+  public forgotPassword(email: string): Observable<void> {
+    return this.http.post<void>(`${environment.apiUrl}/api/auth/forgot-password`, { email });
+  }
+
+  public resetPassword(data: {
+    email: string;
+    token: string;
+    newPassword: string;
+  }): Observable<void> {
+    return this.http.post<void>(`${environment.apiUrl}/api/auth/reset-password`, data);
+  }
+
+  public verifyTwoFactorLogin(userId: string, code: string): Observable<AuthResponse> {
+    return this.http
+      .post<AuthResponse>(`${environment.apiUrl}/api/auth/2fa/verify-login`, { userId, code })
+      .pipe(tap((response) => this.setSession(response)));
+  }
+
+  public getTwoFactorStatus(): Observable<{ enabled: boolean }> {
+    return this.http.get<{ enabled: boolean }>(`${environment.apiUrl}/api/auth/2fa/status`);
+  }
+
+  public getTwoFactorSetup(): Observable<TwoFactorSetupInfo> {
+    return this.http.get<TwoFactorSetupInfo>(`${environment.apiUrl}/api/auth/2fa/setup`);
+  }
+
+  public enableTwoFactor(code: string): Observable<void> {
+    return this.http.post<void>(`${environment.apiUrl}/api/auth/2fa/enable`, { code });
+  }
+
+  public disableTwoFactor(): Observable<void> {
+    return this.http.post<void>(`${environment.apiUrl}/api/auth/2fa/disable`, {});
   }
 
   public isAdmin(): boolean {

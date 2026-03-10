@@ -6,9 +6,18 @@
       <p class="page-subtitle">Leistungsanalysen und Statistiken für das Support-Team.</p>
     </div>
     <div class="page-header-actions">
-      <button class="btn btn-secondary" (click)="onExport()">
-        <mat-icon>file_download</mat-icon>
-        Export
+      <button class="btn btn-secondary" (click)="onExport()" matTooltip="CSV-Datei herunterladen">
+        <mat-icon>table_view</mat-icon>
+        CSV
+      </button>
+      <button
+        class="btn btn-secondary"
+        (click)="onExportPdf()"
+        [disabled]="!reportData()"
+        matTooltip="PDF-Bericht herunterladen"
+      >
+        <mat-icon>picture_as_pdf</mat-icon>
+        PDF
       </button>
       <button class="btn btn-secondary" (click)="onRefresh()">
         <mat-icon>refresh</mat-icon>

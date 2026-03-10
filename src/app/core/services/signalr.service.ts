@@ -29,6 +29,20 @@ export interface TranscriptionErrorEvent {
   details: string;
 }
 
+export interface CallStartedEvent {
+  callId: string;
+  agentUserId: string;
+  callerNumber: string | null;
+  customerName: string | null;
+  startTime: Date;
+}
+
+export interface CallEndedEvent {
+  callId: string;
+  agentUserId: string;
+  durationSeconds: number;
+}
+
 @Injectable({
   providedIn: 'root',
 })
@@ -50,6 +64,12 @@ export class SignalRService {
 
   readonly transcriptionErrorSubject = new Subject<TranscriptionErrorEvent>();
   public transcriptionError$ = this.transcriptionErrorSubject.asObservable();
+
+  readonly callStartedSubject = new Subject<CallStartedEvent>();
+  public callStarted$ = this.callStartedSubject.asObservable();
+
+  readonly callEndedSubject = new Subject<CallEndedEvent>();
+  public callEnded$ = this.callEndedSubject.asObservable();
 
   constructor() {}
 
@@ -110,6 +130,14 @@ export class SignalRService {
     this.hubConnection.on('TranscriptionError', (data: TranscriptionErrorEvent) => {
       console.error('SignalR TranscriptionError received:', data);
       this.transcriptionErrorSubject.next(data);
+    });
+
+    this.hubConnection.on('CallStarted', (data: CallStartedEvent) => {
+      this.callStartedSubject.next(data);
+    });
+
+    this.hubConnection.on('CallEnded', (data: CallEndedEvent) => {
+      this.callEndedSubject.next(data);
     });
   }
 

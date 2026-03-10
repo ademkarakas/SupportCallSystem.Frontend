@@ -1,0 +1,66 @@
+<div class="auth-page">
+  <div class="auth-card">
+    <div class="auth-brand">
+      <div class="brand-logo">
+        <span class="logo-name">dicom</span><span class="logo-pipe">|</span
+        ><span class="logo-sub">di-1</span>
+      </div>
+      <h1>Support Call System</h1>
+    </div>
+
+    <div class="auth-header">
+      <div class="icon-circle">
+        <mat-icon>smartphone</mat-icon>
+      </div>
+      <h2>Zwei-Faktor-Authentifizierung</h2>
+      <p>Geben Sie den 6-stelligen Code aus Ihrer Authenticator-App ein.</p>
+    </div>
+
+    @if (errorMessage()) {
+      <div class="error-banner">
+        <mat-icon>error_outline</mat-icon>
+        {{ errorMessage() }}
+      </div>
+    }
+
+    <form [formGroup]="form" (ngSubmit)="onSubmit()" class="auth-form">
+      <div class="auth-field">
+        <label for="code">Authenticator-Code</label>
+        <div class="input-wrapper code-input">
+          <mat-icon>pin</mat-icon>
+          <input
+            id="code"
+            type="text"
+            inputmode="numeric"
+            formControlName="code"
+            placeholder="000000"
+            maxlength="6"
+          />
+        </div>
+        @if (form.get('code')?.touched && form.get('code')?.hasError('pattern')) {
+          <span class="field-error">Bitte einen 6-stelligen Zahlencode eingeben</span>
+        }
+      </div>
+
+      <button
+        type="submit"
+        class="btn btn-primary btn-block"
+        [disabled]="form.invalid || isLoading()"
+      >
+        @if (isLoading()) {
+          <mat-spinner diameter="20"></mat-spinner>
+        } @else {
+          Verifizieren
+          <mat-icon>verified</mat-icon>
+        }
+      </button>
+    </form>
+
+    <div class="auth-footer">
+      <a routerLink="/login">
+        <mat-icon>arrow_back</mat-icon>
+        Zurück zur Anmeldung
+      </a>
+    </div>
+  </div>
+</div>

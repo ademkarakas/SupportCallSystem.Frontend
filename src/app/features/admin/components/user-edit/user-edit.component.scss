@@ -120,7 +120,7 @@
 .form-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 1.25rem 1.5rem;
+  gap: 0.25rem 1.5rem;
   padding: 1.5rem 1.25rem;
 
   @media (max-width: 680px) {
@@ -131,7 +131,7 @@
 .form-field {
   display: flex;
   flex-direction: column;
-  gap: 0.35rem;
+  gap: 0.25rem;
 
   &.full-width {
     grid-column: 1 / -1;

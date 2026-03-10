@@ -4,29 +4,98 @@
     <div class="header-content">
       <div class="title-row">
         <h1 class="page-title">Anrufhistorie</h1>
-        @if (dataSource.data.length > 0) {
-          <span class="count-badge">{{ dataSource.data.length }} Einträge</span>
+        @if (dataSource.filteredData.length > 0) {
+          <span class="count-badge">{{ dataSource.filteredData.length }} Einträge</span>
         }
       </div>
-      <p class="subtitle">
-        Anzeige aller globalen Anrufaufzeichnungen für die aktuelle Support-Sitzung.
-      </p>
+      <p class="subtitle">Anzeige aller Anrufaufzeichnungen für die aktuelle Support-Sitzung.</p>
+    </div>
+    <div class="header-actions">
+      <button
+        class="btn btn-secondary btn-sm"
+        (click)="exportToCsv()"
+        [disabled]="dataSource.filteredData.length === 0"
+        matTooltip="Gefilterte Einträge als CSV exportieren"
+      >
+        <mat-icon>download</mat-icon>
+        <span>CSV Export</span>
+      </button>
     </div>
   </header>
 
   <!-- Data Table Card -->
   <div class="data-table-card">
-    <div class="table-search">
-      <div class="search-input-wrapper">
-        <mat-icon class="search-icon">search</mat-icon>
-        <input
-          class="search-input"
-          placeholder="Suchen..."
-          (input)="applyFilter($event)"
-          #searchInput
-        />
+    <!-- Filter Toolbar -->
+    <div class="filter-toolbar">
+      <div class="filter-row-search">
+        <div class="search-input-wrapper">
+          <mat-icon class="search-icon">search</mat-icon>
+          <input
+            class="search-input"
+            placeholder="Kunde, Kategorie oder Zusammenfassung suchen..."
+            [(ngModel)]="filterText"
+            (input)="applyFilters()"
+          />
+        </div>
+        @if (hasActiveFilters) {
+          <button class="btn btn-secondary btn-sm filter-reset-btn" (click)="resetFilters()">
+            <mat-icon>filter_alt_off</mat-icon>
+            <span>Zurücksetzen</span>
+          </button>
+        }
+      </div>
+
+      <div class="filter-row-fields">
+        <mat-form-field appearance="outline" class="filter-field">
+          <mat-label>Kategorie</mat-label>
+          <mat-select [(ngModel)]="filterCategory" (selectionChange)="applyFilters()">
+            <mat-option value="">Alle Kategorien</mat-option>
+            @for (cat of categories; track cat) {
+              <mat-option [value]="cat">{{ categoryLabels[cat] }}</mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="filter-field">
+          <mat-label>Zusammenfassung</mat-label>
+          <mat-select [(ngModel)]="filterStatus" (selectionChange)="applyFilters()">
+            <mat-option value="">Alle Status</mat-option>
+            @for (s of summaryStatuses; track s.value) {
+              <mat-option [value]="s.value">{{ s.label }}</mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="filter-field filter-field-date">
+          <mat-label>Von</mat-label>
+          <input
+            matInput
+            [matDatepicker]="pickerFrom"
+            [(ngModel)]="filterDateFrom"
+            (dateChange)="applyFilters()"
+          />
+          <mat-datepicker-toggle matIconSuffix [for]="pickerFrom"></mat-datepicker-toggle>
+          <mat-datepicker #pickerFrom></mat-datepicker>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="filter-field filter-field-date">
+          <mat-label>Bis</mat-label>
+          <input
+            matInput
+            [matDatepicker]="pickerTo"
+            [(ngModel)]="filterDateTo"
+            (dateChange)="applyFilters()"
+          />
+          <mat-datepicker-toggle matIconSuffix [for]="pickerTo"></mat-datepicker-toggle>
+          <mat-datepicker #pickerTo></mat-datepicker>
+        </mat-form-field>
       </div>
     </div>
+
+    <!-- Loading Bar -->
+    @if (isLoading) {
+      <mat-progress-bar mode="indeterminate" class="loading-bar"></mat-progress-bar>
+    }
 
     <!-- Desktop Table View -->
     @if (!isMobile) {
@@ -42,7 +111,19 @@
           <ng-container matColumnDef="category">
             <th mat-header-cell *matHeaderCellDef mat-sort-header>Kategorie</th>
             <td mat-cell *matCellDef="let call">
-              <span class="badge badge-neutral">{{ call.category || 'Unbekannt' }}</span>
+              <span class="badge badge-neutral">{{
+                categoryLabels[call.category] || call.category || 'Unbekannt'
+              }}</span>
+            </td>
+          </ng-container>
+
+          <ng-container matColumnDef="summaryStatus">
+            <th mat-header-cell *matHeaderCellDef mat-sort-header>Status</th>
+            <td mat-cell *matCellDef="let call">
+              <span class="status-chip" [ngClass]="getSummaryStatusClass(call.summaryStatus)">
+                <span class="status-dot"></span>
+                {{ getSummaryStatusLabel(call.summaryStatus) }}
+              </span>
             </td>
           </ng-container>
 
@@ -66,7 +147,7 @@
           <ng-container matColumnDef="summary">
             <th mat-header-cell *matHeaderCellDef>Zusammenfassung</th>
             <td mat-cell *matCellDef="let call" class="summary-cell">
-              {{ call.approvedSummary || 'Keine genehmigte Zusammenfassung' }}
+              {{ call.approvedSummary || call.draftSummary || '—' }}
             </td>
           </ng-container>
 
@@ -77,17 +158,17 @@
                 <button
                   class="btn btn-secondary btn-sm"
                   (click)="viewCallerProfile(call.callerNumber, $event)"
+                  matTooltip="Anrufer-Profil anzeigen"
                 >
                   <mat-icon>person_search</mat-icon>
-                  <span>Anrufer-Profil</span>
+                  <span>Profil</span>
                 </button>
                 <button
                   class="btn btn-secondary btn-sm"
-                  [routerLink]="['/calls/detail']"
-                  [queryParams]="{ id: call.id }"
-                  (click)="$event.stopPropagation()"
+                  (click)="navigateToDetail(call.id); $event.stopPropagation()"
+                  matTooltip="Details anzeigen"
                 >
-                  <mat-icon>info</mat-icon>
+                  <mat-icon>open_in_new</mat-icon>
                   <span>Details</span>
                 </button>
               </div>
@@ -95,13 +176,31 @@
           </ng-container>
 
           <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-          <tr mat-row *matRowDef="let row; columns: displayedColumns" class="interactive-row"></tr>
+          <tr
+            mat-row
+            *matRowDef="let row; columns: displayedColumns"
+            class="interactive-row"
+            (click)="navigateToDetail(row.id)"
+            (keydown.enter)="navigateToDetail(row.id)"
+          ></tr>
         </table>
 
-        @if (dataSource.data.length === 0) {
+        @if (!isLoading && dataSource.filteredData.length === 0) {
           <div class="empty-state">
             <mat-icon class="empty-icon">history_toggle_off</mat-icon>
-            <p>Keine Anrufhistorie für diesen Agenten gefunden.</p>
+            <p>
+              {{
+                hasActiveFilters
+                  ? 'Keine Ergebnisse für die gewählten Filter.'
+                  : 'Keine Anrufhistorie gefunden.'
+              }}
+            </p>
+            @if (hasActiveFilters) {
+              <button class="btn btn-secondary btn-sm" (click)="resetFilters()">
+                <mat-icon>filter_alt_off</mat-icon>
+                <span>Filter zurücksetzen</span>
+              </button>
+            }
           </div>
         }
       </div>
@@ -110,10 +209,22 @@
     <!-- Mobile Card View -->
     @if (isMobile) {
       <div class="mobile-cards-container">
-        @if (dataSource.filteredData.length === 0) {
+        @if (!isLoading && dataSource.filteredData.length === 0) {
           <div class="empty-state">
             <mat-icon class="empty-icon">history_toggle_off</mat-icon>
-            <p>Keine Anrufhistorie gefunden.</p>
+            <p>
+              {{
+                hasActiveFilters
+                  ? 'Keine Ergebnisse für die gewählten Filter.'
+                  : 'Keine Anrufhistorie gefunden.'
+              }}
+            </p>
+            @if (hasActiveFilters) {
+              <button class="btn btn-secondary btn-sm" (click)="resetFilters()">
+                <mat-icon>filter_alt_off</mat-icon>
+                <span>Filter zurücksetzen</span>
+              </button>
+            }
           </div>
         }
 
@@ -133,7 +244,15 @@
                   <span class="time">{{ call.startTime | date: 'shortTime' }}</span>
                 </div>
               </div>
-              <span class="badge badge-neutral">{{ call.category || 'Unbekannt' }}</span>
+              <div class="card-badges">
+                <span class="badge badge-neutral">{{
+                  categoryLabels[call.category] || call.category || 'Unbekannt'
+                }}</span>
+                <span class="status-chip" [ngClass]="getSummaryStatusClass(call.summaryStatus)">
+                  <span class="status-dot"></span>
+                  {{ getSummaryStatusLabel(call.summaryStatus) }}
+                </span>
+              </div>
             </div>
 
             <div class="card-body">
@@ -153,12 +272,14 @@
                 </div>
               </div>
 
-              @if (call.approvedSummary) {
+              @if (call.approvedSummary || call.draftSummary) {
                 <div class="info-row summary-row">
                   <mat-icon class="info-icon">notes</mat-icon>
                   <div class="info-content">
                     <span class="info-label">Zusammenfassung</span>
-                    <span class="info-value summary-text">{{ call.approvedSummary }}</span>
+                    <span class="info-value summary-text">{{
+                      call.approvedSummary || call.draftSummary
+                    }}</span>
                   </div>
                 </div>
               }
@@ -178,7 +299,7 @@
                 [queryParams]="{ id: call.id }"
                 (click)="$event.stopPropagation()"
               >
-                <mat-icon>info</mat-icon>
+                <mat-icon>open_in_new</mat-icon>
                 <span>Details ansehen</span>
               </button>
             </div>

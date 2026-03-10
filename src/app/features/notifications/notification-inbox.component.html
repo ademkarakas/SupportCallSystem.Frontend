@@ -1,0 +1,149 @@
+﻿<div class="admin-page page-enter">
+
+  <!-- Page Header -->
+  <header class="page-header">
+    <div class="header-content">
+      <div class="title-row">
+        <mat-icon class="title-icon">notifications</mat-icon>
+        <h1 class="page-title">Benachrichtigungen</h1>
+      </div>
+      <p class="subtitle">
+        @if (inbox.unreadCount() > 0) {
+          {{ inbox.unreadCount() }} ungelesene Benachrichtigungen
+        } @else {
+          Alle Benachrichtigungen gelesen
+        }
+      </p>
+    </div>
+    <div class="header-actions">
+      @if (inbox.unreadCount() > 0) {
+        <button class="btn btn-secondary btn-sm" (click)="markAllRead()">
+          <mat-icon>done_all</mat-icon>
+          <span>Alle gelesen</span>
+        </button>
+      }
+      @if (inbox.notifications().length > 0) {
+        <button class="btn btn-danger btn-sm" (click)="clearAll()">
+          <mat-icon>delete_sweep</mat-icon>
+          <span>Alle loeschen</span>
+        </button>
+      }
+      <button type="button" class="refresh-btn" (click)="toggleSettings()" [class.active]="showSettings()">
+        <mat-icon>settings</mat-icon>
+        <span>Einstellungen</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- Settings Panel -->
+  @if (showSettings()) {
+    <div class="settings-panel">
+      <div class="settings-panel-title">
+        <mat-icon>tune</mat-icon>
+        Benachrichtigungs-Einstellungen
+      </div>
+      <div class="settings-rows">
+        <div class="settings-row">
+          <span class="srow-icon type-incoming-call"><mat-icon>call</mat-icon></span>
+          <div class="srow-text">
+            <span class="srow-label">Eingehende Anrufe</span>
+            <span class="srow-desc">Benachrichtigung bei neuen Anrufen</span>
+          </div>
+          <mat-slide-toggle [checked]="inbox.settings().showIncomingCall"
+            (change)="updateSetting('showIncomingCall', $event.checked)"></mat-slide-toggle>
+        </div>
+        <div class="settings-row">
+          <span class="srow-icon type-summary-ready"><mat-icon>auto_awesome</mat-icon></span>
+          <div class="srow-text">
+            <span class="srow-label">KI-Zusammenfassungen</span>
+            <span class="srow-desc">Wenn eine Zusammenfassung genehmigt werden kann</span>
+          </div>
+          <mat-slide-toggle [checked]="inbox.settings().showSummaryReady"
+            (change)="updateSetting('showSummaryReady', $event.checked)"></mat-slide-toggle>
+        </div>
+        <div class="settings-row">
+          <span class="srow-icon type-transcription-error"><mat-icon>error_outline</mat-icon></span>
+          <div class="srow-text">
+            <span class="srow-label">Transkriptionsfehler</span>
+            <span class="srow-desc">Fehler bei der Sprachtranskription</span>
+          </div>
+          <mat-slide-toggle [checked]="inbox.settings().showTranscriptionError"
+            (change)="updateSetting('showTranscriptionError', $event.checked)"></mat-slide-toggle>
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- Filter Bar -->
+  <div class="filters-bar">
+    @for (tab of tabs; track tab.key) {
+      <button type="button" class="filter-chip" [class.active]="activeTab() === tab.key" (click)="setTab(tab.key)">
+        <mat-icon>{{ tab.icon }}</mat-icon>
+        {{ tab.label }}
+        @if (tabCount(tab.key) > 0) {
+          <span class="chip-count">{{ tabCount(tab.key) }}</span>
+        }
+      </button>
+    }
+  </div>
+
+  <!-- Content Card -->
+  <div class="content-container">
+    @if (filtered().length === 0) {
+      <div class="empty-state">
+        <mat-icon>notifications_none</mat-icon>
+        <p>
+          @if (activeTab() === 'unread') { Alle Benachrichtigungen wurden gelesen. }
+          @else { Hier erscheinen Ihre Benachrichtigungen. }
+        </p>
+      </div>
+    } @else {
+      <div class="table-container">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th class="col-icon"></th>
+              <th>Nachricht</th>
+              <th class="col-time">Zeitpunkt</th>
+              <th class="col-status">Status</th>
+              <th class="col-actions"></th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (notif of filtered(); track notif.id) {
+              <tr class="notif-row" [class.unread]="!notif.read"
+                (click)="onItemClick(notif)"
+                (keydown.enter)="onItemClick(notif)"
+                tabindex="0">
+                <td class="col-icon">
+                  <span class="type-icon" [class]="'type-' + notif.type">
+                    <mat-icon>{{ iconFor(notif.type) }}</mat-icon>
+                  </span>
+                </td>
+                <td class="col-content">
+                  <div class="notif-title-text" [class.bold]="!notif.read">{{ notif.title }}</div>
+                  <div class="notif-msg">{{ notif.message }}</div>
+                </td>
+                <td class="col-time">{{ relativeTime(notif.timestamp) }}</td>
+                <td class="col-status">
+                  @if (!notif.read) {
+                    <span class="badge-new">Neu</span>
+                  } @else {
+                    <span class="badge-read">Gelesen</span>
+                  }
+                </td>
+                <td class="col-actions">
+                  <button type="button" class="dismiss-btn" (click)="dismiss(notif, $event)"
+                    aria-label="Loeschen">
+                    <mat-icon>close</mat-icon>
+                  </button>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+  </div>
+
+</div>
