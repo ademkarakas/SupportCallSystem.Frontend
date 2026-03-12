@@ -1,6 +1,6 @@
 .audit-page {
   padding: 24px;
-  max-width: 1200px;
+  max-width: 1600px;
 }
 
 .page-header {
@@ -214,6 +214,13 @@
     background: rgba(158, 158, 158, 0.12);
     color: #424242;
   }
+}
+.count-badge {
+  background-color: var(--color-status-neutral-bg);
+  color: var(--color-text-secondary);
+  padding: 2px 10px;
+  border-radius: 10px;
+  font-size: 13px;
 }
 
 .entity-cell {

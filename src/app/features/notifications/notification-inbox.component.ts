@@ -5,6 +5,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { MatTooltipModule } from '@angular/material/tooltip';
+import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
 import {
   NotificationInboxService,
   AppNotification,
@@ -17,7 +18,7 @@ type FilterTab = 'all' | 'unread' | 'incoming_call' | 'summary_ready' | 'transcr
 @Component({
   selector: 'app-notification-inbox',
   standalone: true,
-  imports: [CommonModule, MatIconModule, MatButtonModule, MatSlideToggleModule, MatTooltipModule],
+  imports: [CommonModule, MatIconModule, MatButtonModule, MatSlideToggleModule, MatTooltipModule, MatPaginatorModule],
   templateUrl: './notification-inbox.component.html',
   styleUrls: ['./notification-inbox.component.scss'],
 })
@@ -27,6 +28,19 @@ export class NotificationInboxComponent {
 
   activeTab = signal<FilterTab>('all');
   showSettings = signal(false);
+
+  pageIndex = signal(0);
+  pageSize = signal(15);
+
+  readonly paginated = computed(() => {
+    const start = this.pageIndex() * this.pageSize();
+    return this.filtered().slice(start, start + this.pageSize());
+  });
+
+  onPage(e: PageEvent) {
+    this.pageIndex.set(e.pageIndex);
+    this.pageSize.set(e.pageSize);
+  }
 
   readonly filtered = computed(() => {
     const tab = this.activeTab();
@@ -109,3 +123,5 @@ export class NotificationInboxComponent {
     this.inbox.updateSettings({ [key]: value });
   }
 }
+
+

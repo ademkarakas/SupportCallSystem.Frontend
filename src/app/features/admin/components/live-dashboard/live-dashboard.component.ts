@@ -19,6 +19,7 @@ export interface AgentStatusRow {
   status: AgentStatus;
   activeCallId: string | null;
   activeCallSince: Date | null;
+  elapsedLabel: string | null;
 }
 
 export interface QueuedCall {
@@ -61,6 +62,7 @@ export class LiveDashboardComponent implements OnInit {
     this.timerTick(); // trigger recompute on timer tick
     const calls = this.activeCalls();
     const agents = this.allAgents();
+    const now = Date.now();
     const busyMap = new Map(calls.map((c) => [c.agentUserId, c]));
 
     return agents.map((agent) => {
@@ -73,6 +75,9 @@ export class LiveDashboardComponent implements OnInit {
         status: activeCall ? 'busy' : 'available',
         activeCallId: activeCall?.id ?? null,
         activeCallSince: activeCall ? new Date(activeCall.startTime) : null,
+        elapsedLabel: activeCall
+          ? this.formatElapsedMs(now - new Date(activeCall.startTime).getTime())
+          : null,
       };
     });
   });
@@ -81,6 +86,26 @@ export class LiveDashboardComponent implements OnInit {
   readonly availableCount = computed(
     () => this.agentRows().filter((r) => r.status === 'available').length,
   );
+
+  /** Active calls enriched with a pre-computed elapsed label (avoids NG0100) */
+  readonly activeCallRows = computed(() => {
+    this.timerTick();
+    const now = Date.now();
+    return this.activeCalls().map((call) => ({
+      ...call,
+      elapsedLabel: this.formatElapsedMs(now - new Date(call.startTime).getTime()),
+    }));
+  });
+
+  /** Queue items enriched with a pre-computed wait label (avoids NG0100) */
+  readonly callQueueRows = computed(() => {
+    this.timerTick();
+    const now = Date.now();
+    return this.callQueue().map((q) => ({
+      ...q,
+      waitLabel: this.formatElapsedMs(now - q.arrivedAt.getTime()),
+    }));
+  });
 
   ngOnInit(): void {
     this.loadData();
@@ -181,20 +206,12 @@ export class LiveDashboardComponent implements OnInit {
     this.callQueue.update((q) => q.filter((qc) => qc.callId !== callId));
   }
 
-  elapsedLabel(startTime: string): string {
-    const secs = Math.floor((Date.now() - new Date(startTime).getTime()) / 1000);
-    this.timerTick(); // reactive dependency
+  private formatElapsedMs(ms: number): string {
+    const secs = Math.max(0, Math.floor(ms / 1000));
     if (secs < 60) return `${secs}s`;
     const mins = Math.floor(secs / 60);
     const remainder = secs % 60;
     return `${mins}m ${remainder}s`;
-  }
-
-  queueWaitLabel(arrivedAt: Date): string {
-    const secs = Math.floor((Date.now() - arrivedAt.getTime()) / 1000);
-    this.timerTick();
-    if (secs < 60) return `${secs}s`;
-    return `${Math.floor(secs / 60)}m ${secs % 60}s`;
   }
 
   statusLabel(status: AgentStatus): string {

@@ -1,38 +1,41 @@
-<div class="setup-page">
-  <div class="page-header">
-    <div class="header-icon">
-      <mat-icon>verified_user</mat-icon>
+<div class="setup-page global-page-container">
+  <header class="page-header">
+    <div class="header-content">
+      <div class="title-row">
+        <mat-icon class="title-icon">verified_user</mat-icon>
+        <div class="title-text-group">
+          <h1 class="global-page-title">Zwei-Faktor-Authentifizierung</h1>
+          <p class="subtitle">
+            Sch\u00fctzen Sie Ihr Konto mit einem zus\u00e4tzlichen Sicherheitsfaktor.
+          </p>
+        </div>
+      </div>
     </div>
-    <div>
-      <h1>Zwei-Faktor-Authentifizierung</h1>
-      <p>Schützen Sie Ihr Konto mit einem zusätzlichen Sicherheitsfaktor.</p>
-    </div>
-  </div>
+  </header>
 
   @if (isLoading() && !setupInfo()) {
     <div class="loading-state">
       <mat-spinner diameter="40"></mat-spinner>
     </div>
   } @else {
-    <!-- Status Card -->
-    <div class="status-card" [class.enabled]="isEnabled()">
-      <div class="status-left">
-        <mat-icon>{{ isEnabled() ? 'shield' : 'shield_off' }}</mat-icon>
-        <div>
-          <div class="status-label">Status</div>
-          <div class="status-value">
-            {{ isEnabled() ? '2FA ist aktiviert' : '2FA ist deaktiviert' }}
+    <!-- Status Card + Info Card side by side -->
+    <div class="cards-row">
+      <div class="status-card" [class.enabled]="isEnabled()">
+        <div class="status-left">
+          <mat-icon>{{ isEnabled() ? 'shield' : 'shield_off' }}</mat-icon>
+          <div>
+            <div class="status-label">Status</div>
+            <div class="status-value">
+              {{ isEnabled() ? '2FA ist aktiviert' : '2FA ist deaktiviert' }}
+            </div>
           </div>
         </div>
+        <div class="status-badge" [class.active]="isEnabled()">
+          {{ isEnabled() ? 'Aktiv' : 'Inaktiv' }}
+        </div>
       </div>
-      <div class="status-badge" [class.active]="isEnabled()">
-        {{ isEnabled() ? 'Aktiv' : 'Inaktiv' }}
-      </div>
-    </div>
 
-    @if (!isEnabled()) {
-      <!-- Enable Flow -->
-      @if (!showSetup()) {
+      @if (!isEnabled() && !showSetup()) {
         <div class="info-card">
           <h2>2FA einrichten</h2>
           <p>
@@ -44,91 +47,137 @@
             Jetzt einrichten
           </button>
         </div>
-      } @else {
-        @if (setupInfo(); as info) {
-          <div class="setup-card">
-            <div class="step">
-              <div class="step-num">1</div>
-              <div class="step-body">
-                <h3>Authenticator-App öffnen und QR-Code scannen</h3>
-                <p>Scannen Sie den QR-Code mit Ihrer Authenticator-App.</p>
-                <div class="qr-wrapper">
-                  <div [innerHTML]="safeQrSvg()"></div>
-                </div>
+      }
+
+      @if (isEnabled()) {
+        <div class="info-card danger">
+          <h2>2FA deaktivieren</h2>
+          <p>
+            Wenn Sie 2FA deaktivieren, wird Ihr Konto nur durch Ihr Passwort geschützt. Wir
+            empfehlen, 2FA aktiviert zu lassen.
+          </p>
+          <button class="btn btn-danger" (click)="disableTwoFactor()" [disabled]="isLoading()">
+            @if (isLoading()) {
+              <mat-spinner diameter="18"></mat-spinner>
+            } @else {
+              <mat-icon>shield_off</mat-icon>
+              2FA deaktivieren
+            }
+          </button>
+        </div>
+      }
+    </div>
+
+    <!-- Full-width setup card (QR code flow) -->
+    @if (!isEnabled() && showSetup()) {
+      @if (setupInfo(); as info) {
+        <div class="setup-card">
+          <!-- Step progress bar -->
+          <div class="step-progress">
+            @for (n of [1, 2, 3]; track n) {
+              <div
+                class="step-node"
+                [class.active]="setupStep() === n"
+                [class.done]="setupStep() > n"
+              >
+                <span class="step-num">{{ n }}</span>
+              </div>
+              @if (n < 3) {
+                <div class="step-connector" [class.done]="setupStep() > n"></div>
+              }
+            }
+          </div>
+
+          <!-- Step 1: Scan QR code -->
+          @if (setupStep() === 1) {
+            <div class="step-body">
+              <h3>Schritt 1 &ndash; QR-Code scannen</h3>
+              <p>
+                Scannen Sie den QR-Code mit Ihrer Authenticator-App (Google Authenticator, Authy,
+                Microsoft Authenticator).
+              </p>
+              <div class="qr-wrapper">
+                <div [innerHTML]="safeQrSvg()"></div>
+              </div>
+              <div class="step-actions">
+                <button class="btn btn-primary" (click)="nextStep()">
+                  Weiter <mat-icon>arrow_forward</mat-icon>
+                </button>
               </div>
             </div>
+          }
 
-            <div class="step">
-              <div class="step-num">2</div>
-              <div class="step-body">
-                <h3>Oder Schlüssel manuell eingeben</h3>
-                <div class="manual-key">
-                  <code>{{ info.sharedKey }}</code>
-                  <button class="btn btn-icon" (click)="copyKey(info.sharedKey)" title="Kopieren">
-                    <mat-icon>content_copy</mat-icon>
+          <!-- Step 2: Manual key -->
+          @if (setupStep() === 2) {
+            <div class="step-body">
+              <h3>Schritt 2 &ndash; Schl&uuml;ssel manuell eingeben</h3>
+              <p>
+                Falls das Scannen nicht funktioniert, geben Sie diesen Schl&uuml;ssel manuell in
+                Ihre App ein.
+              </p>
+              <div class="manual-key">
+                <code>{{ info.sharedKey }}</code>
+                <button class="btn btn-icon" (click)="copyKey(info.sharedKey)" title="Kopieren">
+                  <mat-icon>content_copy</mat-icon>
+                </button>
+              </div>
+              <div class="step-actions">
+                <button class="btn btn-secondary" (click)="prevStep()">
+                  <mat-icon>arrow_back</mat-icon> Zur&uuml;ck
+                </button>
+                <button class="btn btn-primary" (click)="nextStep()">
+                  Weiter <mat-icon>arrow_forward</mat-icon>
+                </button>
+              </div>
+            </div>
+          }
+
+          <!-- Step 3: Verify code -->
+          @if (setupStep() === 3) {
+            <div class="step-body">
+              <h3>Schritt 3 &ndash; Code best&auml;tigen</h3>
+              <p>
+                Geben Sie den 6-stelligen Code aus der App ein, um die Einrichtung
+                abzuschlie&szlig;en.
+              </p>
+              <form [formGroup]="enableForm" (ngSubmit)="enableTwoFactor()" class="verify-form">
+                <div class="code-field">
+                  <input
+                    type="text"
+                    inputmode="numeric"
+                    formControlName="code"
+                    placeholder="000000"
+                    maxlength="6"
+                    class="code-input"
+                  />
+                  <button
+                    type="submit"
+                    class="btn btn-primary"
+                    [disabled]="enableForm.invalid || isLoading()"
+                  >
+                    @if (isLoading()) {
+                      <mat-spinner diameter="18"></mat-spinner>
+                    } @else {
+                      <mat-icon>check</mat-icon>
+                      Aktivieren
+                    }
                   </button>
                 </div>
+                @if (
+                  enableForm.get('code')?.touched && enableForm.get('code')?.hasError('pattern')
+                ) {
+                  <span class="field-error">Bitte einen 6-stelligen Zahlencode eingeben</span>
+                }
+              </form>
+              <div class="step-actions">
+                <button class="btn btn-secondary" (click)="prevStep()">
+                  <mat-icon>arrow_back</mat-icon> Zur&uuml;ck
+                </button>
               </div>
             </div>
-
-            <div class="step">
-              <div class="step-num">3</div>
-              <div class="step-body">
-                <h3>Code bestätigen</h3>
-                <p>
-                  Geben Sie den 6-stelligen Code aus der App ein, um die Einrichtung abzuschließen.
-                </p>
-                <form [formGroup]="enableForm" (ngSubmit)="enableTwoFactor()" class="verify-form">
-                  <div class="code-field">
-                    <input
-                      type="text"
-                      inputmode="numeric"
-                      formControlName="code"
-                      placeholder="000000"
-                      maxlength="6"
-                      class="code-input"
-                    />
-                    <button
-                      type="submit"
-                      class="btn btn-primary"
-                      [disabled]="enableForm.invalid || isLoading()"
-                    >
-                      @if (isLoading()) {
-                        <mat-spinner diameter="18"></mat-spinner>
-                      } @else {
-                        <mat-icon>check</mat-icon>
-                        Aktivieren
-                      }
-                    </button>
-                  </div>
-                  @if (
-                    enableForm.get('code')?.touched && enableForm.get('code')?.hasError('pattern')
-                  ) {
-                    <span class="field-error">Bitte einen 6-stelligen Zahlencode eingeben</span>
-                  }
-                </form>
-              </div>
-            </div>
-          </div>
-        }
-      }
-    } @else {
-      <!-- Disable Option -->
-      <div class="info-card danger">
-        <h2>2FA deaktivieren</h2>
-        <p>
-          Wenn Sie 2FA deaktivieren, wird Ihr Konto nur durch Ihr Passwort geschützt. Wir empfehlen,
-          2FA aktiviert zu lassen.
-        </p>
-        <button class="btn btn-danger" (click)="disableTwoFactor()" [disabled]="isLoading()">
-          @if (isLoading()) {
-            <mat-spinner diameter="18"></mat-spinner>
-          } @else {
-            <mat-icon>shield_off</mat-icon>
-            2FA deaktivieren
           }
-        </button>
-      </div>
+        </div>
+      }
     }
   }
 </div>

@@ -291,4 +291,52 @@ export class CallHistoryComponent implements OnInit, AfterViewInit {
     link.click();
     URL.revokeObjectURL(url);
   }
+
+  exportToPdf() {
+    const data = this.dataSource.filteredData;
+    if (data.length === 0) {
+      this.notification.showError('Keine Daten zum Exportieren.');
+      return;
+    }
+    
+    // Quick and dirty print to PDF approach natively
+    const pw = window.open('', '_blank');
+    if (!pw) return;
+
+    const headers = ['Kunde', 'Telefon', 'Kategorie', 'Status', 'Datum', 'Dauer (s)' ];
+    let html = `<html><head><title>Anrufhistorie</title>
+      <style>
+        body { font-family: sans-serif; padding: 20px; }
+        h1 { color: #1e3a5f; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th, td { border: 1px solid #cbd5e1; padding: 8px; text-align: left; }
+        th { background-color: #f8fafc; }
+      </style>
+    </head><body>
+    <h1>Anrufhistorie</h1>
+    <table><thead><tr>`;
+    html += headers.map(h => `<th>${h}</th>`).join('');
+    html += `</tr></thead><tbody>`;
+
+    data.forEach(call => {
+      html += `<tr>
+        <td>${call.customerName || 'Manueller Eintrag'}</td>
+        <td>${call.callerNumber || ''}</td>
+        <td>${call.category || 'Unknown'}</td>
+        <td>${this.getSummaryStatusLabel(call.summaryStatus)}</td>
+        <td>${new Date(call.startTime).toLocaleString('de-DE')}</td>
+        <td>${call.durationSeconds}</td>
+      </tr>`;
+    });
+
+    html += `</tbody></table></body></html>`;
+    pw.document.write(html);
+    pw.document.close();
+    pw.focus();
+    setTimeout(() => {
+      pw.print();
+      pw.close();
+    }, 250);
+  }
 }
+

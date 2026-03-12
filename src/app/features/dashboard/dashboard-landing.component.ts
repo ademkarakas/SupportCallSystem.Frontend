@@ -48,4 +48,33 @@ export class DashboardComponent implements OnInit {
       'Warten auf eingehenden Anruf... (Simulation über Debug-Panel möglich)',
     );
   }
+
+  readonly categoryLabels: Record<string, string> = {
+    TechnicalIssue: 'Technisches Problem',
+    BillingInquiry: 'Abrechnung',
+    ProductInquiry: 'Produkt-Anfrage',
+    Complaint: 'Beschwerde',
+    GeneralInquiry: 'Allgemeine Anfrage',
+    Other: 'Sonstiges',
+    Unknown: 'Unbekannt',
+  };
+
+  getCategoryLabel(category: string): string {
+    return this.categoryLabels[category] ?? category ?? 'Unbekannt';
+  }
+
+  getStatusLabel(status: string): string {
+    const map: Record<string, string> = {
+      Approved: 'Genehmigt',
+      Draft: 'Entwurf',
+      None: 'Kein Entwurf',
+    };
+    return map[status] ?? status ?? '—';
+  }
+
+  getStatusClass(status: string): string {
+    if (status === 'Approved') return 'badge-active';
+    if (status === 'Draft') return 'badge-draft';
+    return 'badge-inactive';
+  }
 }

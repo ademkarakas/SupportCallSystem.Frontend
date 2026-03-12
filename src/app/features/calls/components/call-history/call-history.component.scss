@@ -87,11 +87,14 @@
   border-bottom: 1px solid var(--color-table-border);
   padding: var(--spacing-md) var(--spacing-lg);
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
+  flex-wrap: wrap;
+  align-items: flex-start;
   gap: var(--spacing-md);
 
   @media (max-width: 768px) {
     padding: var(--spacing-md);
+    flex-direction: column;
   }
 }
 
@@ -99,7 +102,10 @@
   display: flex;
   align-items: center;
   gap: var(--spacing-md);
+  flex: 1 1 320px;
+  height: 56px;
 
+  .search-input { height: 56px; border-radius: var(--radius-md) !important; }
   .search-input-wrapper {
     flex: 1;
     max-width: 400px;
@@ -128,13 +134,14 @@
   gap: var(--spacing-md);
   flex-wrap: wrap;
   align-items: flex-start;
+  flex: 3 1 400px;
 
   .filter-field {
     flex: 1;
-    min-width: 150px;
-    max-width: 220px;
+    min-width: 130px;
+    max-width: 160px;
 
-    // Override Material form field sizing
+    // Override Material form field sizing — compact Berichte-like style
     ::ng-deep {
       .mat-mdc-form-field-subscript-wrapper {
         display: none; // hide hint/error space to reduce height
@@ -143,28 +150,38 @@
       .mdc-notched-outline__leading,
       .mdc-notched-outline__notch,
       .mdc-notched-outline__trailing {
-        border-color: var(--color-input-border) !important;
+        border-color: var(--color-input-border, var(--color-card-border)) !important;
+        border-radius: var(--radius-md) !important;
       }
 
       &:hover .mdc-notched-outline__leading,
       &:hover .mdc-notched-outline__notch,
       &:hover .mdc-notched-outline__trailing {
-        border-color: var(--color-input-focus) !important;
+        border-color: var(--color-brand) !important;
+      }
+
+      .mat-mdc-text-field-wrapper {
+        padding: 0 8px;
+        background: var(--color-surface, var(--color-card-bg));
       }
 
       .mat-mdc-select-value-text,
       .mat-mdc-input-element {
-        font-size: var(--font-size-sm);
+        font-size: 0.8rem;
         color: var(--color-text-primary);
       }
 
       .mat-mdc-floating-label {
-        font-size: var(--font-size-sm);
+        font-size: 0.8rem;
         color: var(--color-text-secondary);
       }
 
       .mat-mdc-form-field-icon-suffix {
         color: var(--color-text-tertiary);
+      }
+
+      .mat-mdc-select-arrow {
+        color: var(--color-text-secondary);
       }
     }
   }
@@ -354,7 +371,7 @@
     .empty-icon {
       font-size: 40px;
       width: 40px;
-      height: 40px;
+      height: 56px;
     }
 
     p {
@@ -574,3 +591,5 @@
     flex-wrap: wrap;
   }
 }
+
+

@@ -7,8 +7,7 @@ import { SignalRService } from './signalr.service';
 export class AudioCaptureService {
   private audioContext?: AudioContext;
   private mediaStream?: MediaStream;
-  // Using deprecated ScriptProcessorNode until migration to AudioWorklet
-  private processor?: ScriptProcessorNode;
+  private workletNode?: AudioWorkletNode;
   private isCapturing = false;
   private currentCallId?: string;
   private audioQueue: ArrayBuffer[] = [];
@@ -54,11 +53,13 @@ export class AudioCaptureService {
         sampleRate: audioTrack.getSettings().sampleRate,
       });
 
-      // Create audio context with 16kHz sample rate (Vosk requirement)
-      this.audioContext = new AudioContext({ sampleRate: 16000 });
+      // Create audio context at the native sample rate (48kHz or 44.1kHz).
+      // Forcing 16kHz caused browsers to feed silent/zero data in some configurations.
+      this.audioContext = new AudioContext();
+      const nativeSampleRate = this.audioContext.sampleRate;
       console.log('AudioContext created:', {
         state: this.audioContext.state,
-        sampleRate: this.audioContext.sampleRate,
+        sampleRate: nativeSampleRate,
       });
 
       // Resume context if suspended (required by browser autoplay policies)
@@ -70,13 +71,13 @@ export class AudioCaptureService {
       const source = this.audioContext.createMediaStreamSource(this.mediaStream);
       console.log('Media stream source created');
 
-      // Create script processor for audio data (deprecated, will migrate to AudioWorklet)
-      // Buffer size 4096 matches backend chunk size
-      this.processor = this.audioContext.createScriptProcessor(4096, 1, 1);
-      console.log('Script processor created');
+      // Load and create AudioWorkletNode (replaces deprecated ScriptProcessorNode)
+      await this.audioContext.audioWorklet.addModule('/assets/audio-processor.js');
+      this.workletNode = new AudioWorkletNode(this.audioContext, 'pcm-audio-processor');
+      console.log('AudioWorkletNode created');
 
       let chunkCount = 0;
-      this.processor.onaudioprocess = (e) => {
+      this.workletNode.port.onmessage = (event: MessageEvent<Float32Array>) => {
         if (!this.isCapturing) return;
 
         chunkCount++;
@@ -84,45 +85,38 @@ export class AudioCaptureService {
           console.log(`Audio processing chunk #${chunkCount}`);
         }
 
-        const audioData = e.inputBuffer.getChannelData(0);
+        const rawData: Float32Array = event.data;
+
+        // Downsample from native rate (e.g. 48kHz) to 16kHz required by Vosk
+        const downsampled =
+          nativeSampleRate === 16000
+            ? rawData
+            : this.downsampleBuffer(rawData, nativeSampleRate, 16000);
 
         // Check if we have actual audio data (not silence)
-        const hasAudio = audioData.some((sample) => Math.abs(sample) > 0.01);
-        const maxAmplitude = Math.max(...audioData.map((s) => Math.abs(s)));
+        const maxAmplitude = downsampled.reduce((max, s) => Math.max(max, Math.abs(s)), 0);
+        const hasAudio = maxAmplitude > 0.01;
 
         if (chunkCount <= 5 || chunkCount % 50 === 0) {
           console.log(
-            `🎤 Chunk ${chunkCount} - hasAudio: ${hasAudio}, maxAmplitude: ${maxAmplitude.toFixed(4)}, samples: ${audioData.length}`,
+            `🎤 Chunk ${chunkCount} - hasAudio: ${hasAudio}, maxAmplitude: ${maxAmplitude.toFixed(4)}, samples: ${downsampled.length}`,
           );
         }
 
-        // Warn if consistently silent
         if (chunkCount === 100 && !hasAudio) {
           console.warn('⚠️ 100 chunks işlendi ama ses tespit edilmedi! Mikrofona konuşuyor musun?');
         }
 
-        // Convert Float32 to Int16 PCM (required by Vosk)
-        const pcmData = this.float32ToInt16(audioData);
-
-        // Add to queue instead of sending immediately
+        const pcmData = this.float32ToInt16(downsampled);
         this.audioQueue.push(pcmData);
         if (chunkCount === 1) {
           console.log(`First chunk added to queue. Queue length: ${this.audioQueue.length}`);
         }
-
-        // Process queue if not already sending
         this.processAudioQueue();
       };
 
-      source.connect(this.processor);
-      // Connect through a silent GainNode (gain=0) to destination.
-      // This is REQUIRED: Chrome/Chromium will NOT fire onaudioprocess unless
-      // the processor node is part of a fully connected audio graph.
-      // GainNode with gain=0 ensures no audible output (no echo/feedback).
-      const silentGain = this.audioContext.createGain();
-      silentGain.gain.value = 0;
-      this.processor.connect(silentGain);
-      silentGain.connect(this.audioContext.destination);
+      source.connect(this.workletNode);
+      // AudioWorkletNode does not need to be connected to destination to fire
 
       this.isCapturing = true;
       this.currentCallId = callId;
@@ -144,11 +138,12 @@ export class AudioCaptureService {
 
     console.log('Stopping audio capture...');
 
-    this.processor?.disconnect();
+    this.workletNode?.port.close();
+    this.workletNode?.disconnect();
     this.mediaStream?.getTracks().forEach((track) => track.stop());
     this.audioContext?.close();
 
-    this.processor = undefined;
+    this.workletNode = undefined;
     this.mediaStream = undefined;
     this.audioContext = undefined;
     this.isCapturing = false;
@@ -222,6 +217,28 @@ export class AudioCaptureService {
     }
 
     this.isSending = false;
+  }
+
+  /**
+   * Downsample a Float32Array from one sample rate to another using averaging.
+   */
+  private downsampleBuffer(buffer: Float32Array, fromRate: number, toRate: number): Float32Array {
+    if (fromRate === toRate) return buffer;
+    const ratio = fromRate / toRate;
+    const result = new Float32Array(Math.round(buffer.length / ratio));
+    let offset = 0;
+    for (let i = 0; i < result.length; i++) {
+      const nextOffset = Math.round((i + 1) * ratio);
+      let accum = 0;
+      let count = 0;
+      for (let j = offset; j < nextOffset && j < buffer.length; j++) {
+        accum += buffer[j];
+        count++;
+      }
+      result[i] = count ? accum / count : 0;
+      offset = nextOffset;
+    }
+    return result;
   }
 
   /**

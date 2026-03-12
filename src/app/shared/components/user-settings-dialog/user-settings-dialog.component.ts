@@ -5,7 +5,6 @@ import { MatDialogRef, MatDialogModule } from '@angular/material/dialog';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import { MatDividerModule } from '@angular/material/divider';
-import { MatTabsModule } from '@angular/material/tabs';
 import { AuthService, User } from '../../../core/services/auth.service';
 import { NotificationService } from '../../../core/services/notification.service';
 
@@ -25,7 +24,6 @@ import { NotificationService } from '../../../core/services/notification.service
     MatIconModule,
     MatButtonModule,
     MatDividerModule,
-    MatTabsModule,
   ],
   templateUrl: './user-settings-dialog.component.html',
   styleUrls: ['./user-settings-dialog.component.scss'],
@@ -35,6 +33,9 @@ export class UserSettingsDialogComponent implements OnInit {
   private readonly dialogRef = inject(MatDialogRef<UserSettingsDialogComponent>);
   readonly auth = inject(AuthService);
   private readonly notification = inject(NotificationService);
+
+  /** Active sidebar tab */
+  activeTab = signal<'profil' | 'sicherheit' | 'info'>('profil');
 
   /** Currently authenticated user */
   currentUser = signal<User | null>(null);
@@ -207,6 +208,11 @@ export class UserSettingsDialogComponent implements OnInit {
       !!this.passwordForm.errors?.['passwordMismatch'] &&
       !!this.passwordForm.get('confirmPassword')?.touched
     );
+  }
+
+  /** Switches the active sidebar tab. */
+  setTab(tab: 'profil' | 'sicherheit' | 'info'): void {
+    this.activeTab.set(tab);
   }
 
   /** Closes the dialog without saving. */

@@ -144,6 +144,8 @@
   --header-height: 56px;
   --nav-item-height: 48px;
   --sub-nav-item-height: 40px;
+  --global-page-padding: 32px 40px;
+  --global-page-max-width: 1600px;
 
   // === Z-INDEX ===
   --z-base: 1;
@@ -240,7 +242,7 @@
 *::before,
 *::after {
   box-sizing: border-box;
-  margin: 0;
+  margin: 0 !important;
   padding: 0;
 }
 
@@ -407,7 +409,7 @@ select {
 // Spacing utilities
 .m {
   &-0 {
-    margin: 0;
+    margin: 0 !important;
   }
   &-xs {
     margin: var(--spacing-xs);
@@ -1033,7 +1035,7 @@ select {
   }
 
   label {
-    margin: 0;
+    margin: 0 !important;
     cursor: pointer;
     font-size: var(--font-size-base);
     color: var(--color-text-primary);
@@ -1388,14 +1390,14 @@ select {
         font-size: var(--font-size-xl);
         font-weight: var(--font-weight-semibold);
         color: var(--color-text-primary);
-        margin: 0;
+        margin: 0 !important;
       }
     }
 
     .page-subtitle {
       font-size: var(--font-size-sm);
       color: var(--color-text-secondary);
-      margin: 0;
+      margin: 0 !important;
     }
   }
 
@@ -1471,7 +1473,7 @@ select {
       font-size: var(--font-size-lg);
       font-weight: var(--font-weight-semibold);
       color: var(--color-text-primary);
-      margin: 0;
+      margin: 0 !important;
     }
   }
 
@@ -2012,4 +2014,45 @@ select {
 
 .animate-scale-in {
   animation: scaleIn 0.2s ease-out;
+}
+
+// ============================================================================
+// GLOBAL PAGE LAYOUT & TYPOGRAPHY
+// ============================================================================
+
+.global-page-container {
+  padding: var(--global-page-padding) !important;
+  max-width: var(--global-page-max-width);
+  margin: 0 auto;
+  box-sizing: border-box;
+  width: 100%;
+  height: 100%;
+  overflow-y: auto;
+}
+
+.global-page-title {
+  font-size: 1.5rem !important;
+  font-weight: 600 !important;
+  margin: 0 !important;
+  color: var(--color-text-primary);
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+
+  .title-icon {
+    font-size: 1.75rem;
+    width: 1.75rem;
+    height: 1.75rem;
+    color: var(--color-primary);
+  }
+}
+
+// ============================================================================
+// PAGINATOR OVERRIDES
+// ============================================================================
+.mat-mdc-paginator {
+  .mat-mdc-select-value {
+    display: flex;
+    justify-content: center;
+  }
 }

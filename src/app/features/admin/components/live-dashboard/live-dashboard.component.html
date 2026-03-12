@@ -1,4 +1,4 @@
-<div class="admin-page page-enter">
+<div class="admin-page global-page-container page-enter">
   <!-- Page Header -->
   <header class="page-header">
     <div class="header-content">
@@ -88,7 +88,7 @@
             </tr>
           </thead>
           <tbody>
-            <tr *ngFor="let call of activeCalls()">
+            <tr *ngFor="let call of activeCallRows()">
               <td>
                 <div class="caller-cell">
                   <span class="live-dot"></span>
@@ -103,7 +103,7 @@
                 <span class="agent-id">{{ agentDisplayName(call.agentUserId) }}</span>
               </td>
               <td>
-                <span class="duration-badge">{{ elapsedLabel(call.startTime) }}</span>
+                <span class="duration-badge">{{ call.elapsedLabel }}</span>
               </td>
             </tr>
             <tr *ngIf="activeCalls().length === 0">
@@ -126,14 +126,14 @@
       </div>
 
       <div class="queue-list">
-        <div *ngFor="let item of callQueue()" class="queue-item">
+        <div *ngFor="let item of callQueueRows()" class="queue-item">
           <div class="queue-icon">
             <mat-icon>phone</mat-icon>
           </div>
           <div class="queue-body">
             <span class="queue-caller">{{ item.callerNumber }}</span>
             <span *ngIf="item.customerName" class="queue-customer">{{ item.customerName }}</span>
-            <span class="queue-wait">{{ queueWaitLabel(item.arrivedAt) }}</span>
+            <span class="queue-wait">{{ item.waitLabel }}</span>
           </div>
         </div>
         <div *ngIf="callQueue().length === 0" class="queue-empty">
@@ -180,7 +180,7 @@
             </td>
             <td>
               <span *ngIf="row.activeCallSince" class="call-since">
-                {{ elapsedLabel(row.activeCallSince.toISOString()) }}
+                {{ row.elapsedLabel }}
               </span>
               <span *ngIf="!row.activeCallSince" class="no-value">—</span>
             </td>
@@ -200,3 +200,6 @@
     </div>
   </div>
 </div>
+
+
+

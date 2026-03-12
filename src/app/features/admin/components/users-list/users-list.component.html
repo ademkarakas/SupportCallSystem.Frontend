@@ -1,9 +1,9 @@
-<div class="admin-page page-enter">
+<div class="admin-page global-page-container page-enter">
   <header class="page-header">
     <div class="header-content">
       <div class="title-row">
         <mat-icon class="title-icon">group</mat-icon>
-        <h1 class="page-title">Benutzerverwaltung</h1>
+        <h1 class="global-page-title">Benutzerverwaltung</h1>
       </div>
       <p class="subtitle">Benutzer anzeigen, bearbeiten und verwalten</p>
     </div>
@@ -34,12 +34,19 @@
           </thead>
           <tbody>
             @for (user of users(); track user.id) {
-              <tr class="clickable-row" (click)="editUser(user)" (keydown.enter)="editUser(user)" tabindex="0">
-                <td class="name-cell">
-                  <div class="user-avatar-small" [ngClass]="getRoleBadgeClass(user.roles)">
-                    {{ (user.firstName[0] || '') + (user.lastName[0] || '') }}
+              <tr
+                class="clickable-row"
+                (click)="editUser(user)"
+                (keydown.enter)="editUser(user)"
+                tabindex="0"
+              >
+                <td>
+                  <div class="name-cell">
+                    <div class="user-avatar-small" [ngClass]="getRoleBadgeClass(user.roles)">
+                      {{ (user.firstName[0] || '') + (user.lastName[0] || '') }}
+                    </div>
+                    <span>{{ user.firstName }} {{ user.lastName }}</span>
                   </div>
-                  <span>{{ user.firstName }} {{ user.lastName }}</span>
                 </td>
                 <td>{{ user.email }}</td>
                 <td>{{ user.extension || '—' }}</td>
@@ -60,3 +67,6 @@
     }
   </div>
 </div>
+
+
+

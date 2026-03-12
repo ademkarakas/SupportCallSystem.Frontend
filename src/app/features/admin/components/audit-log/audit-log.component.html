@@ -1,9 +1,14 @@
-<div class="audit-page">
+<div class="audit-page global-page-container">
   <div class="page-header">
     <div class="header-left">
       <mat-icon class="page-icon">security</mat-icon>
       <div>
-        <h1>Audit Log</h1>
+        <div class="title-row">
+          <h1 class="global-page-title">Audit Log</h1>
+          @if (!isLoading()) {
+            <span class="count-badge">{{ filteredEntries().length }} Eintr\u00e4ge</span>
+          }
+        </div>
         <p>Überblick aller sicherheitsrelevanten Aktionen im System</p>
       </div>
     </div>
@@ -18,7 +23,7 @@
     <div class="action-chips">
       @for (f of ACTION_FILTERS; track f) {
         <button class="chip" [class.active]="activeFilter() === f" (click)="setFilter(f)">
-          {{ f }}
+          {{ filterLabels[f] }}
         </button>
       }
     </div>
@@ -54,15 +59,16 @@
       <table class="audit-table">
         <thead>
           <tr>
+            <th>Benutzer-ID</th>
             <th>Zeitstempel</th>
             <th>Aktion</th>
             <th>Entität</th>
-            <th>Benutzer-ID</th>
+
             <th></th>
           </tr>
         </thead>
         <tbody>
-          @for (entry of filteredEntries(); track entry.id) {
+          @for (entry of paginatedEntries(); track entry.id) {
             <tr
               class="audit-row"
               [class.expanded]="expandedId() === entry.id"
@@ -71,10 +77,13 @@
               (keydown.space)="toggleExpand(entry.id)"
               tabindex="0"
             >
+              <td class="user-cell">
+                {{ entry.userId ? (entry.userId | slice: 0 : 12) + '…' : '—' }}
+              </td>
               <td class="ts-cell">{{ formatTimestamp(entry.timestamp) }}</td>
               <td>
                 <span class="action-badge" [class]="getActionClass(entry.action)">
-                  {{ entry.action }}
+                  {{ translateAction(entry.action) }}
                 </span>
               </td>
               <td class="entity-cell">
@@ -85,9 +94,7 @@
                   </span>
                 }
               </td>
-              <td class="user-cell">
-                {{ entry.userId ? (entry.userId | slice: 0 : 12) + '…' : '—' }}
-              </td>
+
               <td class="chevron-cell">
                 <mat-icon>{{ expandedId() === entry.id ? 'expand_less' : 'expand_more' }}</mat-icon>
               </td>
@@ -104,6 +111,13 @@
       </table>
     </div>
 
-    <div class="table-footer">{{ filteredEntries().length }} Einträge</div>
+    <mat-paginator
+      [length]="filteredEntries().length"
+      [pageSize]="pageSize()"
+      [pageIndex]="pageIndex()"
+      [pageSizeOptions]="[5, 15, 25, 50]"
+      (page)="onPage($event)"
+      class="mat-paginator-modern"
+    ></mat-paginator>
   }
 </div>

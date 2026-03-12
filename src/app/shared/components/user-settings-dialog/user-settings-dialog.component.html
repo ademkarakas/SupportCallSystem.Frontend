@@ -26,401 +26,414 @@
     </button>
   </div>
 
-  <!-- Tabs -->
-  <mat-tab-group class="settings-tabs" animationDuration="200ms" [disableRipple]="true">
-    <!-- Profile Tab -->
-    <mat-tab>
-      <ng-template mat-tab-label>
-        <mat-icon class="tab-icon">person</mat-icon>
+  <!-- Sidebar + Content -->
+  <div class="settings-body">
+    <nav class="settings-nav">
+      <button class="nav-item" [class.active]="activeTab() === 'profil'" (click)="setTab('profil')">
+        <mat-icon>person</mat-icon>
         <span>Profil</span>
-      </ng-template>
-
-      <div class="tab-content">
-        <form [formGroup]="profileForm" (ngSubmit)="saveProfile()" novalidate>
-          <section class="form-section">
-            <h3 class="section-title">Persönliche Daten</h3>
-            <p class="section-desc">Aktualisieren Sie Ihre Kontaktdaten und Profilinformationen.</p>
-
-            <div class="form-row two-col">
-              <!-- First Name -->
-              <div class="form-field-group">
-                <label class="form-label" for="firstName"
-                  >Vorname <span class="required">*</span></label
-                >
-                <div
-                  class="input-wrapper"
-                  [class.error]="
-                    profileForm.get('firstName')?.invalid && profileForm.get('firstName')?.touched
-                  "
-                >
-                  <mat-icon class="input-icon">badge</mat-icon>
-                  <input
-                    id="firstName"
-                    type="text"
-                    class="form-input with-icon"
-                    formControlName="firstName"
-                    placeholder="Max"
-                    autocomplete="given-name"
-                  />
-                </div>
-                @if (getError(profileForm, 'firstName')) {
-                  <span class="field-error">
-                    <mat-icon>error_outline</mat-icon>
-                    {{ getError(profileForm, 'firstName') }}
-                  </span>
-                }
-              </div>
-
-              <!-- Last Name -->
-              <div class="form-field-group">
-                <label class="form-label" for="lastName"
-                  >Nachname <span class="required">*</span></label
-                >
-                <div
-                  class="input-wrapper"
-                  [class.error]="
-                    profileForm.get('lastName')?.invalid && profileForm.get('lastName')?.touched
-                  "
-                >
-                  <mat-icon class="input-icon">badge</mat-icon>
-                  <input
-                    id="lastName"
-                    type="text"
-                    class="form-input with-icon"
-                    formControlName="lastName"
-                    placeholder="Mustermann"
-                    autocomplete="family-name"
-                  />
-                </div>
-                @if (getError(profileForm, 'lastName')) {
-                  <span class="field-error">
-                    <mat-icon>error_outline</mat-icon>
-                    {{ getError(profileForm, 'lastName') }}
-                  </span>
-                }
-              </div>
-            </div>
-
-            <!-- Email -->
-            <div class="form-field-group">
-              <label class="form-label" for="email"
-                >E-Mail-Adresse <span class="required">*</span></label
-              >
-              <div
-                class="input-wrapper"
-                [class.error]="
-                  profileForm.get('email')?.invalid && profileForm.get('email')?.touched
-                "
-              >
-                <mat-icon class="input-icon">mail</mat-icon>
-                <input
-                  id="email"
-                  type="email"
-                  class="form-input with-icon"
-                  formControlName="email"
-                  placeholder="max.mustermann@dicom.de"
-                  autocomplete="email"
-                />
-              </div>
-              @if (getError(profileForm, 'email')) {
-                <span class="field-error">
-                  <mat-icon>error_outline</mat-icon>
-                  {{ getError(profileForm, 'email') }}
-                </span>
-              }
-            </div>
-
-            <!-- Extension -->
-            <div class="form-field-group">
-              <label class="form-label" for="extension">Nebenstelle (Durchwahl)</label>
-              <div class="input-wrapper">
-                <mat-icon class="input-icon">call</mat-icon>
-                <input
-                  id="extension"
-                  type="text"
-                  class="form-input with-icon"
-                  formControlName="extension"
-                  placeholder="z. B. 1234"
-                  autocomplete="off"
-                />
-              </div>
-              @if (getError(profileForm, 'extension')) {
-                <span class="field-error">
-                  <mat-icon>error_outline</mat-icon>
-                  {{ getError(profileForm, 'extension') }}
-                </span>
-              }
-              <span class="field-hint">Interne Rufnummer für das Call-System</span>
-            </div>
-          </section>
-
-          <!-- Profile Actions -->
-          <div class="dialog-actions">
-            <button
-              type="button"
-              class="btn btn-secondary"
-              (click)="close()"
-              id="profile-cancel-btn"
-            >
-              Abbrechen
-            </button>
-            <button
-              type="submit"
-              class="btn btn-primary"
-              id="profile-save-btn"
-              [disabled]="profileForm.invalid || isSaving()"
-            >
-              @if (isSaving()) {
-                <mat-icon class="spin-icon">refresh</mat-icon>
-                Speichern...
-              } @else {
-                <mat-icon>save</mat-icon>
-                Änderungen speichern
-              }
-            </button>
-          </div>
-        </form>
-      </div>
-    </mat-tab>
-
-    <!-- Security Tab -->
-    <mat-tab>
-      <ng-template mat-tab-label>
-        <mat-icon class="tab-icon">lock</mat-icon>
+      </button>
+      <button
+        class="nav-item"
+        [class.active]="activeTab() === 'sicherheit'"
+        (click)="setTab('sicherheit')"
+      >
+        <mat-icon>lock</mat-icon>
         <span>Sicherheit</span>
-      </ng-template>
-
-      <div class="tab-content">
-        <form [formGroup]="passwordForm" (ngSubmit)="changePassword()" novalidate>
-          <section class="form-section">
-            <h3 class="section-title">Passwort ändern</h3>
-            <p class="section-desc">
-              Wählen Sie ein sicheres Passwort mit mindestens 8 Zeichen, einer Zahl und einem
-              Sonderzeichen.
-            </p>
-
-            <!-- Current Password -->
-            <div class="form-field-group">
-              <label class="form-label" for="currentPassword"
-                >Aktuelles Passwort <span class="required">*</span></label
-              >
-              <div
-                class="input-wrapper"
-                [class.error]="
-                  passwordForm.get('currentPassword')?.invalid &&
-                  passwordForm.get('currentPassword')?.touched
-                "
-              >
-                <mat-icon class="input-icon">lock_outline</mat-icon>
-                <input
-                  id="currentPassword"
-                  [type]="showCurrentPassword() ? 'text' : 'password'"
-                  class="form-input with-icon has-suffix"
-                  formControlName="currentPassword"
-                  placeholder="••••••••"
-                  autocomplete="current-password"
-                />
-                <button
-                  type="button"
-                  class="input-suffix-btn"
-                  (click)="toggleCurrentPasswordVisibility()"
-                  [title]="showCurrentPassword() ? 'Passwort verbergen' : 'Passwort anzeigen'"
-                >
-                  <mat-icon>{{ showCurrentPassword() ? 'visibility_off' : 'visibility' }}</mat-icon>
-                </button>
-              </div>
-              @if (getError(passwordForm, 'currentPassword')) {
-                <span class="field-error">
-                  <mat-icon>error_outline</mat-icon>
-                  {{ getError(passwordForm, 'currentPassword') }}
-                </span>
-              }
-            </div>
-
-            <mat-divider class="section-divider"></mat-divider>
-
-            <!-- New Password -->
-            <div class="form-field-group">
-              <label class="form-label" for="newPassword"
-                >Neues Passwort <span class="required">*</span></label
-              >
-              <div
-                class="input-wrapper"
-                [class.error]="
-                  passwordForm.get('newPassword')?.invalid &&
-                  passwordForm.get('newPassword')?.touched
-                "
-              >
-                <mat-icon class="input-icon">lock</mat-icon>
-                <input
-                  id="newPassword"
-                  [type]="showNewPassword() ? 'text' : 'password'"
-                  class="form-input with-icon has-suffix"
-                  formControlName="newPassword"
-                  placeholder="••••••••"
-                  autocomplete="new-password"
-                />
-                <button
-                  type="button"
-                  class="input-suffix-btn"
-                  (click)="toggleNewPasswordVisibility()"
-                  [title]="showNewPassword() ? 'Passwort verbergen' : 'Passwort anzeigen'"
-                >
-                  <mat-icon>{{ showNewPassword() ? 'visibility_off' : 'visibility' }}</mat-icon>
-                </button>
-              </div>
-              @if (
-                passwordForm.get('newPassword')?.dirty || passwordForm.get('newPassword')?.touched
-              ) {
-                <div class="pw-requirements">
-                  <span
-                    class="pw-req"
-                    [class.met]="(passwordForm.get('newPassword')?.value?.length ?? 0) >= 8"
-                    [class.fail]="(passwordForm.get('newPassword')?.value?.length ?? 0) < 8"
-                  >
-                    <mat-icon>{{
-                      (passwordForm.get('newPassword')?.value?.length ?? 0) >= 8 ? 'check' : 'close'
-                    }}</mat-icon>
-                    8 Zeichen
-                  </span>
-                  <span
-                    class="pw-req"
-                    [class.met]="passwordForm.get('newPassword')?.value?.match(/[0-9]/)"
-                    [class.fail]="!passwordForm.get('newPassword')?.value?.match(/[0-9]/)"
-                  >
-                    <mat-icon>{{
-                      passwordForm.get('newPassword')?.value?.match(/[0-9]/) ? 'check' : 'close'
-                    }}</mat-icon>
-                    Zahl
-                  </span>
-                  <span
-                    class="pw-req"
-                    [class.met]="passwordForm.get('newPassword')?.value?.match(/[!@#$%^&*]/)"
-                    [class.fail]="!passwordForm.get('newPassword')?.value?.match(/[!@#$%^&*]/)"
-                  >
-                    <mat-icon>{{
-                      passwordForm.get('newPassword')?.value?.match(/[!@#$%^&*]/)
-                        ? 'check'
-                        : 'close'
-                    }}</mat-icon>
-                    Sonderzeichen
-                  </span>
-                </div>
-              }
-            </div>
-
-            <!-- Confirm Password -->
-            <div class="form-field-group">
-              <label class="form-label" for="confirmPassword"
-                >Passwort bestätigen <span class="required">*</span></label
-              >
-              <div
-                class="input-wrapper"
-                [class.error]="
-                  (passwordForm.get('confirmPassword')?.invalid &&
-                    passwordForm.get('confirmPassword')?.touched) ||
-                  passwordMismatch
-                "
-              >
-                <mat-icon class="input-icon">lock</mat-icon>
-                <input
-                  id="confirmPassword"
-                  [type]="showConfirmPassword() ? 'text' : 'password'"
-                  class="form-input with-icon has-suffix"
-                  formControlName="confirmPassword"
-                  placeholder="••••••••"
-                  autocomplete="new-password"
-                />
-                <button
-                  type="button"
-                  class="input-suffix-btn"
-                  (click)="toggleConfirmPasswordVisibility()"
-                  [title]="showConfirmPassword() ? 'Passwort verbergen' : 'Passwort anzeigen'"
-                >
-                  <mat-icon>{{ showConfirmPassword() ? 'visibility_off' : 'visibility' }}</mat-icon>
-                </button>
-              </div>
-              @if (passwordMismatch) {
-                <span class="field-error">
-                  <mat-icon>error_outline</mat-icon>
-                  Passwörter stimmen nicht überein
-                </span>
-              } @else if (getError(passwordForm, 'confirmPassword')) {
-                <span class="field-error">
-                  <mat-icon>error_outline</mat-icon>
-                  {{ getError(passwordForm, 'confirmPassword') }}
-                </span>
-              }
-            </div>
-          </section>
-
-          <!-- Password Actions -->
-          <div class="dialog-actions">
-            <button
-              type="button"
-              class="btn btn-secondary"
-              (click)="close()"
-              id="password-cancel-btn"
-            >
-              Abbrechen
-            </button>
-            <button
-              type="submit"
-              class="btn btn-primary"
-              id="password-save-btn"
-              [disabled]="passwordForm.invalid || passwordMismatch || isSaving()"
-            >
-              @if (isSaving()) {
-                <mat-icon class="spin-icon">refresh</mat-icon>
-                Speichern...
-              } @else {
-                <mat-icon>lock_reset</mat-icon>
-                Passwort ändern
-              }
-            </button>
-          </div>
-        </form>
-      </div>
-    </mat-tab>
-
-    <!-- Info Tab -->
-    <mat-tab>
-      <ng-template mat-tab-label>
-        <mat-icon class="tab-icon">info</mat-icon>
+      </button>
+      <button class="nav-item" [class.active]="activeTab() === 'info'" (click)="setTab('info')">
+        <mat-icon>info</mat-icon>
         <span>Info</span>
-      </ng-template>
+      </button>
+    </nav>
 
-      <div class="tab-content">
-        <section class="form-section">
-          <h3 class="section-title">Systeminformationen</h3>
-          <p class="section-desc">Details zu Ihrem Konto und der aktuellen Session.</p>
+    <div class="tab-panel-wrapper">
+      @switch (activeTab()) {
+        @case ('profil') {
+          <div class="tab-content">
+            <form [formGroup]="profileForm" (ngSubmit)="saveProfile()" novalidate>
+              <section class="form-section">
+                <h3 class="section-title">Persönliche Daten</h3>
+                <p class="section-desc">
+                  Aktualisieren Sie Ihre Kontaktdaten und Profilinformationen.
+                </p>
 
-          <div class="info-grid">
-            @if (currentUser(); as user) {
-              <div class="info-item">
-                <span class="info-label">Benutzer-ID</span>
-                <span class="info-value mono">{{ user.id }}</span>
+                <div class="form-row two-col">
+                  <!-- First Name -->
+                  <div class="form-field-group">
+                    <label class="form-label" for="firstName"
+                      >Vorname <span class="required">*</span></label
+                    >
+                    <div
+                      class="input-wrapper"
+                      [class.error]="
+                        profileForm.get('firstName')?.invalid &&
+                        profileForm.get('firstName')?.touched
+                      "
+                    >
+                      <mat-icon class="input-icon">badge</mat-icon>
+                      <input
+                        id="firstName"
+                        type="text"
+                        class="form-input with-icon"
+                        formControlName="firstName"
+                        placeholder="Max"
+                        autocomplete="given-name"
+                      />
+                    </div>
+                    @if (getError(profileForm, 'firstName')) {
+                      <span class="field-error">
+                        <mat-icon>error_outline</mat-icon>
+                        {{ getError(profileForm, 'firstName') }}
+                      </span>
+                    }
+                  </div>
+
+                  <!-- Last Name -->
+                  <div class="form-field-group">
+                    <label class="form-label" for="lastName"
+                      >Nachname <span class="required">*</span></label
+                    >
+                    <div
+                      class="input-wrapper"
+                      [class.error]="
+                        profileForm.get('lastName')?.invalid && profileForm.get('lastName')?.touched
+                      "
+                    >
+                      <mat-icon class="input-icon">badge</mat-icon>
+                      <input
+                        id="lastName"
+                        type="text"
+                        class="form-input with-icon"
+                        formControlName="lastName"
+                        placeholder="Mustermann"
+                        autocomplete="family-name"
+                      />
+                    </div>
+                    @if (getError(profileForm, 'lastName')) {
+                      <span class="field-error">
+                        <mat-icon>error_outline</mat-icon>
+                        {{ getError(profileForm, 'lastName') }}
+                      </span>
+                    }
+                  </div>
+                </div>
+
+                <!-- Email -->
+                <div class="form-field-group">
+                  <label class="form-label" for="email"
+                    >E-Mail-Adresse <span class="required">*</span></label
+                  >
+                  <div
+                    class="input-wrapper"
+                    [class.error]="
+                      profileForm.get('email')?.invalid && profileForm.get('email')?.touched
+                    "
+                  >
+                    <mat-icon class="input-icon">mail</mat-icon>
+                    <input
+                      id="email"
+                      type="email"
+                      class="form-input with-icon"
+                      formControlName="email"
+                      placeholder="max.mustermann@dicom.de"
+                      autocomplete="email"
+                    />
+                  </div>
+                  @if (getError(profileForm, 'email')) {
+                    <span class="field-error">
+                      <mat-icon>error_outline</mat-icon>
+                      {{ getError(profileForm, 'email') }}
+                    </span>
+                  }
+                </div>
+
+                <!-- Extension -->
+                <div class="form-field-group">
+                  <label class="form-label" for="extension">Nebenstelle (Durchwahl)</label>
+                  <div class="input-wrapper">
+                    <mat-icon class="input-icon">call</mat-icon>
+                    <input
+                      id="extension"
+                      type="text"
+                      class="form-input with-icon"
+                      formControlName="extension"
+                      placeholder="z. B. 1234"
+                      autocomplete="off"
+                    />
+                  </div>
+                  @if (getError(profileForm, 'extension')) {
+                    <span class="field-error">
+                      <mat-icon>error_outline</mat-icon>
+                      {{ getError(profileForm, 'extension') }}
+                    </span>
+                  }
+                  <span class="field-hint">Interne Rufnummer für das Call-System</span>
+                </div>
+              </section>
+
+              <!-- Profile Actions -->
+              <div class="dialog-actions">
+                <button
+                  type="button"
+                  class="btn btn-secondary"
+                  (click)="close()"
+                  id="profile-cancel-btn"
+                >
+                  Abbrechen
+                </button>
+                <button
+                  type="submit"
+                  class="btn btn-primary"
+                  id="profile-save-btn"
+                  [disabled]="profileForm.invalid || isSaving()"
+                >
+                  @if (isSaving()) {
+                    <mat-icon class="spin-icon">refresh</mat-icon>
+                    Speichern...
+                  } @else {
+                    <mat-icon>save</mat-icon>
+                    Änderungen speichern
+                  }
+                </button>
               </div>
-              <div class="info-item">
-                <span class="info-label">E-Mail</span>
-                <span class="info-value">{{ user.email }}</span>
-              </div>
-              <div class="info-item">
-                <span class="info-label">Nebenstelle</span>
-                <span class="info-value">{{ user.extension || '—' }}</span>
-              </div>
-            }
-            <div class="info-item">
-              <span class="info-label">System-Version</span>
-              <span class="info-value badge badge-active">v1.0.0</span>
-            </div>
-            <div class="info-item">
-              <span class="info-label">Anmeldung</span>
-              <span class="info-value">SessionStorage (sicher)</span>
-            </div>
+            </form>
           </div>
-        </section>
-      </div>
-    </mat-tab>
-  </mat-tab-group>
+        }
+        @case ('sicherheit') {
+          <div class="tab-content">
+            <form [formGroup]="passwordForm" (ngSubmit)="changePassword()" novalidate>
+              <section class="form-section">
+                <h3 class="section-title">Passwort ändern</h3>
+                <p class="section-desc">
+                  Wählen Sie ein sicheres Passwort mit mindestens 8 Zeichen, einer Zahl und einem
+                  Sonderzeichen.
+                </p>
+
+                <!-- Current Password -->
+                <div class="form-field-group">
+                  <label class="form-label" for="currentPassword"
+                    >Aktuelles Passwort <span class="required">*</span></label
+                  >
+                  <div
+                    class="input-wrapper"
+                    [class.error]="
+                      passwordForm.get('currentPassword')?.invalid &&
+                      passwordForm.get('currentPassword')?.touched
+                    "
+                  >
+                    <mat-icon class="input-icon">lock_outline</mat-icon>
+                    <input
+                      id="currentPassword"
+                      [type]="showCurrentPassword() ? 'text' : 'password'"
+                      class="form-input with-icon has-suffix"
+                      formControlName="currentPassword"
+                      placeholder="••••••••"
+                      autocomplete="current-password"
+                    />
+                    <button
+                      type="button"
+                      class="input-suffix-btn"
+                      (click)="toggleCurrentPasswordVisibility()"
+                      [title]="showCurrentPassword() ? 'Passwort verbergen' : 'Passwort anzeigen'"
+                    >
+                      <mat-icon>{{
+                        showCurrentPassword() ? 'visibility_off' : 'visibility'
+                      }}</mat-icon>
+                    </button>
+                  </div>
+                  @if (getError(passwordForm, 'currentPassword')) {
+                    <span class="field-error">
+                      <mat-icon>error_outline</mat-icon>
+                      {{ getError(passwordForm, 'currentPassword') }}
+                    </span>
+                  }
+                </div>
+
+                <mat-divider class="section-divider"></mat-divider>
+
+                <!-- New Password -->
+                <div class="form-field-group">
+                  <label class="form-label" for="newPassword"
+                    >Neues Passwort <span class="required">*</span></label
+                  >
+                  <div
+                    class="input-wrapper"
+                    [class.error]="
+                      passwordForm.get('newPassword')?.invalid &&
+                      passwordForm.get('newPassword')?.touched
+                    "
+                  >
+                    <mat-icon class="input-icon">lock</mat-icon>
+                    <input
+                      id="newPassword"
+                      [type]="showNewPassword() ? 'text' : 'password'"
+                      class="form-input with-icon has-suffix"
+                      formControlName="newPassword"
+                      placeholder="••••••••"
+                      autocomplete="new-password"
+                    />
+                    <button
+                      type="button"
+                      class="input-suffix-btn"
+                      (click)="toggleNewPasswordVisibility()"
+                      [title]="showNewPassword() ? 'Passwort verbergen' : 'Passwort anzeigen'"
+                    >
+                      <mat-icon>{{ showNewPassword() ? 'visibility_off' : 'visibility' }}</mat-icon>
+                    </button>
+                  </div>
+                  @if (
+                    passwordForm.get('newPassword')?.dirty ||
+                    passwordForm.get('newPassword')?.touched
+                  ) {
+                    <div class="pw-requirements">
+                      <span
+                        class="pw-req"
+                        [class.met]="(passwordForm.get('newPassword')?.value?.length ?? 0) >= 8"
+                        [class.fail]="(passwordForm.get('newPassword')?.value?.length ?? 0) < 8"
+                      >
+                        <mat-icon>{{
+                          (passwordForm.get('newPassword')?.value?.length ?? 0) >= 8
+                            ? 'check'
+                            : 'close'
+                        }}</mat-icon>
+                        8 Zeichen
+                      </span>
+                      <span
+                        class="pw-req"
+                        [class.met]="passwordForm.get('newPassword')?.value?.match(/[0-9]/)"
+                        [class.fail]="!passwordForm.get('newPassword')?.value?.match(/[0-9]/)"
+                      >
+                        <mat-icon>{{
+                          passwordForm.get('newPassword')?.value?.match(/[0-9]/) ? 'check' : 'close'
+                        }}</mat-icon>
+                        Zahl
+                      </span>
+                      <span
+                        class="pw-req"
+                        [class.met]="passwordForm.get('newPassword')?.value?.match(/[!@#$%^&*]/)"
+                        [class.fail]="!passwordForm.get('newPassword')?.value?.match(/[!@#$%^&*]/)"
+                      >
+                        <mat-icon>{{
+                          passwordForm.get('newPassword')?.value?.match(/[!@#$%^&*]/)
+                            ? 'check'
+                            : 'close'
+                        }}</mat-icon>
+                        Sonderzeichen
+                      </span>
+                    </div>
+                  }
+                </div>
+
+                <!-- Confirm Password -->
+                <div class="form-field-group">
+                  <label class="form-label" for="confirmPassword"
+                    >Passwort bestätigen <span class="required">*</span></label
+                  >
+                  <div
+                    class="input-wrapper"
+                    [class.error]="
+                      (passwordForm.get('confirmPassword')?.invalid &&
+                        passwordForm.get('confirmPassword')?.touched) ||
+                      passwordMismatch
+                    "
+                  >
+                    <mat-icon class="input-icon">lock</mat-icon>
+                    <input
+                      id="confirmPassword"
+                      [type]="showConfirmPassword() ? 'text' : 'password'"
+                      class="form-input with-icon has-suffix"
+                      formControlName="confirmPassword"
+                      placeholder="••••••••"
+                      autocomplete="new-password"
+                    />
+                    <button
+                      type="button"
+                      class="input-suffix-btn"
+                      (click)="toggleConfirmPasswordVisibility()"
+                      [title]="showConfirmPassword() ? 'Passwort verbergen' : 'Passwort anzeigen'"
+                    >
+                      <mat-icon>{{
+                        showConfirmPassword() ? 'visibility_off' : 'visibility'
+                      }}</mat-icon>
+                    </button>
+                  </div>
+                  @if (passwordMismatch) {
+                    <span class="field-error">
+                      <mat-icon>error_outline</mat-icon>
+                      Passwörter stimmen nicht überein
+                    </span>
+                  } @else if (getError(passwordForm, 'confirmPassword')) {
+                    <span class="field-error">
+                      <mat-icon>error_outline</mat-icon>
+                      {{ getError(passwordForm, 'confirmPassword') }}
+                    </span>
+                  }
+                </div>
+              </section>
+
+              <!-- Password Actions -->
+              <div class="dialog-actions">
+                <button
+                  type="button"
+                  class="btn btn-secondary"
+                  (click)="close()"
+                  id="password-cancel-btn"
+                >
+                  Abbrechen
+                </button>
+                <button
+                  type="submit"
+                  class="btn btn-primary"
+                  id="password-save-btn"
+                  [disabled]="passwordForm.invalid || passwordMismatch || isSaving()"
+                >
+                  @if (isSaving()) {
+                    <mat-icon class="spin-icon">refresh</mat-icon>
+                    Speichern...
+                  } @else {
+                    <mat-icon>lock_reset</mat-icon>
+                    Passwort ändern
+                  }
+                </button>
+              </div>
+            </form>
+          </div>
+        }
+        @case ('info') {
+          <div class="tab-content">
+            <section class="form-section">
+              <h3 class="section-title">Systeminformationen</h3>
+              <p class="section-desc">Details zu Ihrem Konto und der aktuellen Session.</p>
+
+              <div class="info-grid">
+                @if (currentUser(); as user) {
+                  <div class="info-item">
+                    <span class="info-label">Benutzer-ID</span>
+                    <span class="info-value mono">{{ user.id }}</span>
+                  </div>
+                  <div class="info-item">
+                    <span class="info-label">E-Mail</span>
+                    <span class="info-value">{{ user.email }}</span>
+                  </div>
+                  <div class="info-item">
+                    <span class="info-label">Nebenstelle</span>
+                    <span class="info-value">{{ user.extension || '—' }}</span>
+                  </div>
+                }
+                <div class="info-item">
+                  <span class="info-label">System-Version</span>
+                  <span class="info-value badge badge-active">v1.0.0</span>
+                </div>
+                <div class="info-item">
+                  <span class="info-label">Anmeldung</span>
+                  <span class="info-value">SessionStorage (sicher)</span>
+                </div>
+              </div>
+            </section>
+          </div>
+        }
+      }
+    </div>
+  </div>
 </div>

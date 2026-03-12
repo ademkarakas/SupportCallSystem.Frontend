@@ -1,10 +1,11 @@
-import { Component, signal, inject, OnInit, computed } from '@angular/core';
+﻿import { Component, signal, inject, OnInit, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder } from '@angular/forms';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatButtonModule } from '@angular/material/button';
 import { MatTooltipModule } from '@angular/material/tooltip';
+import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
 import { AdminApiService, AuditLogDto } from '../../services/admin-api.service';
 import { NotificationService } from '../../../../core/services/notification.service';
 import { finalize } from 'rxjs';
@@ -20,6 +21,7 @@ type ActionFilter = 'ALL' | 'USER' | 'CALL' | 'SECURITY' | 'SYSTEM';
     MatProgressSpinnerModule,
     MatButtonModule,
     MatTooltipModule,
+    MatPaginatorModule,
   ],
   templateUrl: './audit-log.component.html',
   styleUrls: ['./audit-log.component.scss'],
@@ -41,6 +43,19 @@ export class AuditLogComponent implements OnInit {
   });
 
   readonly ACTION_FILTERS: ActionFilter[] = ['ALL', 'USER', 'CALL', 'SECURITY', 'SYSTEM'];
+
+  pageIndex = signal(0);
+  pageSize = signal(15);
+
+  paginatedEntries = computed(() => {
+    const start = this.pageIndex() * this.pageSize();
+    return this.filteredEntries().slice(start, start + this.pageSize());
+  });
+
+  onPage(e: PageEvent) {
+    this.pageIndex.set(e.pageIndex);
+    this.pageSize.set(e.pageSize);
+  }
 
   filteredEntries = computed(() => {
     const filter = this.activeFilter();
@@ -91,6 +106,24 @@ export class AuditLogComponent implements OnInit {
     });
   }
 
+  translateAction(action: string): string {
+    const map: Record<string, string> = {
+      CREATE_USER: 'Benutzer erstellt',
+      UPDATE_USER: 'Benutzer aktualisiert',
+      DELETE_USER: 'Benutzer gel + [char]0xF6 + scht',
+      USER_CREATED: 'Benutzer erstellt',
+      USER_UPDATED: 'Benutzer aktualisiert',
+      USER_DELETED: 'Benutzer gel + [char]0xF6 + scht',
+      CALL_STARTED: 'Anruf gestartet',
+      CALL_ENDED: 'Anruf beendet',
+      LOGIN: 'Anmeldung',
+      LOGOUT: 'Abmeldung',
+      SECURITY_ALERT: 'Sicherheitswarnung',
+      SYSTEM_ERROR: 'Systemfehler',
+    };
+    return map[action.toUpperCase()] ?? action;
+  }
+
   getActionClass(action: string): string {
     const a = action.toUpperCase();
     if (a.startsWith('USER')) return 'action-user';
@@ -99,4 +132,12 @@ export class AuditLogComponent implements OnInit {
       return 'action-security';
     return 'action-system';
   }
+
+  readonly filterLabels: Record<ActionFilter, string> = {
+    ALL: 'Alle',
+    USER: 'Benutzer',
+    CALL: 'Anruf',
+    SECURITY: 'Sicherheit',
+    SYSTEM: 'System',
+  };
 }

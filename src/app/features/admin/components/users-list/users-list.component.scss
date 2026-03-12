@@ -117,6 +117,10 @@
     }
   }
 
+  tbody tr:last-child td {
+    border-bottom: none;
+  }
+
   .name-cell {
     display: flex;
     align-items: center;

@@ -24,6 +24,7 @@ export class TwoFactorSetupComponent implements OnInit {
   setupInfo = signal<TwoFactorSetupInfo | null>(null);
   isEnabled = signal(false);
   showSetup = signal(false);
+  setupStep = signal<1 | 2 | 3>(1);
 
   safeQrSvg = signal<SafeHtml>('');
 
@@ -56,6 +57,7 @@ export class TwoFactorSetupComponent implements OnInit {
           this.setupInfo.set(info);
           this.safeQrSvg.set(this.sanitizer.bypassSecurityTrustHtml(info.qrCodeSvg));
           this.showSetup.set(true);
+          this.setupStep.set(1);
         },
         error: () =>
           this.notification.showError('Setup-Informationen konnten nicht geladen werden'),
@@ -89,6 +91,16 @@ export class TwoFactorSetupComponent implements OnInit {
       () => this.notification.showSuccess('Schlüssel kopiert'),
       () => this.notification.showError('Kopieren fehlgeschlagen'),
     );
+  }
+
+  nextStep(): void {
+    const s = this.setupStep();
+    if (s < 3) this.setupStep.set((s + 1) as 1 | 2 | 3);
+  }
+
+  prevStep(): void {
+    const s = this.setupStep();
+    if (s > 1) this.setupStep.set((s - 1) as 1 | 2 | 3);
   }
 
   disableTwoFactor(): void {

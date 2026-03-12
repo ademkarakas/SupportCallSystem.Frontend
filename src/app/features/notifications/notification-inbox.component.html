@@ -1,11 +1,10 @@
-﻿<div class="admin-page page-enter">
-
+<div class="admin-page global-page-container page-enter">
   <!-- Page Header -->
   <header class="page-header">
     <div class="header-content">
       <div class="title-row">
         <mat-icon class="title-icon">notifications</mat-icon>
-        <h1 class="page-title">Benachrichtigungen</h1>
+        <h1 class="global-page-title">Benachrichtigungen</h1>
       </div>
       <p class="subtitle">
         @if (inbox.unreadCount() > 0) {
@@ -28,7 +27,12 @@
           <span>Alle loeschen</span>
         </button>
       }
-      <button type="button" class="refresh-btn" (click)="toggleSettings()" [class.active]="showSettings()">
+      <button
+        type="button"
+        class="refresh-btn"
+        (click)="toggleSettings()"
+        [class.active]="showSettings()"
+      >
         <mat-icon>settings</mat-icon>
         <span>Einstellungen</span>
       </button>
@@ -49,8 +53,10 @@
             <span class="srow-label">Eingehende Anrufe</span>
             <span class="srow-desc">Benachrichtigung bei neuen Anrufen</span>
           </div>
-          <mat-slide-toggle [checked]="inbox.settings().showIncomingCall"
-            (change)="updateSetting('showIncomingCall', $event.checked)"></mat-slide-toggle>
+          <mat-slide-toggle
+            [checked]="inbox.settings().showIncomingCall"
+            (change)="updateSetting('showIncomingCall', $event.checked)"
+          ></mat-slide-toggle>
         </div>
         <div class="settings-row">
           <span class="srow-icon type-summary-ready"><mat-icon>auto_awesome</mat-icon></span>
@@ -58,8 +64,10 @@
             <span class="srow-label">KI-Zusammenfassungen</span>
             <span class="srow-desc">Wenn eine Zusammenfassung genehmigt werden kann</span>
           </div>
-          <mat-slide-toggle [checked]="inbox.settings().showSummaryReady"
-            (change)="updateSetting('showSummaryReady', $event.checked)"></mat-slide-toggle>
+          <mat-slide-toggle
+            [checked]="inbox.settings().showSummaryReady"
+            (change)="updateSetting('showSummaryReady', $event.checked)"
+          ></mat-slide-toggle>
         </div>
         <div class="settings-row">
           <span class="srow-icon type-transcription-error"><mat-icon>error_outline</mat-icon></span>
@@ -67,24 +75,33 @@
             <span class="srow-label">Transkriptionsfehler</span>
             <span class="srow-desc">Fehler bei der Sprachtranskription</span>
           </div>
-          <mat-slide-toggle [checked]="inbox.settings().showTranscriptionError"
-            (change)="updateSetting('showTranscriptionError', $event.checked)"></mat-slide-toggle>
+          <mat-slide-toggle
+            [checked]="inbox.settings().showTranscriptionError"
+            (change)="updateSetting('showTranscriptionError', $event.checked)"
+          ></mat-slide-toggle>
         </div>
       </div>
     </div>
   }
 
   <!-- Filter Bar -->
-  <div class="filters-bar">
-    @for (tab of tabs; track tab.key) {
-      <button type="button" class="filter-chip" [class.active]="activeTab() === tab.key" (click)="setTab(tab.key)">
-        <mat-icon>{{ tab.icon }}</mat-icon>
-        {{ tab.label }}
-        @if (tabCount(tab.key) > 0) {
-          <span class="chip-count">{{ tabCount(tab.key) }}</span>
-        }
-      </button>
-    }
+  <div class="filters-card">
+    <div class="filters-bar">
+      @for (tab of tabs; track tab.key) {
+        <button
+          type="button"
+          class="filter-chip"
+          [class.active]="activeTab() === tab.key"
+          (click)="setTab(tab.key)"
+        >
+          <mat-icon>{{ tab.icon }}</mat-icon>
+          {{ tab.label }}
+          @if (tabCount(tab.key) > 0) {
+            <span class="chip-count">{{ tabCount(tab.key) }}</span>
+          }
+        </button>
+      }
+    </div>
   </div>
 
   <!-- Content Card -->
@@ -93,8 +110,11 @@
       <div class="empty-state">
         <mat-icon>notifications_none</mat-icon>
         <p>
-          @if (activeTab() === 'unread') { Alle Benachrichtigungen wurden gelesen. }
-          @else { Hier erscheinen Ihre Benachrichtigungen. }
+          @if (activeTab() === 'unread') {
+            Alle Benachrichtigungen wurden gelesen.
+          } @else {
+            Hier erscheinen Ihre Benachrichtigungen.
+          }
         </p>
       </div>
     } @else {
@@ -110,11 +130,14 @@
             </tr>
           </thead>
           <tbody>
-            @for (notif of filtered(); track notif.id) {
-              <tr class="notif-row" [class.unread]="!notif.read"
+            @for (notif of paginated(); track notif.id) {
+              <tr
+                class="notif-row"
+                [class.unread]="!notif.read"
                 (click)="onItemClick(notif)"
                 (keydown.enter)="onItemClick(notif)"
-                tabindex="0">
+                tabindex="0"
+              >
                 <td class="col-icon">
                   <span class="type-icon" [class]="'type-' + notif.type">
                     <mat-icon>{{ iconFor(notif.type) }}</mat-icon>
@@ -133,8 +156,12 @@
                   }
                 </td>
                 <td class="col-actions">
-                  <button type="button" class="dismiss-btn" (click)="dismiss(notif, $event)"
-                    aria-label="Loeschen">
+                  <button
+                    type="button"
+                    class="dismiss-btn"
+                    (click)="dismiss(notif, $event)"
+                    aria-label="Loeschen"
+                  >
                     <mat-icon>close</mat-icon>
                   </button>
                 </td>
@@ -146,4 +173,12 @@
     }
   </div>
 
+  <mat-paginator
+    [length]="filtered().length"
+    [pageSize]="pageSize()"
+    [pageIndex]="pageIndex()"
+    [pageSizeOptions]="[15, 25, 50]"
+    (page)="onPage($event)"
+    class="mat-paginator-modern"
+  ></mat-paginator>
 </div>

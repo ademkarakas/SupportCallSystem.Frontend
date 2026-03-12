@@ -1,9 +1,30 @@
+<!-- No active call: empty / waiting state -->
+<div class="no-call-page" *ngIf="!call() && !isLoadingCall()">
+  <div class="no-call-card">
+    <div class="no-call-icon-wrap">
+      <mat-icon>phone_disabled</mat-icon>
+    </div>
+    <h2>Kein aktiver Anruf</h2>
+    <p>Sobald ein Gespräch gestartet wird, erscheint hier die Echtzeit-Dokumentation.<br>Sie werden automatisch benachrichtigt, wenn ein eingehender Anruf vorliegt.</p>
+    <div class="no-call-hints">
+      <div class="hint-item">
+        <mat-icon>notifications_active</mat-icon>
+        <span>Eingehende Anrufe erscheinen oben rechts in der Benachrichtigungsglocke.</span>
+      </div>
+      <div class="hint-item">
+        <mat-icon>phone_in_talk</mat-icon>
+        <span>Die NFON-Integration startet Anrufe automatisch.</span>
+      </div>
+    </div>
+  </div>
+</div>
+
 <div class="workspace-page page-enter" *ngIf="call()">
   <!-- Page Header -->
   <header class="page-header">
     <div class="header-content">
       <div class="title-row">
-        <h1 class="page-title">{{ call()?.customerName || 'Unbekannter Kunde' }}</h1>
+        <h1 class="global-page-title">{{ call()?.customerName || 'Unbekannter Kunde' }}</h1>
         <div class="call-status-badge" [class.live]="isRecording()" [class.ended]="!isRecording()">
           <span class="pulse" *ngIf="isRecording()"></span>
           <mat-icon *ngIf="!isRecording()">check_circle</mat-icon>
@@ -325,3 +346,6 @@
     <!-- /right-sidebar -->
   </div>
 </div>
+
+
+

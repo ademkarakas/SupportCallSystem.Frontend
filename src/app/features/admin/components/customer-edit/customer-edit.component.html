@@ -1,4 +1,4 @@
-<div class="edit-page page-enter">
+<div class="edit-page global-page-container page-enter">
   <!-- Top bar -->
   <div class="top-bar">
     <button class="btn btn-ghost back-btn" (click)="goBack()">
@@ -7,7 +7,7 @@
     </button>
 
     <div class="top-bar-center">
-      <h1 class="page-title">{{ pageTitle }}</h1>
+      <h1 class="global-page-title">{{ pageTitle }}</h1>
       @if (!isNew() && customerId()) {
         <span class="page-subtitle"
           >{{ editForm.get('firstName')?.value }} {{ editForm.get('lastName')?.value }}</span
@@ -284,3 +284,6 @@
     </div>
   }
 </div>
+
+
+

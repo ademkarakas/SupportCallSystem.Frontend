@@ -3,8 +3,8 @@
 // ============================================================
 
 .activity-page {
-  padding: 32px;
-  max-width: 1600px;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 // Header
@@ -192,13 +192,16 @@
 .agent-split-view {
   display: flex;
   gap: 20px;
+  width: 100%;
   height: calc(100vh - 380px);
-  min-height: 300px;
+  min-height: 320px;
 }
 
 .agent-list-section {
-  flex: 1;
-  min-width: 280px;
+  flex: 1 1 auto;
+  width: 100%;
+  min-width: 0;
+
   background: #fff;
   border: 1px solid rgba(0, 0, 0, 0.09);
   border-radius: 16px;

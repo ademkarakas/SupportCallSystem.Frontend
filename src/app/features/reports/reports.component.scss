@@ -181,8 +181,8 @@ select.filter-input {
 // ---- Charts Grid ----
 .charts-grid {
   display: grid;
-  grid-template-columns: 2fr 1fr;
-  grid-template-rows: auto auto;
+  grid-template-columns: 1fr 1fr 1fr;
+  grid-template-rows: auto;
   gap: var(--spacing-lg);
 
   @media (max-width: 1024px) {
@@ -191,11 +191,7 @@ select.filter-input {
 }
 
 .chart-wide {
-  grid-column: span 2;
-
-  @media (max-width: 1024px) {
-    grid-column: span 1;
-  }
+  grid-column: span 1;
 }
 
 .chart-card {

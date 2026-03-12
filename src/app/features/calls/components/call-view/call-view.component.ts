@@ -50,6 +50,7 @@ export class CallViewComponent implements OnInit, OnDestroy {
 
   call = signal<CallRecord | null>(null);
   isRecording = signal(true);
+  isLoadingCall = signal(false);
   isProcessingManual = signal(false);
   isSubmitting = signal(false);
   transcript = signal<string>('');
@@ -68,6 +69,21 @@ export class CallViewComponent implements OnInit, OnDestroy {
       const id = params['id'];
       if (id) {
         this.loadCall(id);
+      } else {
+        // No id param: try to find the agent's current active call
+        const userId = this.auth.currentUser()?.id;
+        if (userId) {
+          this.isLoadingCall.set(true);
+          this.callApi.getActiveCall(userId).subscribe({
+            next: (activeCall) => {
+              this.isLoadingCall.set(false);
+              if (activeCall?.id) {
+                this.router.navigate(['/calls'], { queryParams: { id: activeCall.id }, replaceUrl: true });
+              }
+            },
+            error: () => this.isLoadingCall.set(false),
+          });
+        }
       }
     });
 

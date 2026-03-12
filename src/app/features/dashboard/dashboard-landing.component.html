@@ -4,7 +4,7 @@
     <div class="header-content">
       <div class="title-row">
         @if (auth.currentUser(); as user) {
-          <h1 class="page-title">Willkommen, {{ user.firstName }}</h1>
+          <h1 class="global-page-title">Willkommen, {{ user.firstName }}</h1>
         }
         @if (activities().length > 0) {
           <span class="count-badge">{{ activities().length }} Aktivitäten</span>
@@ -121,18 +121,17 @@
                   style="cursor: pointer"
                 >
                   <td>
-                    <span
-                      class="badge"
-                      [ngClass]="activity.status === 'Approved' ? 'badge-active' : 'badge-inactive'"
-                    >
-                      {{ activity.status === 'Approved' ? 'Aktiv' : 'Draft' }}
+                    <span class="badge" [ngClass]="getStatusClass(activity.status)">
+                      {{ getStatusLabel(activity.status) }}
                     </span>
                   </td>
                   <td class="font-medium">{{ activity.title }}</td>
                   <td>{{ activity.customerName }}</td>
                   <td class="color-text-secondary">{{ activity.relativeTime }}</td>
                   <td>
-                    <span class="badge badge-neutral">{{ activity.category }}</span>
+                    <span class="badge badge-neutral">{{
+                      getCategoryLabel(activity.category)
+                    }}</span>
                   </td>
                 </tr>
               }
