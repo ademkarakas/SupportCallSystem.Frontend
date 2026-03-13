@@ -1,9 +1,11 @@
 .admin-page {
   padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: var(--page-section-gap);
 }
 
 .page-header {
-  margin-bottom: 1.5rem;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -59,6 +61,23 @@
   border-radius: 12px;
   border: 1px solid var(--color-card-border);
   overflow: hidden;
+}
+
+.filters-bar {
+  padding: var(--spacing-md) var(--spacing-lg);
+  border-bottom: 1px solid var(--color-table-border);
+
+  .search-input-wrapper {
+    max-width: 280px;
+  }
+
+  @media (max-width: 768px) {
+    padding: var(--spacing-md);
+
+    .search-input-wrapper {
+      max-width: 100%;
+    }
+  }
 }
 
 .loading-state {

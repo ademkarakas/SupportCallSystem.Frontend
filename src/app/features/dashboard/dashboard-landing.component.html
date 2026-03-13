@@ -1,10 +1,12 @@
-<div class="dashboard-landing page-enter" [@fadeIn]>
+<div class="dashboard-landing global-page-container page-enter" [@fadeIn]>
   <!-- Page Header -->
   <header class="page-header">
     <div class="header-content">
       <div class="title-row">
         @if (auth.currentUser(); as user) {
-          <h1 class="global-page-title">Willkommen, {{ user.firstName }}</h1>
+          <h1 class="global-page-title">
+            Willkommen, <span>{{ user.firstName }}</span>
+          </h1>
         }
         @if (activities().length > 0) {
           <span class="count-badge">{{ activities().length }} Aktivitäten</span>

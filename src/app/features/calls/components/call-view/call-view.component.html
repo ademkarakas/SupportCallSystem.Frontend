@@ -5,7 +5,10 @@
       <mat-icon>phone_disabled</mat-icon>
     </div>
     <h2>Kein aktiver Anruf</h2>
-    <p>Sobald ein Gespräch gestartet wird, erscheint hier die Echtzeit-Dokumentation.<br>Sie werden automatisch benachrichtigt, wenn ein eingehender Anruf vorliegt.</p>
+    <p>
+      Sobald ein Gespräch gestartet wird, erscheint hier die Echtzeit-Dokumentation.<br />Sie werden
+      automatisch benachrichtigt, wenn ein eingehender Anruf vorliegt.
+    </p>
     <div class="no-call-hints">
       <div class="hint-item">
         <mat-icon>notifications_active</mat-icon>
@@ -19,17 +22,12 @@
   </div>
 </div>
 
-<div class="workspace-page page-enter" *ngIf="call()">
+<div class="workspace-page global-page-container page-enter" *ngIf="call()">
   <!-- Page Header -->
   <header class="page-header">
     <div class="header-content">
       <div class="title-row">
         <h1 class="global-page-title">{{ call()?.customerName || 'Unbekannter Kunde' }}</h1>
-        <div class="call-status-badge" [class.live]="isRecording()" [class.ended]="!isRecording()">
-          <span class="pulse" *ngIf="isRecording()"></span>
-          <mat-icon *ngIf="!isRecording()">check_circle</mat-icon>
-          {{ isRecording() ? 'Live-Gespräch' : 'Anruf Beendet' }}
-        </div>
       </div>
       <div class="subtitle-row">
         <span class="info-tag">NFON: {{ call()?.nfonCallId || 'Simuliert' }}</span>
@@ -41,6 +39,11 @@
       </div>
     </div>
     <div class="header-actions">
+      <div class="call-status-badge" [class.live]="isRecording()" [class.ended]="!isRecording()">
+        <span class="pulse" *ngIf="isRecording()"></span>
+        <mat-icon *ngIf="!isRecording()">check_circle</mat-icon>
+        {{ isRecording() ? 'Live-Gespräch aktiv' : 'Anruf Beendet' }}
+      </div>
       <button
         class="btn btn-secondary btn-sm"
         *ngIf="call()?.callerNumber"
@@ -53,17 +56,6 @@
       >
         <mat-icon>person_search</mat-icon>
         Anrufer-Profil
-      </button>
-      <button
-        class="btn btn-sm"
-        [class.btn-success]="!audioCapture.isCaptureActive"
-        [class.btn-secondary]="audioCapture.isCaptureActive"
-        *ngIf="isRecording()"
-        (click)="toggleMicrophone()"
-        title="{{ audioCapture.isCaptureActive ? 'Mikrofon deaktivieren' : 'Mikrofon aktivieren' }}"
-      >
-        <mat-icon>{{ audioCapture.isCaptureActive ? 'mic' : 'mic_off' }}</mat-icon>
-        {{ audioCapture.isCaptureActive ? 'Mikrofon Aktiv' : 'Mikrofon Starten' }}
       </button>
       <button class="btn btn-danger-filled" *ngIf="isRecording()" (click)="endCall()">
         <mat-icon>call_end</mat-icon>
@@ -121,7 +113,7 @@
             <div class="summary-section" *ngIf="transcript()">
               <label class="section-label">
                 <mat-icon class="inline-icon">transcribe</mat-icon>
-                LIVE-TRANSKRIPTION
+                WHISPER-TRANSKRIPTION
               </label>
               <div class="text-card transcript-card">
                 <p>{{ transcript() }}</p>
@@ -319,6 +311,57 @@
                   placeholder="Was wurde gelöst? Welche nächsten Schritte?"
                 ></textarea>
               </mat-form-field>
+
+              <!-- Dictation controls (available when consent is declined or not yet asked) -->
+              <div
+                class="dictation-toolbar"
+                *ngIf="
+                  call()?.consent === 'Declined' ||
+                  call()?.consent === 2 ||
+                  call()?.consent === 'NotAsked' ||
+                  call()?.consent === 0
+                "
+              >
+                <!-- Start dictation -->
+                <button
+                  class="btn btn-sm btn-secondary"
+                  *ngIf="!dictation.isDictating() && !dictation.isTranscribing()"
+                  (click)="startDictation()"
+                  matTooltip="Notizen per Sprache diktieren"
+                >
+                  <mat-icon>mic</mat-icon>
+                  Diktieren
+                </button>
+
+                <!-- Recording active: stop or cancel -->
+                <ng-container *ngIf="dictation.isDictating()">
+                  <button
+                    class="btn btn-sm btn-danger-filled"
+                    (click)="stopDictationAndAppend()"
+                    matTooltip="Aufnahme beenden & Text hinzufügen"
+                  >
+                    <mat-icon>stop</mat-icon>
+                    Fertig
+                  </button>
+                  <button
+                    class="btn btn-sm btn-secondary"
+                    (click)="cancelDictation()"
+                    matTooltip="Aufnahme verwerfen"
+                  >
+                    <mat-icon>close</mat-icon>
+                    Abbrechen
+                  </button>
+                  <span class="dictation-status">
+                    <span class="pulse-dot"></span> Aufnahme läuft...
+                  </span>
+                </ng-container>
+
+                <!-- Transcription in progress -->
+                <span *ngIf="dictation.isTranscribing()" class="dictation-status">
+                  <mat-progress-spinner mode="indeterminate" diameter="16"></mat-progress-spinner>
+                  Transkribiere...
+                </span>
+              </div>
             </div>
 
             <div class="form-actions">
@@ -330,6 +373,8 @@
                 <mat-icon>{{ isSubmitting() ? 'hourglass_empty' : 'done_all' }}</mat-icon>
                 {{ isSubmitting() ? 'Speichert...' : 'Vorgang abschließen' }}
               </button>
+            </div>
+            <div class="assist-actions">
               <button
                 class="btn btn-secondary w-full"
                 (click)="tidyUpManualNotes()"
@@ -346,6 +391,3 @@
     <!-- /right-sidebar -->
   </div>
 </div>
-
-
-

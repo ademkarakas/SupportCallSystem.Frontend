@@ -1,7 +1,9 @@
 import { Component, inject, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
+import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
 import {
   AdminApiService,
   AgentActivityDto,
@@ -11,7 +13,7 @@ import { NotificationService } from '../../../../core/services/notification.serv
 
 @Component({
   selector: 'app-agent-activity',
-  imports: [CommonModule, MatIconModule, MatButtonModule],
+  imports: [CommonModule, FormsModule, MatIconModule, MatButtonModule, MatPaginatorModule],
   templateUrl: './agent-activity.component.html',
   styleUrls: ['./agent-activity.component.scss'],
 })
@@ -23,6 +25,10 @@ export class AgentActivityComponent implements OnInit {
   isLoading = signal(true);
   selectedAgent = signal<AgentActivityRow | null>(null);
   isPanelOpen = signal(false);
+  searchInput = signal('');
+  pageIndex = signal(0);
+  pageSize = signal(15);
+  readonly pageSizeOptions = [15, 30, 50];
 
   ngOnInit() {
     this.loadActivity();
@@ -33,6 +39,8 @@ export class AgentActivityComponent implements OnInit {
     this.adminApi.getAgentActivity().subscribe({
       next: (data) => {
         this.activityData.set(data);
+        this.pageIndex.set(0);
+        this.syncSelectedAgentForCurrentPage();
         this.isLoading.set(false);
       },
       error: () => {
@@ -46,6 +54,35 @@ export class AgentActivityComponent implements OnInit {
     return this.activityData()?.agents ?? [];
   }
 
+  filteredAgents(): AgentActivityRow[] {
+    const query = this.searchInput().trim().toLowerCase();
+    const all = this.agents();
+    if (!query) return all;
+
+    return all.filter((agent) => {
+      const name = agent.agentName.toLowerCase();
+      const calls = String(agent.totalCalls);
+      return name.includes(query) || calls.includes(query);
+    });
+  }
+
+  pagedAgents(): AgentActivityRow[] {
+    const start = this.pageIndex() * this.pageSize();
+    return this.filteredAgents().slice(start, start + this.pageSize());
+  }
+
+  onSearch(value: string): void {
+    this.searchInput.set(value);
+    this.pageIndex.set(0);
+    this.syncSelectedAgentForCurrentPage();
+  }
+
+  onPage(event: PageEvent): void {
+    this.pageIndex.set(event.pageIndex);
+    this.pageSize.set(event.pageSize);
+    this.syncSelectedAgentForCurrentPage();
+  }
+
   onAgentClick(agent: AgentActivityRow): void {
     this.selectedAgent.set(agent);
     this.isPanelOpen.set(true);
@@ -54,6 +91,19 @@ export class AgentActivityComponent implements OnInit {
   onPanelClose(): void {
     this.isPanelOpen.set(false);
     this.selectedAgent.set(null);
+  }
+
+  private syncSelectedAgentForCurrentPage(): void {
+    const selected = this.selectedAgent();
+    if (!selected) return;
+
+    const isVisibleOnCurrentPage = this.pagedAgents().some(
+      (agent) => agent.agentId === selected.agentId,
+    );
+
+    if (!isVisibleOnCurrentPage) {
+      this.onPanelClose();
+    }
   }
 
   formatDuration(seconds: number): string {

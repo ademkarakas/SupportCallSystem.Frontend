@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy, signal, computed, effect, input } from '@angular/core';
+import { Component, OnDestroy, signal, computed, effect, input } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatIcon } from '@angular/material/icon';
 
@@ -8,11 +8,11 @@ import { MatIcon } from '@angular/material/icon';
   templateUrl: './call-timer.component.html',
   styleUrls: ['./call-timer.component.scss'],
 })
-export class CallTimerComponent implements OnInit, OnDestroy {
-  startTime = input.required<Date>();
-  endTime = input<Date>();
+export class CallTimerComponent implements OnDestroy {
+  startTime = input.required<Date | string>();
+  endTime = input<Date | string>();
 
-  private secondsElapsed = signal(0);
+  private readonly secondsElapsed = signal(0);
   public isActive = signal(true);
 
   public formattedTime = computed(() => {
@@ -20,7 +20,7 @@ export class CallTimerComponent implements OnInit, OnDestroy {
     const h = Math.floor(s / 3600);
     const m = Math.floor((s % 3600) / 60);
     const sec = s % 60;
-    return `${h > 0 ? h + ':' : ''}${m.toString().padStart(2, '0')}:${sec.toString().padStart(2, '0')}`;
+    return `${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}:${sec.toString().padStart(2, '0')}`;
   });
 
   private intervalId?: any;
@@ -35,20 +35,23 @@ export class CallTimerComponent implements OnInit, OnDestroy {
       this.stopTimer();
       this.secondsElapsed.set(0);
 
-      if (end) {
+      const startMs = this.parseDateToMillis(start);
+      const endMs = this.parseDateToMillis(end);
+
+      if (!startMs) {
         this.isActive.set(false);
-        this.secondsElapsed.set(
-          Math.floor((new Date(end).getTime() - new Date(start).getTime()) / 1000),
-        );
-      } else if (start) {
+        this.secondsElapsed.set(0);
+        return;
+      }
+
+      if (endMs) {
+        this.isActive.set(false);
+        this.secondsElapsed.set(Math.max(0, Math.floor((endMs - startMs) / 1000)));
+      } else {
         this.isActive.set(true);
         this.startTimer();
       }
     });
-  }
-
-  ngOnInit() {
-    // Logic is handled by the effect in constructor
   }
 
   private startTimer() {
@@ -67,9 +70,34 @@ export class CallTimerComponent implements OnInit, OnDestroy {
   }
 
   private updateElapsed() {
-    const now = new Date();
-    const start = new Date(this.startTime());
-    this.secondsElapsed.set(Math.floor((now.getTime() - start.getTime()) / 1000));
+    const startMs = this.parseDateToMillis(this.startTime());
+    if (!startMs) {
+      this.secondsElapsed.set(0);
+      return;
+    }
+
+    const nowMs = Date.now();
+    this.secondsElapsed.set(Math.max(0, Math.floor((nowMs - startMs) / 1000)));
+  }
+
+  private parseDateToMillis(value: Date | string | undefined): number | null {
+    if (!value) {
+      return null;
+    }
+
+    if (value instanceof Date) {
+      return value.getTime();
+    }
+
+    const hasTimezone = /(?:Z|[+-]\d{2}:\d{2})$/i.test(value);
+    const normalized = hasTimezone ? value : `${value}Z`;
+    const parsed = Date.parse(normalized);
+    if (!Number.isNaN(parsed)) {
+      return parsed;
+    }
+
+    const fallback = Date.parse(value);
+    return Number.isNaN(fallback) ? null : fallback;
   }
 
   ngOnDestroy() {

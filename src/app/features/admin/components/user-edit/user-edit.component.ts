@@ -41,11 +41,12 @@ export class UserEditComponent implements OnInit {
 
   // Create form (for new users)
   createForm = this.fb.nonNullable.group({
-    userName: ['', Validators.required],
-    email:    ['', [Validators.required, Validators.email]],
-    password: ['', [Validators.required, Validators.minLength(6)]],
+    firstName: ['', Validators.required],
+    lastName:  ['', Validators.required],
+    email:     ['', [Validators.required, Validators.email]],
+    password:  ['', [Validators.required, Validators.minLength(6)]],
     extension: [''],
-    role:     ['Agent', Validators.required],
+    role:      ['Agent', Validators.required],
   });
 
   private originalValues: unknown = null;
@@ -114,7 +115,16 @@ export class UserEditComponent implements OnInit {
     if (this.createForm.invalid) { this.createForm.markAllAsTouched(); return; }
     this.isSaving.set(true);
     const v = this.createForm.getRawValue();
-    this.adminApi.createUser({ userName: v.userName, email: v.email, password: v.password, role: v.role })
+    const userName = `${v.firstName.toLowerCase()}.${v.lastName.toLowerCase()}`.replace(/\s+/g, '');
+    this.adminApi.createUser({
+      userName,
+      email: v.email,
+      password: v.password,
+      role: v.role,
+      firstName: v.firstName,
+      lastName: v.lastName,
+      extension: v.extension || '',
+    })
       .subscribe({
         next: () => {
           this.notification.showSuccess('Benutzer wurde erstellt.');

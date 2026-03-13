@@ -1,9 +1,11 @@
 .admin-page {
   padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: var(--page-section-gap);
 }
 
 .page-header {
-  margin-bottom: 1rem;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -55,16 +57,35 @@
 }
 
 .filters-bar {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-  margin-bottom: 1rem;
-  flex-wrap: wrap;
+  padding: var(--spacing-md) var(--spacing-lg);
+  border-bottom: 1px solid var(--color-table-border);
 
-  .search-field {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 16px; //
+
+  .search-input-wrapper {
     flex: 1;
-    min-width: 250px;
-    max-width: 400px;
+    max-width: 280px;
+    display: flex;
+    align-items: center;
+  }
+
+  .deleted-toggle {
+    display: flex;
+    align-items: center;
+    white-space: nowrap;
+  }
+
+  @media (max-width: 768px) {
+    padding: var(--spacing-md);
+    flex-wrap: wrap;
+
+    .search-input-wrapper {
+      max-width: 100%;
+      flex-basis: 100%;
+    }
   }
 }
 
@@ -164,18 +185,4 @@
   text-align: center;
   color: var(--text-secondary);
   padding: 2rem !important;
-}
-
-.pagination {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.5rem;
-  padding: 0.75rem;
-  border-top: 1px solid var(--border);
-
-  .page-info {
-    font-size: 0.875rem;
-    color: var(--text-secondary);
-  }
 }

@@ -133,6 +133,9 @@ export class AdminApiService {
     email: string;
     password: string;
     role: string;
+    firstName?: string;
+    lastName?: string;
+    extension?: string;
   }): Observable<{ userId: string }> {
     return this.http.post<{ userId: string }>(`${this.apiUrl}/api/users`, data);
   }

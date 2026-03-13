@@ -37,7 +37,7 @@ export class CallDetailComponent implements OnInit {
   isLoading = signal(true);
   callId = signal<string | null>(null);
   isEditing = false;
-  private originalDraftSummary = '';
+  private originalApprovedSummary = '';
 
   ngOnInit() {
     this.route.queryParams.subscribe((params) => {
@@ -54,10 +54,14 @@ export class CallDetailComponent implements OnInit {
 
   startEditing(): void {
     const currentCall = this.call();
-    if (currentCall) {
-      this.originalDraftSummary = currentCall.draftSummary || '';
+    if (currentCall?.approvedSummary) {
+      this.originalApprovedSummary = currentCall.approvedSummary || '';
+      this.isEditing = true;
+    } else {
+      this.notification.showWarning(
+        'Es gibt noch keine genehmigte Zusammenfassung zum Bearbeiten.',
+      );
     }
-    this.isEditing = true;
   }
 
   cancelEditing(): void {
@@ -66,7 +70,7 @@ export class CallDetailComponent implements OnInit {
       // Create a new object to trigger change detection if needed
       this.call.set({
         ...currentCall,
-        draftSummary: this.originalDraftSummary,
+        approvedSummary: this.originalApprovedSummary,
       });
     }
     this.isEditing = false;
@@ -75,8 +79,15 @@ export class CallDetailComponent implements OnInit {
   saveChanges(): void {
     const currentCall = this.call();
     if (currentCall) {
+      const trimmedApprovedSummary = currentCall.approvedSummary?.trim();
+      if (!trimmedApprovedSummary) {
+        this.notification.showWarning('Die Zusammenfassung darf nicht leer sein.');
+        return;
+      }
+
       const updateDto: UpdateCallDto = {
-        draftSummary: currentCall.draftSummary,
+        approvedSummary: trimmedApprovedSummary,
+        updatedByUserId: this.auth.currentUser()?.id || '',
       };
       this.callApi.updateCall(currentCall.id, updateDto).subscribe({
         next: () => {
@@ -112,7 +123,7 @@ export class CallDetailComponent implements OnInit {
   }
 
   goBack() {
-    this.router.navigate(['/dashboard']);
+    this.router.navigate(['/calls/history']);
   }
 
   openInCallView() {

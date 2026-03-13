@@ -1,10 +1,12 @@
 ﻿/* ── Page Shell (matches admin-page pattern) ─────────────── */
 .admin-page {
   padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: var(--page-section-gap);
 }
 
 .page-header {
-  margin-bottom: 1rem;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -183,12 +185,28 @@
   margin-bottom: 1rem;
 }
 
+.search-row {
+  margin-bottom: 0.75rem;
+
+  .search-input-wrapper {
+    max-width: 280px;
+  }
+}
+
 /* ── Filter Chips ─────────────────────────────────────────── */
 .filters-bar {
   display: flex;
   align-items: center;
   gap: 0.5rem;
   flex-wrap: wrap;
+}
+
+@media (max-width: 768px) {
+  .search-row {
+    .search-input-wrapper {
+      max-width: 100%;
+    }
+  }
 }
 
 .filter-chip {
@@ -301,16 +319,18 @@
 .notif-row {
   cursor: pointer;
   transition: background 0.12s ease;
+  background: var(--color-card-bg);
 
   &:hover {
     background: var(--color-table-hover-bg);
   }
 
   &.unread {
-    background: rgba(59, 130, 246, 0.04);
+    background: var(--color-card-bg);
+    border-left: 3px solid var(--color-primary);
 
     &:hover {
-      background: rgba(59, 130, 246, 0.08);
+      background: var(--color-table-hover-bg);
     }
   }
 }

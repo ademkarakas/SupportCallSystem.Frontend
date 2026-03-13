@@ -7,6 +7,7 @@ import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatCheckboxModule } from '@angular/material/checkbox';
+import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
 import { Router } from '@angular/router';
 import { Subject, debounceTime, distinctUntilChanged, takeUntil } from 'rxjs';
 import { AdminApiService, CustomerDetailDto, PagedResult } from '../../services/admin-api.service';
@@ -24,6 +25,7 @@ import { ConfirmDialogComponent } from '../../../../shared/components/confirm-di
     MatFormFieldModule,
     MatInputModule,
     MatCheckboxModule,
+    MatPaginatorModule,
   ],
   templateUrl: './customers-list.component.html',
   styleUrls: ['./customers-list.component.scss'],
@@ -95,6 +97,12 @@ export class CustomersListComponent implements OnInit, OnDestroy {
 
   onIncludeDeletedChange() {
     this.page = 1;
+    this.loadCustomers();
+  }
+
+  onPage(event: PageEvent): void {
+    this.page = event.pageIndex + 1;
+    this.pageSize = event.pageSize;
     this.loadCustomers();
   }
 

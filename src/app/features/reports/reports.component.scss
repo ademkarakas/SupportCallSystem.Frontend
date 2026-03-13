@@ -4,6 +4,14 @@
   gap: var(--spacing-xl);
 }
 
+.page-header-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
 // ---- Filter Bar ----
 .filter-bar {
   padding: var(--spacing-lg) var(--spacing-xl);
@@ -14,6 +22,10 @@
   flex-wrap: wrap;
   align-items: flex-end;
   gap: var(--spacing-lg);
+  width: 100%;
+  & > :not(.preset-group) {
+    flex-shrink: 0;
+  }
 }
 
 .filter-group {
@@ -60,7 +72,19 @@ select.filter-input {
   display: flex;
   gap: var(--spacing-xs);
   align-items: center;
-  margin-left: auto;
+
+  &--inline {
+    margin-left: auto;
+    display: flex;
+    justify-content: flex-end;
+
+    @media (max-width: 768px) {
+      margin-left: 0;
+      width: 100%;
+      justify-content: flex-start;
+      margin-top: 10px;
+    }
+  }
 }
 
 .btn-preset {
@@ -127,7 +151,8 @@ select.filter-input {
   display: flex;
   align-items: center;
   gap: var(--spacing-lg);
-  padding: var(--spacing-xl);
+  padding: calc(var(--spacing-xl) + 4px);
+  min-height: 124px;
 }
 
 .kpi-icon-wrap {

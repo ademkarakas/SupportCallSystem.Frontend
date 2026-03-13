@@ -1,9 +1,9 @@
 <div class="edit-page global-page-container page-enter">
   <!-- Top bar -->
   <div class="top-bar">
-    <button class="btn btn-ghost back-btn" (click)="goBack()">
+    <button class="btn btn-secondary" (click)="goBack()">
       <mat-icon>arrow_back</mat-icon>
-      <span>Zurück</span>
+      Zurück
     </button>
 
     <div class="top-bar-center">
@@ -54,26 +54,49 @@
         <mat-icon>person_add</mat-icon>
         <span>Neuen Benutzer anlegen</span>
       </div>
-      <form [formGroup]="createForm" class="form-grid" (ngSubmit)="save()">
-        <div class="form-field" [class.has-error]="isInvalid('create', 'userName')">
-          <label for="c-userName">Benutzername <span class="required">*</span></label>
+      <form [formGroup]="createForm" class="form-grid" (ngSubmit)="save()" autocomplete="off">
+        <div class="form-field" [class.has-error]="isInvalid('create', 'firstName')">
+          <label for="c-firstName">Vorname <span class="required">*</span></label>
           <div class="input-wrap">
             <input
-              id="c-userName"
-              formControlName="userName"
+              id="c-firstName"
+              formControlName="firstName"
               type="text"
-              placeholder="z. B. max.mustermann"
+              placeholder="Max"
+              autocomplete="off"
             />
           </div>
-          @if (isInvalid('create', 'userName')) {
-            <span class="error-msg">Benutzername ist erforderlich</span>
+          @if (isInvalid('create', 'firstName')) {
+            <span class="error-msg">Vorname ist erforderlich</span>
+          }
+        </div>
+
+        <div class="form-field" [class.has-error]="isInvalid('create', 'lastName')">
+          <label for="c-lastName">Nachname <span class="required">*</span></label>
+          <div class="input-wrap">
+            <input
+              id="c-lastName"
+              formControlName="lastName"
+              type="text"
+              placeholder="Mustermann"
+              autocomplete="off"
+            />
+          </div>
+          @if (isInvalid('create', 'lastName')) {
+            <span class="error-msg">Nachname ist erforderlich</span>
           }
         </div>
 
         <div class="form-field" [class.has-error]="isInvalid('create', 'email')">
           <label for="c-email">E-Mail-Adresse <span class="required">*</span></label>
           <div class="input-wrap">
-            <input id="c-email" formControlName="email" type="email" placeholder="max@firma.de" />
+            <input
+              id="c-email"
+              formControlName="email"
+              type="email"
+              placeholder="max@firma.de"
+              autocomplete="off"
+            />
           </div>
           @if (isInvalid('create', 'email')) {
             <span class="error-msg">Gültige E-Mail-Adresse eingeben</span>
@@ -88,6 +111,7 @@
               formControlName="password"
               type="password"
               placeholder="Sicheres Passwort (mind. 6 Zeichen)"
+              autocomplete="new-password"
             />
           </div>
           @if (isInvalid('create', 'password')) {

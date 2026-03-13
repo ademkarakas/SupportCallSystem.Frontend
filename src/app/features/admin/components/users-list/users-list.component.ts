@@ -1,8 +1,10 @@
-import { Component, inject, OnInit, signal } from '@angular/core';
+import { Component, computed, inject, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
+import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
 import { Router } from '@angular/router';
 import { AdminApiService, UserDto } from '../../services/admin-api.service';
 import { NotificationService } from '../../../../core/services/notification.service';
@@ -11,7 +13,14 @@ import { ConfirmDialogComponent } from '../../../../shared/components/confirm-di
 
 @Component({
   selector: 'app-users-list',
-  imports: [CommonModule, MatIconModule, MatButtonModule, MatDialogModule],
+  imports: [
+    CommonModule,
+    FormsModule,
+    MatIconModule,
+    MatButtonModule,
+    MatDialogModule,
+    MatPaginatorModule,
+  ],
   templateUrl: './users-list.component.html',
   styleUrls: ['./users-list.component.scss'],
 })
@@ -24,6 +33,29 @@ export class UsersListComponent implements OnInit {
 
   users = signal<UserDto[]>([]);
   isLoading = signal(true);
+  searchInput = signal('');
+  pageIndex = signal(0);
+  pageSize = signal(15);
+  readonly pageSizeOptions = [15, 30, 50];
+
+  filteredUsers = computed(() => {
+    const query = this.searchInput().trim().toLowerCase();
+    if (!query) return this.users();
+
+    return this.users().filter((user) => {
+      const fullName = `${user.firstName} ${user.lastName}`.toLowerCase();
+      return (
+        fullName.includes(query) ||
+        user.email.toLowerCase().includes(query) ||
+        (user.extension || '').toLowerCase().includes(query)
+      );
+    });
+  });
+
+  pagedUsers = computed(() => {
+    const start = this.pageIndex() * this.pageSize();
+    return this.filteredUsers().slice(start, start + this.pageSize());
+  });
 
   ngOnInit() {
     this.loadUsers();
@@ -34,6 +66,7 @@ export class UsersListComponent implements OnInit {
     this.adminApi.getAllUsers().subscribe({
       next: (data) => {
         this.users.set(data);
+        this.pageIndex.set(0);
         this.isLoading.set(false);
       },
       error: () => {
@@ -88,5 +121,15 @@ export class UsersListComponent implements OnInit {
     if (roles.includes('SystemAdmin')) return 'System Admin';
     if (roles.includes('UserAdmin')) return 'User Admin';
     return 'Agent';
+  }
+
+  onSearch(value: string): void {
+    this.searchInput.set(value);
+    this.pageIndex.set(0);
+  }
+
+  onPage(event: PageEvent): void {
+    this.pageIndex.set(event.pageIndex);
+    this.pageSize.set(event.pageSize);
   }
 }

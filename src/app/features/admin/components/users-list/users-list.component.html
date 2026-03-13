@@ -16,6 +16,19 @@
   </header>
 
   <div class="content-container">
+    <div class="filters-bar">
+      <div class="search-input-wrapper">
+        <mat-icon class="search-icon">search</mat-icon>
+        <input
+          class="search-input"
+          type="text"
+          placeholder="Name, E-Mail oder Nebenstelle suchen"
+          [ngModel]="searchInput()"
+          (ngModelChange)="onSearch($event)"
+        />
+      </div>
+    </div>
+
     @if (isLoading()) {
       <div class="loading-state">
         <mat-icon class="spinner">sync</mat-icon>
@@ -33,7 +46,7 @@
             </tr>
           </thead>
           <tbody>
-            @for (user of users(); track user.id) {
+            @for (user of pagedUsers(); track user.id) {
               <tr
                 class="clickable-row"
                 (click)="editUser(user)"
@@ -58,15 +71,28 @@
               </tr>
             } @empty {
               <tr>
-                <td colspan="4" class="empty-state">Keine Benutzer gefunden.</td>
+                <td colspan="4" class="empty-state">
+                  @if (searchInput()) {
+                    Keine Benutzer für die Suche gefunden.
+                  } @else {
+                    Keine Benutzer gefunden.
+                  }
+                </td>
               </tr>
             }
           </tbody>
         </table>
       </div>
+
+      <mat-paginator
+        [length]="filteredUsers().length"
+        [pageSize]="pageSize()"
+        [pageIndex]="pageIndex()"
+        [pageSizeOptions]="pageSizeOptions"
+        showFirstLastButtons
+        class="custom-paginator"
+        (page)="onPage($event)"
+      ></mat-paginator>
     }
   </div>
 </div>
-
-
-

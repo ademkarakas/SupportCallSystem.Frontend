@@ -6,7 +6,7 @@
         <div class="title-row">
           <h1 class="global-page-title">Audit Log</h1>
           @if (!isLoading()) {
-            <span class="count-badge">{{ filteredEntries().length }} Eintr\u00e4ge</span>
+            <span class="count-badge">{{ filteredEntries().length }} Einträge</span>
           }
         </div>
         <p>Überblick aller sicherheitsrelevanten Aktionen im System</p>
@@ -115,9 +115,10 @@
       [length]="filteredEntries().length"
       [pageSize]="pageSize()"
       [pageIndex]="pageIndex()"
-      [pageSizeOptions]="[5, 15, 25, 50]"
+      [pageSizeOptions]="[15, 30, 50]"
+      showFirstLastButtons
       (page)="onPage($event)"
-      class="mat-paginator-modern"
+      class="custom-paginator"
     ></mat-paginator>
   }
 </div>

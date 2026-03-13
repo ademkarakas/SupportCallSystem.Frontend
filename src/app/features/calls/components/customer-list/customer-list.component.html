@@ -1,0 +1,85 @@
+<div class="call-customers-page global-page-container page-enter">
+  <header class="page-header">
+    <div class="header-content">
+      <div class="title-row">
+        <mat-icon class="title-icon">people</mat-icon>
+        <h1 class="global-page-title">Kunden</h1>
+        @if (!isLoading()) {
+          <span class="count-badge">{{ filteredCustomers().length }} Einträge</span>
+        }
+      </div>
+      <p class="subtitle">Wählen Sie einen Kunden aus, um das Anrufer-Profil direkt zu öffnen.</p>
+    </div>
+  </header>
+
+  <div class="card search-card">
+    <div class="search-input-wrapper">
+      <mat-icon class="search-icon">search</mat-icon>
+      <input
+        class="search-input"
+        type="text"
+        placeholder="Name oder Telefonnummer suchen"
+        [ngModel]="searchInput()"
+        (ngModelChange)="onSearch($event)"
+      />
+    </div>
+  </div>
+
+  <div class="data-table-card content-card">
+    @if (isLoading()) {
+      <div class="loading-state">
+        <mat-icon class="spinner">sync</mat-icon>
+        <p>Kundenliste wird geladen...</p>
+      </div>
+    } @else if (filteredCustomers().length === 0) {
+      <div class="empty-state">
+        <mat-icon class="empty-icon">person_search</mat-icon>
+        <p>Keine Kunden gefunden.</p>
+      </div>
+    } @else {
+      <div class="table-container">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Telefonnummer</th>
+              <th>Anrufe</th>
+              <th>Erfasst am</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (customer of pagedCustomers(); track customer.key) {
+              <tr>
+                <td>
+                  <button class="customer-link" (click)="openProfile(customer)">
+                    {{ customer.fullName }}
+                  </button>
+                </td>
+                <td>{{ customer.phoneNumber }}</td>
+                <td>{{ customer.totalCalls }}</td>
+                <td>{{ customer.lastCallTime | date: 'dd.MM.yyyy HH:mm' }}</td>
+                <td class="actions-cell">
+                  <button class="btn btn-secondary btn-sm" (click)="openProfile(customer)">
+                    <mat-icon>person_search</mat-icon>
+                    Profil
+                  </button>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+
+      <mat-paginator
+        [length]="filteredCustomers().length"
+        [pageSize]="pageSize()"
+        [pageIndex]="pageIndex()"
+        [pageSizeOptions]="pageSizeOptions"
+        showFirstLastButtons
+        class="custom-paginator"
+        (page)="onPage($event)"
+      ></mat-paginator>
+    }
+  </div>
+</div>

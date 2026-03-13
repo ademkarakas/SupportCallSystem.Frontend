@@ -2,17 +2,7 @@
 // CALL DETAIL PAGE
 // ============================================================================
 
-.detail-page {
-  &.global-page-container {
-    padding: var(--spacing-lg);
-    max-width: 1600px;
-    margin: 0 auto;
-
-    @media (max-width: 640px) {
-      padding: var(--spacing-md);
-    }
-  }
-}
+// detail-page uses global-page-container from styles.scss for consistent padding
 
 // Loading state
 .detail-loading {
@@ -28,7 +18,7 @@
 
 // Page Header
 .page-header {
-  margin-bottom: var(--spacing-xl);
+  margin-bottom: var(--page-section-gap);
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
@@ -113,43 +103,52 @@
   }
 }
 
-// Top grid: 350px / 1fr
-.detail-grid-top {
-  display: grid;
-  grid-template-columns: 260px 1fr;
-  gap: var(--spacing-lg);
-  margin-bottom: var(--spacing-xl);
-
-  @media (max-width: 1024px) {
-    grid-template-columns: 1fr;
-    gap: var(--spacing-lg);
-  }
-
-  @media (max-width: 640px) {
-    gap: var(--spacing-md);
-  }
-}
-
-// Left column: Narrow info
-.detail-info-column {
-  min-width: 0;
-}
-
-// Right column: Wide actions
-.detail-actions-column {
-  min-width: 0;
-}
-
-// Bottom summaries section: Full width
-.detail-summaries-section {
+// detail-page: flex column, gap from global-page-container children
+.detail-page {
   display: flex;
   flex-direction: column;
-  gap: var(--spacing-lg);
-  max-width: 100%;
+  gap: var(--page-section-gap);
+}
 
-  @media (max-width: 640px) {
-    gap: var(--spacing-md);
+// 2-column grid row for Card 1 + Card 2
+.detail-cards-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--page-section-gap);
+  align-items: start;
+
+  @media (max-width: 900px) {
+    grid-template-columns: 1fr;
   }
+}
+
+// Draft section inside Card 1
+.draft-section {
+  margin-top: var(--spacing-lg);
+  padding-top: var(--spacing-lg);
+  border-top: 1px solid var(--color-card-border);
+}
+
+.draft-section-header {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  margin-bottom: var(--spacing-md);
+
+  mat-icon {
+    font-size: 18px;
+    width: 18px;
+    height: 18px;
+    color: var(--color-warning);
+    flex-shrink: 0;
+  }
+}
+
+.draft-section-title {
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-primary);
+  flex: 1;
 }
 
 // Cards
@@ -188,15 +187,22 @@
   }
 }
 
-// Meta grid
+// Horizontal meta grid
+.meta-grid-horizontal {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: var(--spacing-md) var(--spacing-lg);
+
+  @media (max-width: 640px) {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+// Vertical meta grid (legacy)
 .meta-grid {
   display: grid;
   grid-template-columns: 1fr;
   gap: var(--spacing-md);
-
-  @media (max-width: 640px) {
-    gap: var(--spacing-md);
-  }
 }
 
 .meta-item {
@@ -233,21 +239,47 @@
   white-space: pre-wrap;
 }
 
-// Draft actions (side-by-side buttons)
+.approved-summary-card {
+  .card-body {
+    min-height: 280px;
+  }
+}
+
+.approved-summary-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+}
+
+// Draft textarea
+.draft-field {
+  width: 100%;
+
+  ::ng-deep textarea {
+    min-height: 180px;
+    font-size: var(--font-size-base);
+    line-height: 1.6;
+  }
+}
+
+// Draft actions
 .draft-actions {
   display: flex;
   gap: var(--spacing-sm);
-  margin-top: var(--spacing-lg);
-  padding-top: var(--spacing-md);
-  border-top: 1px solid var(--color-card-border);
+  margin-top: var(--spacing-md);
+  justify-content: flex-end;
 
   .btn {
-    flex: 1;
+    min-width: 120px;
     justify-content: center;
   }
 
   @media (max-width: 640px) {
     flex-direction: column;
+
+    .btn {
+      width: 100%;
+    }
   }
 }
 
@@ -271,6 +303,10 @@
   p {
     font-size: var(--font-size-base);
     margin: 0;
+  }
+
+  &.compact {
+    padding: var(--spacing-lg) var(--spacing-md);
   }
 }
 

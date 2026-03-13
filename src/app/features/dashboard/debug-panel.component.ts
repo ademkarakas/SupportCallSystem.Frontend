@@ -37,7 +37,7 @@ export class DebugPanelComponent {
   }
 
   private runSimulation(injectMockTranscript: boolean) {
-    const request = this.debugSvc.simulateIncomingCall('+4915123456789', injectMockTranscript);
+    const request = this.debugSvc.simulateIncomingCall('+4915101234567', injectMockTranscript);
 
     if (!request) {
       return;

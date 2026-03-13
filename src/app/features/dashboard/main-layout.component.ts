@@ -126,6 +126,7 @@ export class MainLayoutComponent implements OnInit {
         customerId: event.customer?.id || null,
         agentUserId: userId,
         nfonCallId: event.callId,
+        callerNumber: event.callerNumber,
       })
       .subscribe({
         next: (res) => {
@@ -147,6 +148,7 @@ export class MainLayoutComponent implements OnInit {
     if (url.includes('/admin/audit-log')) return 'Audit Log';
     if (url.includes('/settings/security')) return '2FA Sicherheit';
     if (url.includes('/dashboard')) return 'Systemübersicht';
+    if (url.includes('/calls/customers')) return 'Kundenliste';
     if (url.includes('/calls/history')) return 'Anrufhistorie';
     if (url.includes('/calls')) return 'Aktiver Call Workspace';
     if (url.includes('/reports')) return 'Analyse & Berichte';
@@ -160,9 +162,9 @@ export class MainLayoutComponent implements OnInit {
    */
   openUserSettings(): void {
     this.dialog.open(UserSettingsDialogComponent, {
-      width: '560px',
+      width: '700px',
       maxWidth: '95vw',
-      maxHeight: '80vh',
+      maxHeight: '90vh',
       panelClass: 'user-settings-dialog',
       disableClose: false,
       autoFocus: 'first-tabbable',

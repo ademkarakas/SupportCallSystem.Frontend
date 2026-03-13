@@ -19,6 +19,13 @@ export const CALLS_ROUTES: Routes = [
       import('./components/call-detail/call-detail.component').then((m) => m.CallDetailComponent),
   },
   {
+    path: 'customers',
+    loadComponent: () =>
+      import('./components/customer-list/customer-list.component').then(
+        (m) => m.CallCustomersListComponent,
+      ),
+  },
+  {
     path: 'caller-profile',
     loadComponent: () =>
       import('./components/caller-profile/caller-profile.component').then(

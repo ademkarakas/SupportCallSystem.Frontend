@@ -9,6 +9,7 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatSelectModule } from '@angular/material/select';
 import { MatInputModule } from '@angular/material/input';
+import { MatTooltipModule } from '@angular/material/tooltip';
 import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
 import { Subject, takeUntil, finalize, switchMap, tap, catchError, of, from } from 'rxjs';
 import { CallApiService, CallRecord } from '../../services/call-api.service';
@@ -17,6 +18,7 @@ import { NotificationService } from '../../../../core/services/notification.serv
 import { CallTimerComponent } from '../call-timer/call-timer.component';
 import { AuthService } from '../../../../core/services/auth.service';
 import { AudioCaptureService } from '../../../../core/services/audio-capture.service';
+import { AgentDictationService } from '../../../../core/services/agent-dictation.service';
 import { AdminApiService, CustomerWithHistoryDto } from '../../../admin/services/admin-api.service';
 
 @Component({
@@ -31,6 +33,7 @@ import { AdminApiService, CustomerWithHistoryDto } from '../../../admin/services
     MatFormFieldModule,
     MatSelectModule,
     MatInputModule,
+    MatTooltipModule,
     ReactiveFormsModule,
     CallTimerComponent,
   ],
@@ -46,6 +49,7 @@ export class CallViewComponent implements OnInit, OnDestroy {
   notification = inject(NotificationService);
   auth = inject(AuthService);
   audioCapture = inject(AudioCaptureService);
+  dictation = inject(AgentDictationService);
   adminApi = inject(AdminApiService);
 
   call = signal<CallRecord | null>(null);
@@ -78,7 +82,10 @@ export class CallViewComponent implements OnInit, OnDestroy {
             next: (activeCall) => {
               this.isLoadingCall.set(false);
               if (activeCall?.id) {
-                this.router.navigate(['/calls'], { queryParams: { id: activeCall.id }, replaceUrl: true });
+                this.router.navigate(['/calls'], {
+                  queryParams: { id: activeCall.id },
+                  replaceUrl: true,
+                });
               }
             },
             error: () => this.isLoadingCall.set(false),
@@ -92,7 +99,7 @@ export class CallViewComponent implements OnInit, OnDestroy {
       console.log('🤖 Received AI Summary Draft notification:', event);
 
       const currentCall = this.call();
-      if (event && currentCall && event.callId.toLowerCase() === currentCall.id.toLowerCase()) {
+      if (event?.callId?.toLowerCase() === currentCall?.id?.toLowerCase()) {
         console.log('✅ Matching call found, updating UI state');
         this.isProcessingManual.set(false); // Reset manual processing state
         this.call.update((c) =>
@@ -137,7 +144,7 @@ export class CallViewComponent implements OnInit, OnDestroy {
   private loadCall(id: string) {
     this.callApi.getCallById(id).subscribe({
       next: (data) => {
-        if (data && data.id === id) {
+        if (data?.id === id) {
           this.call.set(data);
           this.isRecording.set(!data.endTime);
 
@@ -166,7 +173,7 @@ export class CallViewComponent implements OnInit, OnDestroy {
               .catch((err) => {
                 console.error('❌ Failed to auto-start microphone:', err);
                 this.notification.showError(
-                  'Mikrofonzugriff verweigert. Bitte manuell aktivieren.',
+                  'Automatische Mikrofonerfassung konnte nicht gestartet werden.',
                 );
               });
           }
@@ -252,7 +259,7 @@ export class CallViewComponent implements OnInit, OnDestroy {
       .pipe(
         // Finalize Vosk transcription first to flush remaining text
         switchMap(() => {
-          console.log('🏁 Finalizing Vosk transcription...');
+          console.log('🏁 Finalizing Whisper transcription...');
           return from(this.signalR.finalizeCall(activeCall.id));
         }),
         // Then end the call on backend (may trigger AI summary)
@@ -328,34 +335,52 @@ export class CallViewComponent implements OnInit, OnDestroy {
     });
   }
 
+  startDictation() {
+    const activeCall = this.call();
+    if (!activeCall) return;
+
+    this.dictation
+      .startDictation()
+      .then(() => {
+        this.notification.showInfo('🎙️ Diktat gestartet – sprechen Sie jetzt...');
+      })
+      .catch((err) => {
+        console.error('Dictation start error:', err);
+        this.notification.showError('Mikrofonzugriff für Diktat verweigert.');
+      });
+  }
+
+  stopDictationAndAppend() {
+    const activeCall = this.call();
+    if (!activeCall) return;
+
+    this.dictation
+      .stopDictationAndTranscribe(activeCall.id)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (text) => {
+          const current = this.approvalForm.get('summary')?.value ?? '';
+          const separator = current.trim().length > 0 ? ' ' : '';
+          this.approvalForm.patchValue({ summary: current + separator + text });
+          this.notification.showSuccess('Diktat hinzugefügt.');
+        },
+        error: (err) => {
+          console.error('Dictation transcription error:', err);
+          this.notification.showError('Diktat-Transkription fehlgeschlagen.');
+        },
+      });
+  }
+
+  cancelDictation() {
+    this.dictation.cancelDictation();
+    this.notification.showInfo('Diktat abgebrochen.');
+  }
+
   isApprovable(): boolean {
     // Can approve if there is an AI draft OR if the user has typed something manually
     const hasDraft = !!this.call()?.draftSummary;
     const hasManualEntry = (this.approvalForm.get('summary')?.value?.length || 0) > 10;
     return hasDraft || hasManualEntry;
-  }
-
-  toggleMicrophone() {
-    const activeCall = this.call();
-    if (!activeCall) {
-      this.notification.showError('Kein aktiver Anruf');
-      return;
-    }
-
-    if (this.audioCapture.isCaptureActive) {
-      this.audioCapture.stopCapture();
-      this.notification.showInfo('Mikrofon deaktiviert');
-    } else {
-      this.audioCapture
-        .startCapture(activeCall.id)
-        .then(() => {
-          this.notification.showSuccess('Mikrofon aktiviert - Transkription läuft');
-        })
-        .catch((err) => {
-          console.error('Microphone access error:', err);
-          this.notification.showError('Mikrofonzugriff verweigert');
-        });
-    }
   }
 
   getStatusMessage(): string {
@@ -398,6 +423,11 @@ export class CallViewComponent implements OnInit, OnDestroy {
     // Stop audio capture if active
     if (this.audioCapture.isCaptureActive) {
       this.audioCapture.stopCapture();
+    }
+
+    // Cancel any active dictation
+    if (this.dictation.isDictating()) {
+      this.dictation.cancelDictation();
     }
 
     this.destroy$.next();

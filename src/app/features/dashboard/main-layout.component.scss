@@ -53,20 +53,37 @@
   height: var(--header-height);
   display: flex;
   align-items: center;
+  justify-content: center;
   padding: 0 var(--spacing-lg);
   border-bottom: 1px solid var(--color-header-border);
   overflow: hidden;
   flex-shrink: 0;
 
+  .logo-area {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+
   .logo-brand {
     display: flex;
     align-items: center;
+    justify-content: center;
     gap: 8px;
     font-weight: $font-bold;
     font-size: 16px;
     color: var(--color-brand);
     white-space: nowrap;
     transition: opacity $duration-base;
+
+    .brand-logo-img {
+      height: 40px;
+      width: auto;
+      display: block;
+      max-width: 100%;
+      object-fit: contain;
+    }
 
     .icon {
       font-weight: $font-extrabold;
@@ -84,6 +101,10 @@
   }
 
   .sidebar-collapsed & .logo-brand {
+    .brand-logo-img {
+      height: 28px;
+    }
+
     .pipe,
     .sub {
       display: none;
@@ -117,11 +138,47 @@
   list-style: none;
 }
 
+.nav-section-label {
+  list-style: none;
+  padding: 14px $spacing-4 4px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+
+  &::before,
+  &::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--color-border);
+  }
+
+  span {
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--color-text-tertiary);
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+
+  // Collapsed sidebar: thin line only, no text
+  .sidebar-collapsed & {
+    padding: 6px $spacing-2;
+
+    span {
+      display: none;
+    }
+  }
+}
+
 .nav-item {
   a {
     height: var(--nav-item-height);
     display: flex;
     align-items: center;
+    gap: 12px;
     padding: 0 $spacing-4;
     color: var(--color-nav-text);
     position: relative;
@@ -131,7 +188,6 @@
     text-decoration: none;
 
     mat-icon {
-      margin-right: $spacing-4;
       font-size: 18px;
       width: 18px;
       height: 18px;
@@ -181,6 +237,7 @@
 
       mat-icon {
         margin-right: 0;
+        flex-shrink: 0;
       }
 
       .label {
@@ -652,7 +709,6 @@
   overflow-y: auto;
   overflow-x: hidden;
   background-color: var(--color-main-bg);
-  padding: 28px 32px;
 
   @include mobile-only {
     padding: var(--spacing-md);
@@ -681,7 +737,7 @@
 }
 
 .content-body {
-  max-width: 1600px;
+  max-width: var(--global-page-max-width);
   margin: 0 auto;
   width: 100%;
 }

@@ -24,7 +24,7 @@
       @if (inbox.notifications().length > 0) {
         <button class="btn btn-danger btn-sm" (click)="clearAll()">
           <mat-icon>delete_sweep</mat-icon>
-          <span>Alle loeschen</span>
+          <span>Alle löschen</span>
         </button>
       }
       <button
@@ -171,14 +171,14 @@
         </table>
       </div>
     }
+    <mat-paginator
+      [length]="filtered().length"
+      [pageSize]="pageSize()"
+      [pageIndex]="pageIndex()"
+      [pageSizeOptions]="[15, 30, 50]"
+      showFirstLastButtons
+      (page)="onPage($event)"
+      class="custom-paginator"
+    ></mat-paginator>
   </div>
-
-  <mat-paginator
-    [length]="filtered().length"
-    [pageSize]="pageSize()"
-    [pageIndex]="pageIndex()"
-    [pageSizeOptions]="[15, 25, 50]"
-    (page)="onPage($event)"
-    class="mat-paginator-modern"
-  ></mat-paginator>
 </div>

@@ -1,58 +1,64 @@
-<div class="caller-profile-page page-enter">
+<div class="caller-profile-page global-page-container page-enter">
+
   <!-- Page Header -->
   <header class="page-header">
-    <div class="page-header-left">
-      <div class="global-page-title-row">
-        <button class="btn btn-icon btn-sm" (click)="goBack()" title="Zurück">
-          <mat-icon>arrow_back</mat-icon>
-        </button>
+    <div class="header-content">
+      <div class="title-row">
+        <mat-icon class="title-icon">person_search</mat-icon>
         <h1 class="global-page-title">Anrufer-Profil</h1>
       </div>
-      <p class="page-subtitle">Vollständige Anrufhistorie für eine Telefonnummer einsehen</p>
+      <p class="subtitle">Vollständige Anrufhistorie und Profil des Anrufers</p>
     </div>
-  </header>
-
-  <!-- Phone Search Bar -->
-  <div class="card search-card">
-    <div class="search-row">
-      <div class="search-input-wrapper phone-search">
-        <mat-icon class="search-icon">phone</mat-icon>
-        <input
-          class="search-input"
-          type="tel"
-          placeholder="Telefonnummer eingeben, z.B. +4915123456789"
-          [(ngModel)]="searchInput"
-          (keydown)="onSearchKeydown($event)"
-        />
-        @if (searchInput) {
-          <button class="clear-button" (click)="clearSearch()" title="Leeren">
-            <mat-icon style="font-size: 16px; width: 16px; height: 16px">close</mat-icon>
-          </button>
-        }
-      </div>
-      <button class="btn btn-navy" (click)="onSearch()" [disabled]="isLoading()">
-        <mat-icon>search</mat-icon>
-        Suchen
+    <div class="header-actions">
+      <button class="btn btn-secondary btn-sm" (click)="goBack()">
+        <mat-icon>arrow_back</mat-icon>
+        Zurück
       </button>
     </div>
-  </div>
+  </header>
 
   <!-- Loading skeleton -->
   @if (isLoading()) {
     <div class="skeleton-container">
+      <div class="skeleton caller-skeleton" style="height: 96px; border-radius: 16px;"></div>
       <div class="stats-grid">
         @for (_ of [1, 2, 3]; track $index) {
-          <div class="card stat-card skeleton" style="height: 80px"></div>
+          <div class="skeleton" style="height: 100px; border-radius: 16px;"></div>
         }
       </div>
       @for (_ of [1, 2, 3, 4]; track $index) {
-        <div class="skeleton" style="height: 88px; border-radius: 10px; margin-bottom: 12px"></div>
+        <div class="skeleton" style="height: 88px; border-radius: 12px; margin-bottom: 10px;"></div>
       }
     </div>
   }
 
-  <!-- Results Section -->
+  <!-- Profile Content -->
   @if (!isLoading() && searchedPhone()) {
+
+    <!-- Caller Identity Card -->
+    <div class="caller-identity-card card">
+      <div class="caller-avatar">
+        <mat-icon>account_circle</mat-icon>
+      </div>
+      <div class="caller-info">
+        <div class="caller-name">
+          {{ callerName() || 'Unbekannter Anrufer' }}
+        </div>
+        <div class="caller-phone">
+          <mat-icon class="phone-icon">phone</mat-icon>
+          <span class="phone-number">{{ searchedPhone() }}</span>
+        </div>
+      </div>
+      <div class="caller-meta">
+        @if (totalCalls() > 0) {
+          <span class="caller-meta-badge">
+            <mat-icon>history</mat-icon>
+            {{ totalCalls() }} {{ totalCalls() === 1 ? 'Anruf' : 'Anrufe' }} insgesamt
+          </span>
+        }
+      </div>
+    </div>
+
     <!-- Stats Row -->
     @if (totalCalls() > 0) {
       <div class="stats-grid">
@@ -71,9 +77,7 @@
             <mat-icon>event</mat-icon>
           </div>
           <div class="stat-info">
-            <span class="stat-value">
-              {{ lastCallDate() | date: 'dd.MM.yyyy' }}
-            </span>
+            <span class="stat-value">{{ lastCallDate() | date: 'dd.MM.yyyy' }}</span>
             <span class="stat-label">Letzter Anruf</span>
           </div>
         </div>
@@ -91,86 +95,91 @@
         </div>
       </div>
 
-      <!-- Timeline -->
-      <div class="timeline-wrapper">
-        <div class="timeline-header">
+      <!-- Call List -->
+      <div class="call-list-section">
+        <div class="call-list-header">
           <h2 class="section-title">
             <mat-icon>history</mat-icon>
             Anrufverlauf
-            <span class="badge badge-neutral">{{ searchedPhone() }}</span>
           </h2>
+          <span class="badge badge-neutral count-badge">{{ totalCalls() }} Einträge</span>
         </div>
 
-        <div class="timeline">
-          @for (call of sortedCalls(); track call.id) {
-            <div class="timeline-item" (click)="navigateToDetail(call.id)">
-              <!-- Date Spine -->
-              <div class="timeline-spine">
-                <div class="spine-date">
-                  <span class="spine-day">{{ call.startTime | date: 'dd' }}</span>
-                  <span class="spine-month">{{ call.startTime | date: 'MMM' }}</span>
-                  <span class="spine-year">{{ call.startTime | date: 'yyyy' }}</span>
-                </div>
-                <div class="spine-line"></div>
+        <div class="call-list">
+          @for (call of paginatedCalls(); track call.id) {
+            <button
+              type="button"
+              class="call-list-item"
+              [class]="'call-list-item accent-' + getAccentClass(call.summaryStatus)"
+              (click)="navigateToDetail(call.id)"
+            >
+              <!-- Date/Time Column -->
+              <div class="item-date-col">
+                <span class="item-date-day">{{ call.startTime | date: 'dd.MM' }}</span>
+                <span class="item-date-time">{{ call.startTime | date: 'HH:mm' }}</span>
               </div>
 
-              <!-- Call Card -->
-              <div class="timeline-card card">
-                <div class="call-card-header">
-                  <div class="call-meta">
-                    <div class="call-time">
-                      <mat-icon class="meta-icon">schedule</mat-icon>
-                      {{ call.startTime | date: 'HH:mm' }} Uhr
-                    </div>
-                    <div class="call-duration">
-                      <mat-icon class="meta-icon">timelapse</mat-icon>
-                      {{ formatDuration(call.durationSeconds) }}
-                    </div>
-                    <div class="call-agent">
-                      <mat-icon class="meta-icon">person</mat-icon>
-                      {{ call.customerName || 'Unbekannter Anrufer' }}
-                    </div>
-                  </div>
-                  <div class="call-badges">
+              <!-- Main Content -->
+              <div class="item-content">
+                <div class="item-top-row">
+                  <span class="item-customer">
+                    <mat-icon class="item-icon">person</mat-icon>
+                    {{ call.customerName || 'Unbekannter Anrufer' }}
+                  </span>
+                  <div class="item-badges">
                     <span class="badge badge-neutral">{{ getCategoryLabel(call.category) }}</span>
                     <span class="badge" [class]="getSummaryStatusClass(call.summaryStatus)">
-                      {{ call.summaryStatus === 'Approved' ? 'Genehmigt' : 'Entwurf' }}
+                      {{ getSummaryStatusLabel(call.summaryStatus) }}
                     </span>
                   </div>
                 </div>
 
-                @if (call.approvedSummary || call.draftSummary) {
-                  <p class="call-summary line-clamp line-clamp-2">
-                    {{ call.approvedSummary || call.draftSummary }}
-                  </p>
-                } @else {
-                  <p class="call-summary no-summary">Keine Zusammenfassung verfügbar.</p>
-                }
+                <div class="item-bottom-row">
+                  <span class="item-duration">
+                    <mat-icon class="item-icon">timelapse</mat-icon>
+                    {{ formatDuration(call.durationSeconds) }}
+                  </span>
+                  @if (call.approvedSummary || call.draftSummary) {
+                    <span class="item-summary">{{ call.approvedSummary || call.draftSummary }}</span>
+                  } @else {
+                    <span class="item-summary item-summary--empty">Keine Zusammenfassung</span>
+                  }
+                </div>
 
                 @if (call.actionItems?.length) {
-                  <div class="action-items-preview">
+                  <div class="item-actions-hint">
                     <mat-icon>task_alt</mat-icon>
-                    <span
-                      >{{ call.actionItems!.length }} Folgeaktion{{
-                        call.actionItems!.length === 1 ? '' : 'en'
-                      }}</span
-                    >
+                    {{ call.actionItems!.length }}
+                    Folgeaktion{{ call.actionItems!.length === 1 ? '' : 'en' }}
                   </div>
                 }
-
-                <div class="detail-link">
-                  <mat-icon>info</mat-icon>
-                  Details anzeigen
-                </div>
               </div>
-            </div>
+
+              <!-- Chevron -->
+              <div class="item-chevron">
+                <mat-icon>chevron_right</mat-icon>
+              </div>
+            </button>
           }
         </div>
+
+        <!-- Pagination -->
+        @if (totalCalls() > pageSize()) {
+          <mat-paginator
+            [length]="totalCalls()"
+            [pageSize]="pageSize()"
+            [pageIndex]="currentPage()"
+            [pageSizeOptions]="[10, 25, 50]"
+            (page)="onPageChange($event)"
+            showFirstLastButtons
+            class="profile-paginator"
+          ></mat-paginator>
+        }
       </div>
     }
 
-    <!-- Empty State -->
-    @if (totalCalls() === 0 && !isLoading()) {
+    <!-- Empty State (phone found but no calls) -->
+    @if (totalCalls() === 0) {
       <div class="card empty-card">
         <div class="table-empty">
           <mat-icon class="empty-icon">phone_missed</mat-icon>
@@ -184,19 +193,21 @@
     }
   }
 
-  <!-- Initial State (before first search) -->
+  <!-- Initial State (no phone in URL) -->
   @if (!isLoading() && !searchedPhone()) {
     <div class="card empty-card initial-state">
       <div class="table-empty">
-        <mat-icon class="empty-icon">manage_search</mat-icon>
-        <p class="empty-text">Telefonnummer suchen</p>
+        <mat-icon class="empty-icon">person_off</mat-icon>
+        <p class="empty-text">Kein Anrufer ausgewählt</p>
         <p class="empty-hint">
-          Geben Sie eine Telefonnummer ein, um alle zugehörigen Anrufe anzuzeigen.
+          Bitte navigieren Sie über die Anrufhistorie zum Profil eines Anrufers.
         </p>
+        <button class="btn btn-secondary btn-sm" (click)="goBack()">
+          <mat-icon>arrow_back</mat-icon>
+          Zurück zur Anrufhistorie
+        </button>
       </div>
     </div>
   }
+
 </div>
-
-
-

@@ -64,29 +64,62 @@
     <div class="agent-split-view" [class.panel-open]="isPanelOpen()">
       <!-- Left: Scrollable Agent List -->
       <div class="agent-list-section">
-        @for (agent of agents(); track agent.agentId) {
-          <button
-            type="button"
-            class="agent-list-row"
-            [class.selected]="selectedAgent()?.agentId === agent.agentId"
-            (click)="onAgentClick(agent)"
-          >
-            <div class="agent-avatar">{{ agent.agentName.split(' ').map(n => n[0]).join('') }}</div>
-            <div class="agent-list-meta">
-              <span class="agent-list-name">{{ agent.agentName }}</span>
-              <span class="agent-list-stat"
-                >{{ agent.totalCalls }} Anrufe · Ø
-                {{ formatDuration(agent.averageDurationSeconds) }}</span
-              >
-            </div>
-            <mat-icon class="row-chevron">chevron_right</mat-icon>
-          </button>
-        } @empty {
-          <div class="list-empty-state">
-            <mat-icon>insights</mat-icon>
-            <p>Keine Aktivitätsdaten für diesen Zeitraum.</p>
+        <div class="list-search-row">
+          <div class="search-input-wrapper">
+            <mat-icon class="search-icon">search</mat-icon>
+            <input
+              class="search-input"
+              type="text"
+              placeholder="Mitarbeiter suchen"
+              [ngModel]="searchInput()"
+              (ngModelChange)="onSearch($event)"
+            />
           </div>
-        }
+        </div>
+
+        <div class="agent-list-scroll">
+          @for (agent of pagedAgents(); track agent.agentId) {
+            <button
+              type="button"
+              class="agent-list-row"
+              [class.selected]="selectedAgent()?.agentId === agent.agentId"
+              (click)="onAgentClick(agent)"
+            >
+              <div class="agent-avatar">
+                {{ agent.agentName.split(' ').map(n => n[0]).join('') }}
+              </div>
+              <div class="agent-list-meta">
+                <span class="agent-list-name">{{ agent.agentName }}</span>
+                <span class="agent-list-stat"
+                  >{{ agent.totalCalls }} Anrufe · Ø
+                  {{ formatDuration(agent.averageDurationSeconds) }}</span
+                >
+              </div>
+              <mat-icon class="row-chevron">chevron_right</mat-icon>
+            </button>
+          } @empty {
+            <div class="list-empty-state">
+              <mat-icon>insights</mat-icon>
+              <p>
+                @if (searchInput()) {
+                  Keine Mitarbeiter für die Suche gefunden.
+                } @else {
+                  Keine Aktivitätsdaten für diesen Zeitraum.
+                }
+              </p>
+            </div>
+          }
+        </div>
+
+        <mat-paginator
+          [length]="filteredAgents().length"
+          [pageSize]="pageSize()"
+          [pageIndex]="pageIndex()"
+          [pageSizeOptions]="pageSizeOptions"
+          showFirstLastButtons
+          class="custom-paginator"
+          (page)="onPage($event)"
+        ></mat-paginator>
       </div>
 
       <!-- Right: Detail Panel -->
@@ -168,7 +201,3 @@
     </div>
   }
 </div>
-
-
-
-

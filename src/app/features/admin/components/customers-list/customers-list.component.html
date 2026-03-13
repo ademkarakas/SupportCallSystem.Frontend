@@ -15,27 +15,27 @@
     </div>
   </header>
 
-  <!-- Search & Filters -->
-  <div class="filters-bar">
-    <mat-form-field appearance="outline" class="search-field">
-      <mat-label>Suche (Name, Telefon, Firma...)</mat-label>
-      <mat-icon matPrefix>search</mat-icon>
-      <input
-        matInput
-        [ngModel]="search"
-        (ngModelChange)="onSearchInput($event)"
-        (keydown)="onSearchKeydown($event)"
-      />
-    </mat-form-field>
-
-    <div class="deleted-toggle">
-      <mat-checkbox [(ngModel)]="includeDeleted" (change)="onIncludeDeletedChange()">
-        Gelöschte anzeigen
-      </mat-checkbox>
-    </div>
-  </div>
-
+  <!-- Search & Filters + Table inside one card -->
   <div class="content-container">
+    <div class="filters-bar">
+      <div class="search-input-wrapper">
+        <mat-icon class="search-icon">search</mat-icon>
+        <input
+          class="search-input"
+          type="text"
+          placeholder="Name, Telefon oder Firma suchen"
+          [ngModel]="search"
+          (ngModelChange)="onSearchInput($event)"
+          (keydown)="onSearchKeydown($event)"
+        />
+      </div>
+
+      <div class="deleted-toggle">
+        <mat-checkbox [(ngModel)]="includeDeleted" (change)="onIncludeDeletedChange()">
+          Gelöschte anzeigen
+        </mat-checkbox>
+      </div>
+    </div>
     @if (isLoading()) {
       <div class="loading-state">
         <mat-icon class="spinner">sync</mat-icon>
@@ -86,21 +86,15 @@
         </table>
       </div>
 
-      <!-- Pagination -->
-      @if (totalPages() > 1) {
-        <div class="pagination">
-          <button mat-icon-button [disabled]="page <= 1" (click)="prevPage()">
-            <mat-icon>chevron_left</mat-icon>
-          </button>
-          <span class="page-info">Seite {{ page }} von {{ totalPages() }}</span>
-          <button mat-icon-button [disabled]="page >= totalPages()" (click)="nextPage()">
-            <mat-icon>chevron_right</mat-icon>
-          </button>
-        </div>
-      }
+      <mat-paginator
+        [length]="totalCount()"
+        [pageSize]="pageSize"
+        [pageIndex]="page - 1"
+        [pageSizeOptions]="[15, 30, 50]"
+        showFirstLastButtons
+        class="custom-paginator"
+        (page)="onPage($event)"
+      ></mat-paginator>
     }
   </div>
 </div>
-
-
-

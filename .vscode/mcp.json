@@ -1,18 +1,15 @@
 {
-	"servers": {
-		"angular-cli": {
-			"command": "npx",
-			"args": [
-				"-y",
-				"@angular/cli",
-				"mcp"
-			],
-			"type": "stdio"
-		},
-		"context7": {
-      "type": "http",
-      "url": "https://mcp.context7.com/mcp",      
+  "servers": {
+    "angular-cli": {
+      "command": "npx",
+      "args": ["-y", "@angular/cli", "mcp"],
+      "type": "stdio"
+    },
+    "context7": {
+      "command": "npx",
+      "args": ["-y", "@upstash/context7-mcp"],
+      "type": "stdio"
     }
-	},
-	"inputs": []
+  },
+  "inputs": []
 }

@@ -18,6 +18,7 @@ import { CallApiService, CallRecord } from '../../services/call-api.service';
 import { NotificationService } from '../../../../core/services/notification.service';
 import { AuthService } from '../../../../core/services/auth.service';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
+import { AdminApiService } from '../../../admin/services/admin-api.service';
 
 @Component({
   selector: 'app-call-history',
@@ -48,6 +49,7 @@ export class CallHistoryComponent implements OnInit, AfterViewInit {
   notification = inject(NotificationService);
   route = inject(ActivatedRoute);
   router = inject(Router);
+  adminApi = inject(AdminApiService);
 
   dataSource = new MatTableDataSource<CallRecord>([]);
   displayedColumns: string[] = [
@@ -223,10 +225,45 @@ export class CallHistoryComponent implements OnInit, AfterViewInit {
     this.router.navigate(['/calls/detail'], { queryParams: { id: callId } });
   }
 
-  viewCallerProfile(callerNumber: string | undefined, event: Event): void {
+  viewCallerProfile(call: CallRecord, event: Event): void {
     event.stopPropagation();
+    const callerNumber = call.callerNumber?.trim();
     if (!callerNumber) {
-      this.notification.showError('Keine Telefonnummer für diesen Anruf gespeichert.');
+      this.callApi.getCallById(call.id).subscribe({
+        next: (freshCall) => {
+          const resolvedCallerNumber = freshCall?.callerNumber?.trim();
+          if (!resolvedCallerNumber) {
+            const customerId = freshCall?.customerId;
+            if (!customerId) {
+              this.notification.showError('Keine Telefonnummer für diesen Anruf gespeichert.');
+              return;
+            }
+
+            this.adminApi.getCustomerById(customerId).subscribe({
+              next: (customer) => {
+                const customerPhone = customer.phoneNumber?.trim();
+                if (!customerPhone) {
+                  this.notification.showError('Keine Telefonnummer für diesen Anruf gespeichert.');
+                  return;
+                }
+                this.router.navigate(['/calls/caller-profile'], {
+                  queryParams: { phone: customerPhone },
+                });
+              },
+              error: () => {
+                this.notification.showError('Keine Telefonnummer für diesen Anruf gespeichert.');
+              },
+            });
+            return;
+          }
+          this.router.navigate(['/calls/caller-profile'], {
+            queryParams: { phone: resolvedCallerNumber },
+          });
+        },
+        error: () => {
+          this.notification.showError('Anrufer-Profil konnte nicht geladen werden.');
+        },
+      });
       return;
     }
     this.router.navigate(['/calls/caller-profile'], { queryParams: { phone: callerNumber } });
@@ -298,12 +335,12 @@ export class CallHistoryComponent implements OnInit, AfterViewInit {
       this.notification.showError('Keine Daten zum Exportieren.');
       return;
     }
-    
+
     // Quick and dirty print to PDF approach natively
     const pw = window.open('', '_blank');
     if (!pw) return;
 
-    const headers = ['Kunde', 'Telefon', 'Kategorie', 'Status', 'Datum', 'Dauer (s)' ];
+    const headers = ['Kunde', 'Telefon', 'Kategorie', 'Status', 'Datum', 'Dauer (s)'];
     let html = `<html><head><title>Anrufhistorie</title>
       <style>
         body { font-family: sans-serif; padding: 20px; }
@@ -315,10 +352,10 @@ export class CallHistoryComponent implements OnInit, AfterViewInit {
     </head><body>
     <h1>Anrufhistorie</h1>
     <table><thead><tr>`;
-    html += headers.map(h => `<th>${h}</th>`).join('');
+    html += headers.map((h) => `<th>${h}</th>`).join('');
     html += `</tr></thead><tbody>`;
 
-    data.forEach(call => {
+    data.forEach((call) => {
       html += `<tr>
         <td>${call.customerName || 'Manueller Eintrag'}</td>
         <td>${call.callerNumber || ''}</td>
@@ -339,4 +376,3 @@ export class CallHistoryComponent implements OnInit, AfterViewInit {
     }, 250);
   }
 }
-

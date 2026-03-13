@@ -49,14 +49,16 @@ export class QuickAccessComponent implements OnInit {
     switch (type) {
       case 'agent':
         this.dialog.open(UserSettingsDialogComponent, {
-          width: '600px',
-          maxWidth: '96vw',
-          maxHeight: '94vh',
+          width: '700px',
+          maxWidth: '95vw',
+          maxHeight: '90vh',
           panelClass: 'user-settings-dialog',
+          disableClose: false,
+          autoFocus: 'first-tabbable',
         });
         break;
       case 'kunden':
-        this.router.navigate(['/calls/caller-profile']);
+        this.router.navigate(['/calls/customers']);
         break;
       case 'notizen':
         this.router.navigate(['/calls/history']);

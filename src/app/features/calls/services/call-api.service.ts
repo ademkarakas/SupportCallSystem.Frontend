@@ -24,6 +24,8 @@ export interface CallRecord {
 
 export interface UpdateCallDto {
   draftSummary?: string;
+  approvedSummary?: string;
+  updatedByUserId?: string;
   category?: string;
   actionItems?: string[];
   nfonCallId?: string;
@@ -62,6 +64,7 @@ export class CallApiService {
     customerId: string | null;
     agentUserId: string;
     nfonCallId?: string;
+    callerNumber?: string;
   }): Observable<{ callId: string }> {
     return this.http.post<{ callId: string }>(`${this.baseUrl}/start`, request);
   }

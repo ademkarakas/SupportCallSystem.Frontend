@@ -1,5 +1,6 @@
 import { Component, inject, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
@@ -18,7 +19,15 @@ type FilterTab = 'all' | 'unread' | 'incoming_call' | 'summary_ready' | 'transcr
 @Component({
   selector: 'app-notification-inbox',
   standalone: true,
-  imports: [CommonModule, MatIconModule, MatButtonModule, MatSlideToggleModule, MatTooltipModule, MatPaginatorModule],
+  imports: [
+    CommonModule,
+    FormsModule,
+    MatIconModule,
+    MatButtonModule,
+    MatSlideToggleModule,
+    MatTooltipModule,
+    MatPaginatorModule,
+  ],
   templateUrl: './notification-inbox.component.html',
   styleUrls: ['./notification-inbox.component.scss'],
 })
@@ -27,6 +36,7 @@ export class NotificationInboxComponent {
   readonly inbox = inject(NotificationInboxService);
 
   activeTab = signal<FilterTab>('all');
+  searchInput = signal('');
   showSettings = signal(false);
 
   pageIndex = signal(0);
@@ -44,10 +54,25 @@ export class NotificationInboxComponent {
 
   readonly filtered = computed(() => {
     const tab = this.activeTab();
-    const all = this.inbox.notifications();
-    if (tab === 'all') return all;
-    if (tab === 'unread') return all.filter((n) => !n.read);
-    return all.filter((n) => n.type === tab);
+    const query = this.searchInput().trim().toLowerCase();
+
+    let items = this.inbox.notifications();
+    if (tab === 'unread') {
+      items = items.filter((n) => !n.read);
+    } else if (tab !== 'all') {
+      items = items.filter((n) => n.type === tab);
+    }
+
+    if (!query) return items;
+
+    return items.filter((n) => {
+      const typeText = String(n.type).replace('_', ' ').toLowerCase();
+      return (
+        n.title.toLowerCase().includes(query) ||
+        n.message.toLowerCase().includes(query) ||
+        typeText.includes(query)
+      );
+    });
   });
 
   readonly tabs: { key: FilterTab; label: string; icon: string }[] = [
@@ -60,6 +85,12 @@ export class NotificationInboxComponent {
 
   setTab(tab: FilterTab): void {
     this.activeTab.set(tab);
+    this.pageIndex.set(0);
+  }
+
+  onSearch(value: string): void {
+    this.searchInput.set(value);
+    this.pageIndex.set(0);
   }
 
   tabCount(tab: FilterTab): number {
@@ -123,5 +154,3 @@ export class NotificationInboxComponent {
     this.inbox.updateSettings({ [key]: value });
   }
 }
-
-

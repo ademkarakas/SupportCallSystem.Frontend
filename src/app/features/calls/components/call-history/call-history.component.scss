@@ -3,7 +3,7 @@
 .call-history-page {
   display: flex;
   flex-direction: column;
-  gap: var(--spacing-xl);
+  gap: var(--page-section-gap);
 
   @media (max-width: 640px) {
     gap: var(--spacing-md);
@@ -92,7 +92,7 @@
   align-items: flex-start;
   gap: var(--spacing-md);
 
-  @media (max-width: 768px) {
+  @media (max-width: 700px) {
     padding: var(--spacing-md);
     flex-direction: column;
   }
@@ -105,12 +105,15 @@
   flex: 1 1 320px;
   height: 56px;
 
-  .search-input { height: 56px; border-radius: var(--radius-md) !important; }
+  .search-input {
+    height: 56px;
+    border-radius: var(--radius-md) !important;
+  }
   .search-input-wrapper {
     flex: 1;
     max-width: 400px;
 
-    @media (max-width: 768px) {
+    @media (max-width: 700px) {
       max-width: 100%;
     }
   }
@@ -190,7 +193,7 @@
     max-width: 180px;
   }
 
-  @media (max-width: 768px) {
+  @media (max-width: 700px) {
     .filter-field,
     .filter-field-date {
       min-width: calc(50% - var(--spacing-sm));
@@ -383,28 +386,7 @@
 // ============================================================================
 // PAGINATOR
 // ============================================================================
-
-.custom-paginator {
-  background: transparent !important;
-  border-top: 1px solid var(--color-table-border);
-
-  ::ng-deep {
-    .mat-mdc-paginator-container {
-      min-height: 52px !important;
-      padding: 0 16px !important;
-    }
-
-    .mat-mdc-paginator-range-label {
-      font-size: 12px;
-      color: var(--color-text-secondary);
-    }
-
-    .mat-mdc-select-value {
-      font-size: 12px;
-      color: var(--color-text-secondary);
-    }
-  }
-}
+// Styles are in global styles.scss (.custom-paginator)
 
 // ============================================================================
 // MOBILE CARD VIEW
@@ -591,5 +573,3 @@
     flex-wrap: wrap;
   }
 }
-
-

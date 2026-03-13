@@ -145,7 +145,8 @@
   --nav-item-height: 48px;
   --sub-nav-item-height: 40px;
   --global-page-padding: 32px 40px;
-  --global-page-max-width: 1600px;
+  --global-page-max-width: 100% !important;
+  --page-section-gap: 1.5rem;
 
   // === Z-INDEX ===
   --z-base: 1;
@@ -2054,5 +2055,58 @@ select {
   .mat-mdc-select-value {
     display: flex;
     justify-content: center;
+  }
+}
+
+/* Shared paginator style for all list pages */
+.custom-paginator {
+  background: #fff;
+  border-top: 1px solid var(--color-table-border);
+
+  .mat-mdc-paginator-container {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 48px;
+    padding: 0 16px;
+  }
+
+  /* LEFT SIDE */
+  .mat-mdc-paginator-page-size {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-right: auto;
+    font-size: 12px;
+    color: var(--color-text-secondary);
+  }
+
+  .mat-mdc-select-value {
+    font-size: 12px;
+    color: var(--color-text-secondary);
+  }
+
+  /* RIGHT SIDE */
+  .mat-mdc-paginator-range-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-left: auto;
+  }
+
+  .mat-mdc-paginator-range-label {
+    font-size: 12px;
+    color: var(--color-text-secondary);
+    margin: 0 8px;
+  }
+
+  /* ICON BUTTONS */
+  .mat-mdc-icon-button {
+    width: 32px;
+    height: 32px;
+  }
+  .mat-mdc-paginator-page-size-label {
+    font-size: 12px;
+    color: var(--color-text-secondary);
   }
 }

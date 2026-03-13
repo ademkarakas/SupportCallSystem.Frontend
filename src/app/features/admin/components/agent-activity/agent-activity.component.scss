@@ -5,6 +5,9 @@
 .activity-page {
   width: 100%;
   box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  gap: var(--page-section-gap);
 }
 
 // Header
@@ -12,7 +15,6 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 36px;
   gap: 16px;
 
   .header-content {
@@ -205,8 +207,24 @@
   background: #fff;
   border: 1px solid rgba(0, 0, 0, 0.09);
   border-radius: 16px;
-  overflow-y: auto;
-  overflow-x: hidden;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+
+  .list-search-row {
+    padding: 12px 16px;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+
+    .search-input-wrapper {
+      max-width: 280px;
+    }
+  }
+
+  .agent-list-scroll {
+    flex: 1;
+    overflow-y: auto;
+    overflow-x: hidden;
+  }
 
   &::-webkit-scrollbar {
     width: 5px;
@@ -214,6 +232,16 @@
   &::-webkit-scrollbar-thumb {
     background: rgba(0, 0, 0, 0.12);
     border-radius: 3px;
+  }
+}
+
+@media (max-width: 768px) {
+  .agent-list-section {
+    .list-search-row {
+      .search-input-wrapper {
+        max-width: 100%;
+      }
+    }
   }
 }
 
