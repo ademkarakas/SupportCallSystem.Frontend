@@ -111,16 +111,15 @@
           }
         </tbody>
       </table>
+      <mat-paginator
+        [length]="filteredEntries().length"
+        [pageSize]="pageSize()"
+        [pageIndex]="pageIndex()"
+        [pageSizeOptions]="[15, 30, 50]"
+        showFirstLastButtons
+        (page)="onPage($event)"
+        class="custom-paginator"
+      ></mat-paginator>
     </div>
-
-    <mat-paginator
-      [length]="filteredEntries().length"
-      [pageSize]="pageSize()"
-      [pageIndex]="pageIndex()"
-      [pageSizeOptions]="[15, 30, 50]"
-      showFirstLastButtons
-      (page)="onPage($event)"
-      class="custom-paginator"
-    ></mat-paginator>
   }
 </div>

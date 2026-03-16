@@ -11,19 +11,27 @@
     </div>
 
     <div class="panel-content">
+      <!-- NFON CTI Status -->
+      <div class="debug-section nfon-status-section">
+        <label class="section-label">NFON CTI Status</label>
+        <div class="nfon-status-badge" [ngClass]="nfonStatusClass()">
+          <mat-icon>{{ nfonStatusIcon() }}</mat-icon>
+          <span>{{ nfonStatusLabel() }}</span>
+        </div>
+        @if (!nfonConnected()) {
+          <p class="status-tip">
+            <mat-icon>info</mat-icon>
+            Für das echte NFON fügen Sie die Zugangsdaten in der
+            <code>appsettings.json</code> hinzu.
+          </p>
+        }
+      </div>
+
       <div class="debug-section">
-        <label class="section-label">Webhooks</label>
+        <label class="section-label">Simulation (Mock)</label>
         <button class="btn btn-primary w-full" (click)="triggerCall()" [disabled]="isLoading()">
           <mat-icon>mic</mat-icon>
           Incoming Call (Real Mic)
-        </button>
-        <button
-          class="btn btn-secondary w-full mt-2"
-          (click)="triggerCallWithMockData()"
-          [disabled]="isLoading()"
-        >
-          <mat-icon>phone_callback</mat-icon>
-          Incoming Call (Demo / Mock Data)
         </button>
       </div>
 
