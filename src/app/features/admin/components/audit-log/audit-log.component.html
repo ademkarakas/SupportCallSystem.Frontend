@@ -4,7 +4,7 @@
       <mat-icon class="page-icon">security</mat-icon>
       <div>
         <div class="title-row">
-          <h1 class="global-page-title">Audit Log</h1>
+          <h1 class="global-page-title">Prüfprotokoll</h1>
           @if (!isLoading()) {
             <span class="count-badge">{{ filteredEntries().length }} Einträge</span>
           }
@@ -87,7 +87,7 @@
                 </span>
               </td>
               <td class="entity-cell">
-                <span>{{ entry.entityType }}</span>
+                <span>{{ translateAction(entry.entityType) }}</span>
                 @if (entry.entityId) {
                   <span class="entity-id" [matTooltip]="entry.entityId">
                     {{ entry.entityId | slice: 0 : 8 }}…
@@ -102,7 +102,9 @@
             @if (expandedId() === entry.id && entry.details) {
               <tr class="detail-row">
                 <td colspan="5">
-                  <div class="detail-content"><strong>Details:</strong> {{ entry.details }}</div>
+                  <div class="detail-content">
+                    <strong>Einzelheiten:</strong> {{ entry.details }}
+                  </div>
                 </td>
               </tr>
             }

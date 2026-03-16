@@ -110,16 +110,26 @@ export class AuditLogComponent implements OnInit {
     const map: Record<string, string> = {
       CREATE_USER: 'Benutzer erstellt',
       UPDATE_USER: 'Benutzer aktualisiert',
-      DELETE_USER: 'Benutzer gel + [char]0xF6 + scht',
+      DELETE_USER: 'Benutzer gelöscht',
       USER_CREATED: 'Benutzer erstellt',
       USER_UPDATED: 'Benutzer aktualisiert',
-      USER_DELETED: 'Benutzer gel + [char]0xF6 + scht',
+      USER_DELETED: 'Benutzer gelöscht',
       CALL_STARTED: 'Anruf gestartet',
       CALL_ENDED: 'Anruf beendet',
       LOGIN: 'Anmeldung',
       LOGOUT: 'Abmeldung',
       SECURITY_ALERT: 'Sicherheitswarnung',
       SYSTEM_ERROR: 'Systemfehler',
+      CUSTOMER_CREATED: 'Kunde erstellt',
+      CUSTOMER_UPDATED: 'Kunde aktualisiert',
+      CUSTOMER_DELETED: 'Kunde gelöscht',
+      CONSENT_GRANTED: 'Einwilligung erteilt',
+      CONSENT_DECLINED: 'Einwilligung abgelehnt',
+      SUMMARY_APPROVED: 'Zusammenfassung genehmigt',
+      SUMMARY_REJECTED: 'Zusammenfassung abgelehnt',
+      SUMMARY_EDITED: 'Zusammenfassung bearbeitet',
+      AI_SUMMARY_GENERATED: 'KI-Zusammenfassung generiert',
+      CallRecord: 'Anrufprotokoll',
     };
     return map[action.toUpperCase()] ?? action;
   }

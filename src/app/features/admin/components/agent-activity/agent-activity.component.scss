@@ -194,15 +194,19 @@
 .agent-split-view {
   display: flex;
   gap: 20px;
+  align-items: flex-start;
+  overflow: hidden;
   width: 100%;
   height: calc(100vh - 380px);
   min-height: 320px;
 }
 
 .agent-list-section {
-  flex: 1 1 auto;
-  width: 100%;
+  flex: 1;
   min-width: 0;
+  transition:
+    flex 0.25s ease,
+    width 0.25s ease;
 
   background: #fff;
   border: 1px solid rgba(0, 0, 0, 0.09);
@@ -452,8 +456,10 @@
   align-items: center;
   justify-content: center;
   height: 100%;
+  width: 100%;
   gap: 12px;
   text-align: center;
+  background: #fff;
 
   mat-icon {
     font-size: 48px;
@@ -480,7 +486,9 @@
 
   .agent-panel-section {
     width: 100%;
+    flex: 0 0 auto;
     height: 0;
+    overflow: hidden;
     transition: height 0.35s ease;
 
     &.visible {

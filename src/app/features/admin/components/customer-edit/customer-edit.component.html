@@ -166,11 +166,19 @@
             }
           </div>
 
-          <div class="form-field">
-            <label for="e-phone">Telefonnummer</label>
-            <div class="input-wrap input-wrap--readonly">
-              <input id="e-phone" [value]="customerPhone()" type="tel" readonly />
+          <div class="form-field" [class.has-error]="isInvalid('edit', 'phoneNumber')">
+            <label for="e-phone">Telefonnummer <span class="required">*</span></label>
+            <div class="input-wrap">
+              <input
+                id="e-phone"
+                formControlName="phoneNumber"
+                type="tel"
+                placeholder="+49 123 456789"
+              />
             </div>
+            @if (isInvalid('edit', 'phoneNumber')) {
+              <span class="error-msg">Telefonnummer ist erforderlich</span>
+            }
           </div>
 
           <div class="form-field full-width">
@@ -260,7 +268,7 @@
                 </div>
                 <div class="panel-row">
                   <span class="panel-label">Status</span>
-                  <span class="panel-value">{{ call.summaryStatus }}</span>
+                  <span class="panel-value">{{ getSummaryStatusLabel(call.summaryStatus) }}</span>
                 </div>
 
                 @if (call.summary) {

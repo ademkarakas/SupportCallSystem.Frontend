@@ -124,6 +124,25 @@ export class CallHistoryComponent implements OnInit, AfterViewInit {
   }
 
   ngAfterViewInit() {
+    this.dataSource.sortingDataAccessor = (
+      data: CallRecord,
+      sortHeaderId: string,
+    ): string | number => {
+      switch (sortHeaderId) {
+        case 'customer':
+          return (data.customerName || '').toLowerCase();
+        case 'category':
+          return (this.categoryLabels[data.category] || data.category || 'Unbekannt').toLowerCase();
+        case 'summaryStatus':
+          return this.getSummaryStatusLabel(data.summaryStatus).toLowerCase();
+        case 'startTime':
+          return new Date(data.startTime).getTime();
+        case 'duration':
+          return data.durationSeconds;
+        default:
+          return '';
+      }
+    };
     this.dataSource.paginator = this.paginator();
     this.dataSource.sort = this.sort();
   }
@@ -201,7 +220,7 @@ export class CallHistoryComponent implements OnInit, AfterViewInit {
         this.isLoading = false;
       },
       error: () => {
-        this.notification.showError('Could not retrieve call logs.');
+        this.notification.showError('Anrufhistorie konnte nicht geladen werden.');
         this.isLoading = false;
       },
     });
@@ -215,7 +234,7 @@ export class CallHistoryComponent implements OnInit, AfterViewInit {
         this.isLoading = false;
       },
       error: () => {
-        this.notification.showError('Could not retrieve call logs.');
+        this.notification.showError('Anrufhistorie konnte nicht geladen werden.');
         this.isLoading = false;
       },
     });
@@ -312,7 +331,7 @@ export class CallHistoryComponent implements OnInit, AfterViewInit {
     const rows = data.map((call) => [
       call.customerName || 'Manueller Eintrag',
       call.callerNumber || '',
-      call.category || 'Unknown',
+      this.categoryLabels[call.category] || 'Unbekannt',
       this.getSummaryStatusLabel(call.summaryStatus),
       new Date(call.startTime).toLocaleString('de-DE'),
       String(call.durationSeconds),
@@ -359,7 +378,7 @@ export class CallHistoryComponent implements OnInit, AfterViewInit {
       html += `<tr>
         <td>${call.customerName || 'Manueller Eintrag'}</td>
         <td>${call.callerNumber || ''}</td>
-        <td>${call.category || 'Unknown'}</td>
+        <td>${this.categoryLabels[call.category] || 'Unbekannt'}</td>
         <td>${this.getSummaryStatusLabel(call.summaryStatus)}</td>
         <td>${new Date(call.startTime).toLocaleString('de-DE')}</td>
         <td>${call.durationSeconds}</td>

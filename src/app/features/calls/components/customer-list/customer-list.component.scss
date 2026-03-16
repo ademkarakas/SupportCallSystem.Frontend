@@ -1,5 +1,4 @@
 .call-customers-page {
-  max-width: 1400px;
   display: flex;
   flex-direction: column;
   gap: var(--spacing-lg);
@@ -67,24 +66,13 @@
   }
 }
 
-.customer-link {
-  border: none;
-  background: transparent;
-  padding: 0;
-  font: inherit;
-  color: var(--color-text-primary);
+.clickable-row {
   cursor: pointer;
-  text-decoration: underline;
-  text-underline-offset: 2px;
-
-  &:hover {
-    color: var(--color-brand);
-  }
 }
 
-.actions-cell {
-  text-align: right;
-  white-space: nowrap;
+.customer-name-text {
+  font-weight: 500;
+  color: var(--color-text-primary);
 }
 
 @keyframes spin {

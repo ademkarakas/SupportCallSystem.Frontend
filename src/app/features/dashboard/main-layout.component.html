@@ -84,7 +84,7 @@
           <li class="nav-item">
             <a routerLink="/admin/audit-log" routerLinkActive="active">
               <mat-icon>security</mat-icon>
-              <span class="label">Audit Log</span>
+              <span class="label">Prüfprotokoll</span>
             </a>
           </li>
         }
@@ -139,7 +139,7 @@
         <button
           class="btn-icon theme-toggle"
           (click)="toggleTheme()"
-          [title]="theme.isDarkMode() ? 'Light Mode' : 'Dark Mode'"
+          [title]="theme.isDarkMode() ? 'Heller Modus' : 'Dunkler Modus'"
         >
           <mat-icon>{{ theme.isDarkMode() ? 'light_mode' : 'dark_mode' }}</mat-icon>
         </button>

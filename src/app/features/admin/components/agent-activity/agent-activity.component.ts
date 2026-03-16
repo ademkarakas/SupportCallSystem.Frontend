@@ -84,8 +84,14 @@ export class AgentActivityComponent implements OnInit {
   }
 
   onAgentClick(agent: AgentActivityRow): void {
-    this.selectedAgent.set(agent);
-    this.isPanelOpen.set(true);
+    const selected = this.selectedAgent();
+
+    if (selected?.agentId === agent.agentId) {
+      this.onPanelClose();
+    } else {
+      this.selectedAgent.set(agent);
+      this.isPanelOpen.set(true);
+    }
   }
 
   onPanelClose(): void {
@@ -123,6 +129,7 @@ export class AgentActivityComponent implements OnInit {
 
   getCategoryLabel(category: string): string {
     const map: Record<string, string> = {
+      Unknown: 'Unbekannt',
       TechnicalIssue: 'Technisch',
       BillingQuestion: 'Abrechnung',
       AccessCredentials: 'Zugangsdaten',

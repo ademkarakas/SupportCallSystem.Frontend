@@ -77,6 +77,7 @@ select.filter-input {
     margin-left: auto;
     display: flex;
     justify-content: flex-end;
+    flex: 1;
 
     @media (max-width: 768px) {
       margin-left: 0;

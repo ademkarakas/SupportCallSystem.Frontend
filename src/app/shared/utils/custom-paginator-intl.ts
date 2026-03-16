@@ -14,10 +14,9 @@ export function getGermanPaginatorIntl() {
       return '0 von ' + length;
     }
     const startIndex = page * pageSize;
-    const endIndex = startIndex < length
-      ? Math.min(startIndex + pageSize, length)
-      : startIndex + pageSize;
-    return (startIndex + 1) + ' \u2013 ' + endIndex + ' von ' + length;
+    const endIndex =
+      startIndex < length ? Math.min(startIndex + pageSize, length) : startIndex + pageSize;
+    return startIndex + 1 + '-' + endIndex + ' von ' + length;
   };
 
   return paginatorIntl;

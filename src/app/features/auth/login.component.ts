@@ -68,7 +68,7 @@ export class LoginComponent {
               queryParams: { userId: response.pendingUserId },
             });
           } else {
-            this.notificationService.showSuccess('Login successful');
+            this.notificationService.showSuccess('Anmeldung erfolgreich.');
             const returnUrl = this.route.snapshot.queryParams['returnUrl'] || '/dashboard';
             this.router.navigateByUrl(returnUrl);
           }

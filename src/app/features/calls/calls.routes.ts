@@ -22,7 +22,7 @@ export const CALLS_ROUTES: Routes = [
     path: 'customers',
     loadComponent: () =>
       import('./components/customer-list/customer-list.component').then(
-        (m) => m.CallCustomersListComponent,
+        (m) => m.CustomerCallsHistoryComponent,
       ),
   },
   {

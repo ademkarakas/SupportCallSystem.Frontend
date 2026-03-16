@@ -3,7 +3,6 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { MatIconModule } from '@angular/material/icon';
-import { MatButtonModule } from '@angular/material/button';
 import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
 import { CallApiService, CallRecord } from '../../services/call-api.service';
 import { AdminApiService } from '../../../admin/services/admin-api.service';
@@ -19,12 +18,12 @@ interface CustomerListItem {
 }
 
 @Component({
-  selector: 'app-call-customers-list',
-  imports: [CommonModule, FormsModule, MatIconModule, MatButtonModule, MatPaginatorModule],
+  selector: 'app-customer-calls-history',
+  imports: [CommonModule, FormsModule, MatIconModule, MatPaginatorModule],
   templateUrl: './customer-list.component.html',
   styleUrls: ['./customer-list.component.scss'],
 })
-export class CallCustomersListComponent implements OnInit {
+export class CustomerCallsHistoryComponent implements OnInit {
   private readonly callApi = inject(CallApiService);
   private readonly adminApi = inject(AdminApiService);
   private readonly auth = inject(AuthService);

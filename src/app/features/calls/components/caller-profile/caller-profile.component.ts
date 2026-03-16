@@ -98,6 +98,7 @@ export class CallerProfileComponent implements OnInit {
 
   getCategoryLabel(category: string): string {
     const map: Record<string, string> = {
+      Unknown: 'Unbekannt',
       TechnicalIssue: 'Technisches Problem',
       BillingQuestion: 'Abrechnung',
       AccessCredentials: 'Zugangsdaten',

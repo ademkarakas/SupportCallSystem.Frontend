@@ -162,6 +162,8 @@ export class CallDetailComponent implements OnInit {
         return 'Genehmigt';
       case 'Draft':
         return 'Entwurf';
+      case 'None':
+        return 'Kein Entwurf';
       default:
         return status || 'Ausstehend';
     }
@@ -173,9 +175,23 @@ export class CallDetailComponent implements OnInit {
         return 'badge-active';
       case 'Draft':
         return 'badge-neutral';
+      case 'None':
+        return 'badge-inactive';
       default:
         return 'badge-inactive';
     }
+  }
+  getCategoryLabel(category: string): string {
+    const map: Record<string, string> = {
+      Unknown: 'Unbekannt',
+      TechnicalIssue: 'Technisches Problem',
+      BillingQuestion: 'Abrechnung',
+      AccessCredentials: 'Zugangsdaten',
+      GeneralInquiry: 'Allgemeine Anfrage',
+      Complaint: 'Beschwerde',
+      FeatureRequest: 'Funktionswunsch',
+    };
+    return map[category] ?? category ?? 'Unbekannt';
   }
 
   formatDuration(seconds: number): string {

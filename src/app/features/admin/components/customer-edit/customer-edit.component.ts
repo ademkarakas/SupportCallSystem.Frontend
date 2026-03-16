@@ -33,10 +33,10 @@ export class CustomerEditComponent implements OnInit {
   isHistoryLoading = signal(false);
   selectedCall = signal<CallHistoryItemDto | null>(null);
   isPanelOpen = signal(false);
-  customerPhone = signal<string>('');
 
   // Edit form (existing customer)
   editForm = this.fb.nonNullable.group({
+    phoneNumber: ['', Validators.required],
     firstName: ['', Validators.required],
     lastName: ['', Validators.required],
     email: ['', Validators.email],
@@ -73,12 +73,12 @@ export class CustomerEditComponent implements OnInit {
     this.adminApi.getCustomerById(id).subscribe({
       next: (c) => {
         this.editForm.patchValue({
+          phoneNumber: c.phoneNumber,
           firstName: c.firstName,
           lastName: c.lastName,
           email: c.email ?? '',
           company: c.company ?? '',
         });
-        this.customerPhone.set(c.phoneNumber);
         this.originalValues = this.editForm.getRawValue();
         this.isLoading.set(false);
         this.loadCallHistory(id);
@@ -104,8 +104,13 @@ export class CustomerEditComponent implements OnInit {
   }
 
   onCallClick(call: CallHistoryItemDto) {
-    this.selectedCall.set(call);
-    this.isPanelOpen.set(true);
+    const current = this.selectedCall();
+    if (current && current.id === call.id) {
+      this.closePanel();
+    } else {
+      this.selectedCall.set(call);
+      this.isPanelOpen.set(true);
+    }
   }
 
   closePanel() {
@@ -121,13 +126,24 @@ export class CustomerEditComponent implements OnInit {
 
   getCategoryLabel(category: string): string {
     const labels: Record<string, string> = {
-      Technical: 'Technisch',
-      Billing: 'Abrechnung',
-      Sales: 'Vertrieb',
-      Support: 'Support',
-      Other: 'Sonstige',
+      TechnicalIssue: 'Technisches Problem',
+      BillingQuestion: 'Abrechnung',
+      AccessCredentials: 'Zugangsdaten',
+      GeneralInquiry: 'Allgemeine Anfrage',
+      Complaint: 'Beschwerde',
+      FeatureRequest: 'Feature-Anfrage',
+      Unknown: 'Unbekannt',
     };
-    return labels[category] ?? category;
+    return labels[category] ?? 'Unbekannt';
+  }
+
+  getSummaryStatusLabel(status: string): string {
+    const map: Record<string, string> = {
+      Approved: 'Genehmigt',
+      Draft: 'Entwurf',
+      None: 'Kein Entwurf',
+    };
+    return map[status] ?? status ?? '—';
   }
 
   get pageTitle(): string {
@@ -184,6 +200,7 @@ export class CustomerEditComponent implements OnInit {
     const v = this.editForm.getRawValue();
     this.adminApi
       .updateCustomer(id, {
+        phoneNumber: v.phoneNumber,
         firstName: v.firstName,
         lastName: v.lastName,
         email: v.email || undefined,

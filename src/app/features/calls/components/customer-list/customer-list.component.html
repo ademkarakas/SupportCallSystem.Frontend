@@ -3,7 +3,7 @@
     <div class="header-content">
       <div class="title-row">
         <mat-icon class="title-icon">people</mat-icon>
-        <h1 class="global-page-title">Kunden</h1>
+        <h1 class="global-page-title">Kunden & Anrufe</h1>
         @if (!isLoading()) {
           <span class="count-badge">{{ filteredCustomers().length }} Einträge</span>
         }
@@ -44,27 +44,25 @@
               <th>Name</th>
               <th>Telefonnummer</th>
               <th>Anrufe</th>
-              <th>Erfasst am</th>
-              <th></th>
+              <th>Letzter Anruf</th>
             </tr>
           </thead>
           <tbody>
             @for (customer of pagedCustomers(); track customer.key) {
-              <tr>
+              <tr
+                class="clickable-row"
+                (click)="openProfile(customer)"
+                (keydown.enter)="openProfile(customer)"
+                tabindex="0"
+              >
                 <td>
-                  <button class="customer-link" (click)="openProfile(customer)">
-                    {{ customer.fullName }}
-                  </button>
+                  <span class="customer-name-text">{{ customer.fullName }}</span>
                 </td>
                 <td>{{ customer.phoneNumber }}</td>
-                <td>{{ customer.totalCalls }}</td>
-                <td>{{ customer.lastCallTime | date: 'dd.MM.yyyy HH:mm' }}</td>
-                <td class="actions-cell">
-                  <button class="btn btn-secondary btn-sm" (click)="openProfile(customer)">
-                    <mat-icon>person_search</mat-icon>
-                    Profil
-                  </button>
+                <td>
+                  <span class="badge badge-neutral">{{ customer.totalCalls }}</span>
                 </td>
+                <td>{{ customer.lastCallTime | date: 'dd.MM.yyyy HH:mm' }}</td>
               </tr>
             }
           </tbody>

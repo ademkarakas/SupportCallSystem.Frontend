@@ -2092,6 +2092,30 @@ select {
     align-items: center;
     gap: 8px;
     margin-left: auto;
+
+    .mat-mdc-paginator-navigation-first {
+      order: 1;
+    }
+
+    .mat-mdc-paginator-navigation-previous {
+      order: 2;
+    }
+
+    .mat-mdc-paginator-range-label {
+      order: 3;
+      margin: 0 10px;
+      min-width: 88px;
+      text-align: center;
+      white-space: nowrap;
+    }
+
+    .mat-mdc-paginator-navigation-next {
+      order: 4;
+    }
+
+    .mat-mdc-paginator-navigation-last {
+      order: 5;
+    }
   }
 
   .mat-mdc-paginator-range-label {
@@ -2102,8 +2126,17 @@ select {
 
   /* ICON BUTTONS */
   .mat-mdc-icon-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
     width: 32px;
     height: 32px;
+
+    .mat-icon,
+    .material-icons {
+      margin: 0;
+      line-height: 1;
+    }
   }
   .mat-mdc-paginator-page-size-label {
     font-size: 12px;

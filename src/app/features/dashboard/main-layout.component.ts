@@ -116,7 +116,7 @@ export class MainLayoutComponent implements OnInit {
     const userId = user?.id || 'system';
 
     if (!userId) {
-      this.notification.showError('User information not available');
+      this.notification.showError('Benutzerinformationen sind nicht verfügbar.');
       return;
     }
 
@@ -134,26 +134,26 @@ export class MainLayoutComponent implements OnInit {
         },
         error: (err) => {
           console.error('Failed to start call:', err);
-          this.notification.showError('Failed to start call');
+          this.notification.showError('Anruf konnte nicht gestartet werden.');
         },
       });
   }
 
   getHeaderTitle(): string {
     const url = this.router.url;
-    if (url.includes('/admin/live')) return 'Live Dashboard';
+    if (url.includes('/admin/live')) return 'Live-Dashboard';
     if (url.includes('/admin/activity')) return 'Mitarbeiter-Aktivität';
     if (url.includes('/admin/customers')) return 'Kundenverwaltung';
     if (url.includes('/admin/users')) return 'Benutzerverwaltung';
-    if (url.includes('/admin/audit-log')) return 'Audit Log';
+    if (url.includes('/admin/audit-log')) return 'Prüfprotokoll';
     if (url.includes('/settings/security')) return '2FA Sicherheit';
     if (url.includes('/dashboard')) return 'Systemübersicht';
     if (url.includes('/calls/customers')) return 'Kundenliste';
     if (url.includes('/calls/history')) return 'Anrufhistorie';
-    if (url.includes('/calls')) return 'Aktiver Call Workspace';
+    if (url.includes('/calls')) return 'Aktiver Anrufbereich';
     if (url.includes('/reports')) return 'Analyse & Berichte';
     if (url.includes('/notifications')) return 'Benachrichtigungen';
-    return 'Management System';
+    return 'Verwaltungssystem';
   }
 
   /**

@@ -182,7 +182,13 @@ export class AdminApiService {
 
   updateCustomer(
     customerId: string,
-    data: { firstName: string; lastName: string; email?: string; company?: string },
+    data: {
+      phoneNumber: string;
+      firstName: string;
+      lastName: string;
+      email?: string;
+      company?: string;
+    },
   ): Observable<void> {
     return this.http.put<void>(`${this.apiUrl}/api/customers/${customerId}`, data);
   }
