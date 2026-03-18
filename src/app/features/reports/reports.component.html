@@ -58,10 +58,10 @@
           <select
             id="agentSelect"
             class="filter-input"
-            [ngModel]="selectedAgentId()"
+            [ngModel]="selectedAgentId() ?? ''"
             (ngModelChange)="onAgentChange($event)"
           >
-            <option [value]="null">Alle Agents</option>
+            <option value="">Alle Agents</option>
             @for (agent of agents(); track agent.id) {
               <option [value]="agent.id">{{ agent.firstName }} {{ agent.lastName }}</option>
             }

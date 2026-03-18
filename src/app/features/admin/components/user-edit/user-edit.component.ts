@@ -1,4 +1,5 @@
-import { Component, inject, OnInit, signal } from '@angular/core';
+import { Component, DestroyRef, inject, OnInit, signal } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -21,6 +22,7 @@ export class UserEditComponent implements OnInit {
   private readonly adminApi = inject(AdminApiService);
   private readonly notification = inject(NotificationService);
   private readonly dialog = inject(MatDialog);
+  private readonly destroyRef = inject(DestroyRef);
 
   userId = signal<string | null>(null);
   isNew = signal(false);
@@ -33,20 +35,20 @@ export class UserEditComponent implements OnInit {
   // Edit form (for existing users)
   editForm = this.fb.nonNullable.group({
     firstName: ['', Validators.required],
-    lastName:  ['', Validators.required],
-    email:     ['', [Validators.required, Validators.email]],
+    lastName: ['', Validators.required],
+    email: ['', [Validators.required, Validators.email]],
     extension: [''],
-    role:      ['Agent', Validators.required],
+    role: ['Agent', Validators.required],
   });
 
   // Create form (for new users)
   createForm = this.fb.nonNullable.group({
     firstName: ['', Validators.required],
-    lastName:  ['', Validators.required],
-    email:     ['', [Validators.required, Validators.email]],
-    password:  ['', [Validators.required, Validators.minLength(6)]],
+    lastName: ['', Validators.required],
+    email: ['', [Validators.required, Validators.email]],
+    password: ['', [Validators.required, Validators.minLength(6)]],
     extension: [''],
-    role:      ['Agent', Validators.required],
+    role: ['Agent', Validators.required],
   });
 
   private originalValues: unknown = null;
@@ -60,7 +62,7 @@ export class UserEditComponent implements OnInit {
       this.isNew.set(true);
     }
 
-    this.editForm.valueChanges.subscribe(() => {
+    this.editForm.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(() => {
       this.isDirty.set(this.editForm.dirty);
     });
   }
@@ -75,8 +77,8 @@ export class UserEditComponent implements OnInit {
 
         this.editForm.patchValue({
           firstName: user.firstName,
-          lastName:  user.lastName,
-          email:     user.email,
+          lastName: user.lastName,
+          email: user.email,
           extension: user.extension,
           role,
         });
@@ -112,19 +114,23 @@ export class UserEditComponent implements OnInit {
   }
 
   private saveNew() {
-    if (this.createForm.invalid) { this.createForm.markAllAsTouched(); return; }
+    if (this.createForm.invalid) {
+      this.createForm.markAllAsTouched();
+      return;
+    }
     this.isSaving.set(true);
     const v = this.createForm.getRawValue();
     const userName = `${v.firstName.toLowerCase()}.${v.lastName.toLowerCase()}`.replace(/\s+/g, '');
-    this.adminApi.createUser({
-      userName,
-      email: v.email,
-      password: v.password,
-      role: v.role,
-      firstName: v.firstName,
-      lastName: v.lastName,
-      extension: v.extension || '',
-    })
+    this.adminApi
+      .createUser({
+        userName,
+        email: v.email,
+        password: v.password,
+        role: v.role,
+        firstName: v.firstName,
+        lastName: v.lastName,
+        extension: v.extension || '',
+      })
       .subscribe({
         next: () => {
           this.notification.showSuccess('Benutzer wurde erstellt.');
@@ -139,25 +145,33 @@ export class UserEditComponent implements OnInit {
 
   private saveEdit() {
     const id = this.userId();
-    if (!id || this.editForm.invalid) { this.editForm.markAllAsTouched(); return; }
+    if (!id || this.editForm.invalid) {
+      this.editForm.markAllAsTouched();
+      return;
+    }
     this.isSaving.set(true);
     const v = this.editForm.getRawValue();
-    this.adminApi.updateUser(id, {
-      firstName: v.firstName, lastName: v.lastName,
-      email: v.email, extension: v.extension || '', role: v.role,
-    }).subscribe({
-      next: () => {
-        this.notification.showSuccess('Benutzer wurde gespeichert.');
-        this.originalValues = this.editForm.getRawValue();
-        this.editForm.markAsPristine();
-        this.isDirty.set(false);
-        this.isSaving.set(false);
-      },
-      error: () => {
-        this.notification.showError('Speichern fehlgeschlagen.');
-        this.isSaving.set(false);
-      },
-    });
+    this.adminApi
+      .updateUser(id, {
+        firstName: v.firstName,
+        lastName: v.lastName,
+        email: v.email,
+        extension: v.extension || '',
+        role: v.role,
+      })
+      .subscribe({
+        next: () => {
+          this.notification.showSuccess('Benutzer wurde gespeichert.');
+          this.originalValues = this.editForm.getRawValue();
+          this.editForm.markAsPristine();
+          this.isDirty.set(false);
+          this.isSaving.set(false);
+        },
+        error: () => {
+          this.notification.showError('Speichern fehlgeschlagen.');
+          this.isSaving.set(false);
+        },
+      });
   }
 
   reset() {
@@ -178,7 +192,8 @@ export class UserEditComponent implements OnInit {
       width: '400px',
       data: {
         title: 'Benutzer löschen',
-        message: 'Möchten Sie diesen Benutzer wirklich löschen? Diese Aktion kann nicht rückgängig gemacht werden.',
+        message:
+          'Möchten Sie diesen Benutzer wirklich löschen? Diese Aktion kann nicht rückgängig gemacht werden.',
         danger: true,
       },
     });

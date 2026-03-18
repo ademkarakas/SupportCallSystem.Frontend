@@ -1,4 +1,4 @@
-import { Component, inject, OnInit, OnDestroy, signal } from '@angular/core';
+import { Component, DestroyRef, inject, OnInit, OnDestroy, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
 import { MatButtonModule } from '@angular/material/button';
@@ -11,7 +11,8 @@ import { MatSelectModule } from '@angular/material/select';
 import { MatInputModule } from '@angular/material/input';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
-import { Subject, takeUntil, finalize, switchMap, tap, catchError, of, from } from 'rxjs';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { finalize, switchMap, tap, catchError, of, from } from 'rxjs';
 import { CallApiService, CallRecord } from '../../services/call-api.service';
 import { SignalRService } from '../../../../core/services/signalr.service';
 import { NotificationService } from '../../../../core/services/notification.service';
@@ -51,6 +52,7 @@ export class CallViewComponent implements OnInit, OnDestroy {
   audioCapture = inject(AudioCaptureService);
   dictation = inject(AgentDictationService);
   adminApi = inject(AdminApiService);
+  private readonly destroyRef = inject(DestroyRef);
 
   call = signal<CallRecord | null>(null);
   isRecording = signal(true);
@@ -66,10 +68,8 @@ export class CallViewComponent implements OnInit, OnDestroy {
     summary: ['', [Validators.required, Validators.maxLength(1000)]],
   });
 
-  readonly destroy$ = new Subject<void>();
-
   ngOnInit() {
-    this.route.queryParams.pipe(takeUntil(this.destroy$)).subscribe((params) => {
+    this.route.queryParams.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((params) => {
       const id = params['id'];
       if (id) {
         this.loadCall(id);
@@ -95,7 +95,7 @@ export class CallViewComponent implements OnInit, OnDestroy {
     });
 
     // Listen for AI summary drafts
-    this.signalR.summaryDraft$.pipe(takeUntil(this.destroy$)).subscribe((event) => {
+    this.signalR.summaryDraft$.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((event) => {
       console.log('🤖 Received AI Summary Draft notification:', event);
 
       const currentCall = this.call();
@@ -124,7 +124,7 @@ export class CallViewComponent implements OnInit, OnDestroy {
     });
 
     // Listen for real-time transcripts
-    this.signalR.transcriptUpdated$.pipe(takeUntil(this.destroy$)).subscribe((event) => {
+    this.signalR.transcriptUpdated$.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((event) => {
       const currentCall = this.call();
       if (event?.callId.toLowerCase() === currentCall?.id.toLowerCase()) {
         this.transcript.update((current) => current + event.text + ' ');
@@ -132,13 +132,15 @@ export class CallViewComponent implements OnInit, OnDestroy {
     });
 
     // Listen for transcription errors
-    this.signalR.transcriptionError$.pipe(takeUntil(this.destroy$)).subscribe((event) => {
-      const currentCall = this.call();
-      if (event?.callId.toLowerCase() === currentCall?.id.toLowerCase()) {
-        console.error('Transcription error:', event);
-        this.notification.showError(`Transkriptionsfehler: ${event.error}`);
-      }
-    });
+    this.signalR.transcriptionError$
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe((event) => {
+        const currentCall = this.call();
+        if (event?.callId.toLowerCase() === currentCall?.id.toLowerCase()) {
+          console.error('Transcription error:', event);
+          this.notification.showError(`Transkriptionsfehler: ${event.error}`);
+        }
+      });
   }
 
   private loadCall(id: string) {
@@ -271,7 +273,7 @@ export class CallViewComponent implements OnInit, OnDestroy {
           // This runs whether success or error
           this.isRecording.set(false);
         }),
-        takeUntil(this.destroy$),
+        takeUntilDestroyed(this.destroyRef),
       )
       .subscribe({
         next: () => {
@@ -356,7 +358,7 @@ export class CallViewComponent implements OnInit, OnDestroy {
 
     this.dictation
       .stopDictationAndTranscribe(activeCall.id)
-      .pipe(takeUntil(this.destroy$))
+      .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (text) => {
           const current = this.approvalForm.get('summary')?.value ?? '';
@@ -429,8 +431,5 @@ export class CallViewComponent implements OnInit, OnDestroy {
     if (this.dictation.isDictating()) {
       this.dictation.cancelDictation();
     }
-
-    this.destroy$.next();
-    this.destroy$.complete();
   }
 }

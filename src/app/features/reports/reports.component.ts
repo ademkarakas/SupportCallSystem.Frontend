@@ -164,8 +164,8 @@ export class ReportsComponent implements OnInit {
     }
   }
 
-  onAgentChange(id: string | null): void {
-    this.selectedAgentId.set(id);
+  onAgentChange(id: string): void {
+    this.selectedAgentId.set(id || null);
     this.loadData();
   }
 

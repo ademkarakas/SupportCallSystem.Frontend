@@ -1,4 +1,5 @@
-import { Component, inject, OnDestroy, OnInit, signal } from '@angular/core';
+import { Component, DestroyRef, inject, OnInit, signal } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { MatIconModule } from '@angular/material/icon';
@@ -9,7 +10,7 @@ import { MatInputModule } from '@angular/material/input';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
 import { Router } from '@angular/router';
-import { Subject, debounceTime, distinctUntilChanged, takeUntil } from 'rxjs';
+import { Subject, catchError, debounceTime, distinctUntilChanged, of, switchMap } from 'rxjs';
 import { AdminApiService, CustomerDetailDto, PagedResult } from '../../services/admin-api.service';
 import { NotificationService } from '../../../../core/services/notification.service';
 import { ConfirmDialogComponent } from '../../../../shared/components/confirm-dialog/confirm-dialog.component';
@@ -30,14 +31,14 @@ import { ConfirmDialogComponent } from '../../../../shared/components/confirm-di
   templateUrl: './customers-list.component.html',
   styleUrls: ['./customers-list.component.scss'],
 })
-export class CustomersListComponent implements OnInit, OnDestroy {
+export class CustomersListComponent implements OnInit {
   private readonly adminApi = inject(AdminApiService);
   private readonly notification = inject(NotificationService);
   private readonly dialog = inject(MatDialog);
   private readonly router = inject(Router);
 
   private readonly searchSubject = new Subject<string>();
-  private readonly destroy$ = new Subject<void>();
+  private readonly destroyRef = inject(DestroyRef);
 
   customers = signal<CustomerDetailDto[]>([]);
   isLoading = signal(true);
@@ -50,17 +51,32 @@ export class CustomersListComponent implements OnInit, OnDestroy {
 
   ngOnInit() {
     this.searchSubject
-      .pipe(debounceTime(300), distinctUntilChanged(), takeUntil(this.destroy$))
-      .subscribe(() => {
-        this.page = 1;
-        this.loadCustomers();
+      .pipe(
+        debounceTime(300),
+        distinctUntilChanged(),
+        switchMap(() => {
+          this.page = 1;
+          this.isLoading.set(true);
+          return this.adminApi
+            .getAllCustomers(this.page, this.pageSize, this.search, this.includeDeleted)
+            .pipe(
+              catchError(() => {
+                this.notification.showError('Kunden konnten nicht geladen werden.');
+                this.isLoading.set(false);
+                return of(null);
+              }),
+            );
+        }),
+        takeUntilDestroyed(this.destroyRef),
+      )
+      .subscribe((result) => {
+        if (!result) return;
+        this.customers.set(result.items);
+        this.totalPages.set(result.totalPages);
+        this.totalCount.set(result.totalCount);
+        this.isLoading.set(false);
       });
     this.loadCustomers();
-  }
-
-  ngOnDestroy() {
-    this.destroy$.next();
-    this.destroy$.complete();
   }
 
   onSearchInput(value: string) {

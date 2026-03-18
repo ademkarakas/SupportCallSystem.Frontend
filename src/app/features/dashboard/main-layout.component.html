@@ -2,7 +2,7 @@
 <div class="app-layout" [class.sidebar-collapsed]="isSidebarCollapsed() && !isMobile()">
   <!-- Mobile Overlay Backdrop -->
   @if (isMobile() && isMobileMenuOpen()) {
-    <div class="mobile-backdrop" (click)="closeMobileMenu()"></div>
+    <div class="mobile-backdrop" (click)="closeMobileMenu()" (keypress)="closeMobileMenu()"></div>
   }
 
   <!-- Sidebar -->
@@ -63,12 +63,16 @@
               <span class="label">Benutzer</span>
             </a>
           </li>
+        }
+        @if (auth.isAdmin() || auth.hasRole('Agent')) {
           <li class="nav-item">
             <a routerLink="/admin/customers" routerLinkActive="active">
               <mat-icon>people</mat-icon>
               <span class="label">Kunden</span>
             </a>
           </li>
+        }
+        @if (auth.isAdmin()) {
           <li class="nav-item">
             <a routerLink="/admin/activity" routerLinkActive="active">
               <mat-icon>analytics</mat-icon>
@@ -89,12 +93,14 @@
           </li>
         }
         <li class="nav-divider"></li>
-        <li class="nav-item">
-          <a routerLink="/settings/security" routerLinkActive="active">
-            <mat-icon>verified_user</mat-icon>
-            <span class="label">2FA Sicherheit</span>
-          </a>
-        </li>
+        @if (false) {
+          <li class="nav-item">
+            <a routerLink="/settings/security" routerLinkActive="active">
+              <mat-icon>verified_user</mat-icon>
+              <span class="label">2FA Sicherheit</span>
+            </a>
+          </li>
+        }
       </ul>
     </nav>
   </aside>

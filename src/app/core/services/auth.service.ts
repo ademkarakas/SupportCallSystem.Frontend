@@ -40,15 +40,15 @@ export class AuthService {
   private readonly USER_KEY = 'auth_user';
 
   // Signals for reactive state
-  private _currentUser = signal<User | null>(this.loadUserFromStorage());
-  private _token = signal<string | null>(this.loadTokenFromStorage());
+  private readonly _currentUser = signal<User | null>(this.loadUserFromStorage());
+  private readonly _token = signal<string | null>(this.loadTokenFromStorage());
 
   public currentUser = computed(() => this._currentUser());
   public isAuthenticated = computed(() => !!this._token());
 
   constructor(
-    private http: HttpClient,
-    private router: Router,
+    private readonly http: HttpClient,
+    private readonly router: Router,
   ) {}
 
   public login(credentials: { email: string; password: any }): Observable<LoginResponse> {
@@ -132,6 +132,11 @@ export class AuthService {
   public isAdmin(): boolean {
     const roles = this.currentUser()?.roles ?? [];
     return roles.includes('SystemAdmin') || roles.includes('UserAdmin');
+  }
+
+  public hasRole(role: string): boolean {
+    const roles = this.currentUser()?.roles ?? [];
+    return roles.includes(role);
   }
 
   private setSession(authResponse: AuthResponse): void {

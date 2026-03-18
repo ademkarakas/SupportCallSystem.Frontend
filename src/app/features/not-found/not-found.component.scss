@@ -1,0 +1,90 @@
+// ============================================================================
+// 404 NOT FOUND PAGE
+// Uses only design tokens from :root — dark mode works automatically.
+//
+// .not-found-page        — standalone full-page mode (unauthenticated)
+// .not-found-layout-view — inside MainLayout content area (authenticated)
+// ============================================================================
+
+// Shared centering base
+%centered-area {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--spacing-xl);
+  transition: background-color var(--transition-base);
+}
+
+// Standalone: fills the entire viewport (no sidebar / navbar present)
+.not-found-page {
+  @extend %centered-area;
+  min-height: 100vh;
+  background-color: var(--color-main-bg);
+}
+
+// In-layout: fills the main content area beneath the header
+.not-found-layout-view {
+  @extend %centered-area;
+  min-height: calc(100vh - var(--header-height));
+}
+
+.not-found-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: var(--spacing-lg);
+  max-width: 480px;
+  width: 100%;
+}
+
+// Large gradient "404" numeral
+.error-code {
+  font-size: clamp(80px, 15vw, 140px);
+  font-weight: var(--font-weight-bold);
+  line-height: 1;
+  background: linear-gradient(135deg, var(--color-primary), var(--color-brand));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  letter-spacing: -4px;
+  user-select: none;
+}
+
+.error-icon {
+  font-size: 48px;
+  width: 48px;
+  height: 48px;
+  color: var(--color-text-tertiary);
+}
+
+.error-title {
+  font-size: var(--font-size-2xl);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-primary);
+  margin: 0;
+}
+
+.error-description {
+  font-size: var(--font-size-base);
+  color: var(--color-text-secondary);
+  line-height: var(--line-height-relaxed);
+  margin: 0;
+}
+
+// btn + btn-secondary / btn-primary come from the global styles.scss
+.error-actions {
+  display: flex;
+  gap: var(--spacing-md);
+  flex-wrap: wrap;
+  justify-content: center;
+
+  @media (max-width: 400px) {
+    flex-direction: column;
+    width: 100%;
+
+    .btn {
+      width: 100%;
+    }
+  }
+}

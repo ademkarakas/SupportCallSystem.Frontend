@@ -732,7 +732,7 @@ select {
 
 // Outlined danger — delete, remove, cancel (destructive)
 .btn-danger {
-  background-color: var(--color-danger-bg, #fef2f2);
+  background-color: var(--color-main-bg);
   border: 1px solid var(--color-button-danger-border);
   color: var(--color-button-danger-text);
 
@@ -747,7 +747,7 @@ select {
   color: #ffffff;
 
   &:hover:not(:disabled) {
-    background-color: #b91c1c;
+    background-color: #9c5959;
     transform: translateY(-1px);
     box-shadow: var(--shadow-md);
   }
