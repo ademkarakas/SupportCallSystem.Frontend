@@ -249,6 +249,29 @@
   display: flex;
   align-items: center;
   gap: var(--spacing-sm);
+  flex-wrap: wrap;
+}
+
+.meta-editor-hint {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+  background: var(--color-surface-hover, rgba(0, 0, 0, 0.04));
+  border-radius: var(--border-radius-sm);
+  padding: 2px var(--spacing-sm);
+
+  .meta-editor-icon {
+    font-size: 14px;
+    width: 14px;
+    height: 14px;
+    color: var(--color-text-tertiary);
+  }
+
+  .meta-editor-date {
+    color: var(--color-text-tertiary);
+  }
 }
 
 // Draft textarea

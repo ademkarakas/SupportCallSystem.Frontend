@@ -72,8 +72,12 @@
                 <td>{{ customer.company || '—' }}</td>
                 <td>{{ customer.totalCallCount }}</td>
                 <td>
-                  @for (tag of customer.tags; track tag) {
-                    <span class="tag-chip">{{ tag }}</span>
+                  @if (customer.tags.length) {
+                    @for (tag of customer.tags; track tag) {
+                      <span class="tag-chip">{{ tag }}</span>
+                    }
+                  } @else {
+                    <span class="no-tags">—</span>
                   }
                 </td>
               </tr>

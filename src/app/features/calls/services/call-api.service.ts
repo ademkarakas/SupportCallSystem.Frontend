@@ -13,11 +13,15 @@ export interface CallRecord {
   endTime?: Date;
   durationSeconds: number;
   handledByUserId: string;
+  handledByUserName?: string;
   consent: number | string; // Enum from backend: 0=NotAsked, 1=Granted, 2=Declined
   category: string;
   summaryStatus: string;
   draftSummary?: string;
   approvedSummary?: string;
+  approvedBy?: string;
+  approvedByName?: string;
+  approvedAt?: Date;
   actionItems?: string[];
   nfonCallId?: string;
 }

@@ -44,6 +44,20 @@
           </a>
         </li>
         <li class="nav-item">
+          <a routerLink="/calls/customers" routerLinkActive="active">
+            <mat-icon>people</mat-icon>
+            <span class="label">Kunden &amp; Anrufe</span>
+          </a>
+        </li>
+        @if (auth.isAdmin() || auth.hasRole('Agent')) {
+          <li class="nav-item">
+            <a routerLink="/admin/customers" routerLinkActive="active">
+              <mat-icon>manage_accounts</mat-icon>
+              <span class="label">Kundenverwaltung</span>
+            </a>
+          </li>
+        }
+        <li class="nav-item">
           <a routerLink="/reports" routerLinkActive="active">
             <mat-icon>bar_chart</mat-icon>
             <span class="label">Berichte</span>
@@ -64,14 +78,7 @@
             </a>
           </li>
         }
-        @if (auth.isAdmin() || auth.hasRole('Agent')) {
-          <li class="nav-item">
-            <a routerLink="/admin/customers" routerLinkActive="active">
-              <mat-icon>people</mat-icon>
-              <span class="label">Kunden</span>
-            </a>
-          </li>
-        }
+
         @if (auth.isAdmin()) {
           <li class="nav-item">
             <a routerLink="/admin/activity" routerLinkActive="active">

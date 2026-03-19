@@ -181,7 +181,7 @@
             }
           </div>
 
-          <div class="form-field full-width">
+          <div class="form-field">
             <label for="e-company">Firma</label>
             <div class="input-wrap">
               <input
@@ -191,6 +191,38 @@
                 placeholder="Musterfirma GmbH"
               />
             </div>
+          </div>
+
+          <!-- Tags (standalone inside reactive form) -->
+          <div class="form-field">
+            <label for="tag-input">Tags</label>
+            <div class="tags-chip-row">
+              @for (tag of tags(); track tag) {
+                <span class="tag-chip">
+                  {{ tag }}
+                  <button
+                    class="tag-chip-remove"
+                    (click)="removeTag(tag)"
+                    type="button"
+                    aria-label="Tag entfernen"
+                  >
+                    <mat-icon>close</mat-icon>
+                  </button>
+                </span>
+              }
+              <input
+                #tagInputEl
+                id="tag-input"
+                class="tag-input"
+                type="text"
+                [(ngModel)]="tagInput"
+                [ngModelOptions]="{ standalone: true }"
+                (keydown)="onTagKeydown($event, tagInputEl)"
+                (blur)="addTag(tagInputEl.value)"
+                placeholder="Tag eingeben + Enter"
+              />
+            </div>
+            <span class="hint-text">Enter oder Komma drücken um Tag hinzuzufügen</span>
           </div>
         </form>
       </div>
@@ -216,7 +248,7 @@
             </div>
           } @else {
             <div class="history-list">
-              @for (call of callHistory(); track call.id) {
+              @for (call of pagedCallHistory(); track call.id) {
                 <button
                   class="history-list-row"
                   [class.selected]="selectedCall()?.id === call.id"
@@ -233,6 +265,15 @@
                   <mat-icon class="call-row-arrow">chevron_right</mat-icon>
                 </button>
               }
+              <mat-paginator
+                [length]="callHistory().length"
+                [pageSize]="pageSize()"
+                [pageIndex]="pageIndex()"
+                [pageSizeOptions]="[5, 10, 15]"
+                (page)="onPageChange($event)"
+                showFirstLastButtons
+                class="custom-paginator"
+              ></mat-paginator>
             </div>
           }
         </div>

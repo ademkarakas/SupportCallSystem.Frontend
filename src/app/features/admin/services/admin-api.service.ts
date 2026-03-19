@@ -188,6 +188,7 @@ export class AdminApiService {
       lastName: string;
       email?: string;
       company?: string;
+      tags?: string[];
     },
   ): Observable<void> {
     return this.http.put<void>(`${this.apiUrl}/api/customers/${customerId}`, data);

@@ -57,6 +57,10 @@
               <span class="meta-value">{{ c.customerName || 'Unbekannt' }}</span>
             </div>
             <div class="meta-item">
+              <span class="meta-label">Bearbeitet von</span>
+              <span class="meta-value">{{ c.handledByUserName || c.handledByUserId }}</span>
+            </div>
+            <div class="meta-item">
               <span class="meta-label">Kategorie</span>
               <span class="badge badge-neutral">{{ getCategoryLabel(c.category) }}</span>
             </div>
@@ -138,6 +142,17 @@
           <span class="badge" [ngClass]="c.approvedSummary ? 'badge-active' : 'badge-neutral'">
             {{ c.approvedSummary ? 'Genehmigt' : 'Nicht vorhanden' }}
           </span>
+          @if (c.approvedByName || c.approvedBy) {
+            <span class="meta-editor-hint">
+              <mat-icon class="meta-editor-icon">person</mat-icon>
+              {{ c.approvedByName || c.approvedBy }}
+              @if (c.approvedAt) {
+                <span class="meta-editor-date"
+                  >&ndash; {{ c.approvedAt | date: 'dd.MM.yyyy, HH:mm' }}</span
+                >
+              }
+            </span>
+          }
           @if (!isEditing && c.approvedSummary) {
             <button class="btn btn-secondary btn-sm" (click)="startEditing()">
               <mat-icon>edit</mat-icon>

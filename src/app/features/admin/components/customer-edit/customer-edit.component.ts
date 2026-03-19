@@ -1,17 +1,25 @@
-import { Component, DestroyRef, inject, OnInit, signal } from '@angular/core';
+import { Component, computed, DestroyRef, inject, OnInit, signal, viewChild } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { CommonModule } from '@angular/common';
-import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
+import { ReactiveFormsModule, FormsModule, FormBuilder, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { MatIconModule } from '@angular/material/icon';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { AdminApiService, CallHistoryItemDto } from '../../services/admin-api.service';
 import { NotificationService } from '../../../../core/services/notification.service';
 import { ConfirmDialogComponent } from '../../../../shared/components/confirm-dialog/confirm-dialog.component';
+import { MatPaginator, MatPaginatorModule, PageEvent } from '@angular/material/paginator';
 
 @Component({
   selector: 'app-customer-edit',
-  imports: [CommonModule, ReactiveFormsModule, MatIconModule, MatDialogModule],
+  imports: [
+    CommonModule,
+    ReactiveFormsModule,
+    FormsModule,
+    MatIconModule,
+    MatDialogModule,
+    MatPaginatorModule,
+  ],
   templateUrl: './customer-edit.component.html',
   styleUrls: ['./customer-edit.component.scss'],
 })
@@ -36,6 +44,19 @@ export class CustomerEditComponent implements OnInit {
   selectedCall = signal<CallHistoryItemDto | null>(null);
   isPanelOpen = signal(false);
 
+  // Tags
+  tags = signal<string[]>([]);
+  tagInput = '';
+
+  pageIndex = signal(0);
+  pageSize = signal(10);
+  pagedCallHistory = computed(() =>
+    this.callHistory().slice(
+      this.pageIndex() * this.pageSize(),
+      (this.pageIndex() + 1) * this.pageSize(),
+    ),
+  );
+
   // Edit form (existing customer)
   editForm = this.fb.nonNullable.group({
     phoneNumber: ['', Validators.required],
@@ -54,6 +75,7 @@ export class CustomerEditComponent implements OnInit {
     company: [''],
   });
 
+  paginator = viewChild.required(MatPaginator);
   private originalValues: unknown = null;
 
   ngOnInit() {
@@ -82,6 +104,7 @@ export class CustomerEditComponent implements OnInit {
           company: c.company ?? '',
         });
         this.originalValues = this.editForm.getRawValue();
+        this.tags.set(c.tags ?? []);
         this.isLoading.set(false);
         this.loadCallHistory(id);
       },
@@ -97,6 +120,7 @@ export class CustomerEditComponent implements OnInit {
     this.adminApi.getCustomerWithHistory(id).subscribe({
       next: (data) => {
         this.callHistory.set(data.recentCalls);
+        this.pageIndex.set(0);
         this.isHistoryLoading.set(false);
       },
       error: () => {
@@ -105,9 +129,14 @@ export class CustomerEditComponent implements OnInit {
     });
   }
 
+  onPageChange(event: PageEvent) {
+    this.pageIndex.set(event.pageIndex);
+    this.pageSize.set(event.pageSize);
+  }
+
   onCallClick(call: CallHistoryItemDto) {
     const current = this.selectedCall();
-    if (current && current.id === call.id) {
+    if (current?.id === call.id) {
       this.closePanel();
     } else {
       this.selectedCall.set(call);
@@ -118,6 +147,27 @@ export class CustomerEditComponent implements OnInit {
   closePanel() {
     this.isPanelOpen.set(false);
     setTimeout(() => this.selectedCall.set(null), 350);
+  }
+
+  addTag(value: string): void {
+    const trimmed = value.trim().toLowerCase();
+    if (trimmed && !this.tags().includes(trimmed)) {
+      this.tags.update((t) => [...t, trimmed]);
+      this.isDirty.set(true);
+    }
+    this.tagInput = '';
+  }
+
+  removeTag(tag: string): void {
+    this.tags.update((t) => t.filter((x) => x !== tag));
+    this.isDirty.set(true);
+  }
+
+  onTagKeydown(event: KeyboardEvent, inputEl: HTMLInputElement): void {
+    if (event.key === 'Enter' || event.key === ',') {
+      event.preventDefault();
+      this.addTag(inputEl.value);
+    }
   }
 
   formatDuration(seconds: number): string {
@@ -207,6 +257,7 @@ export class CustomerEditComponent implements OnInit {
         lastName: v.lastName,
         email: v.email || undefined,
         company: v.company || undefined,
+        tags: this.tags(),
       })
       .subscribe({
         next: () => {
