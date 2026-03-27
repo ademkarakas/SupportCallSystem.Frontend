@@ -81,8 +81,8 @@ export class AudioCaptureService {
         if (!this.isCapturing) return;
 
         chunkCount++;
-        if (chunkCount === 1 || chunkCount % 50 === 0) {
-          console.log(`Audio processing chunk #${chunkCount}`);
+        if (chunkCount % 100 === 0) {
+          console.log(`Audio chunks processed: ${chunkCount}`);
         }
 
         const rawData: Float32Array = event.data;
@@ -97,14 +97,8 @@ export class AudioCaptureService {
         const maxAmplitude = downsampled.reduce((max, s) => Math.max(max, Math.abs(s)), 0);
         const hasAudio = maxAmplitude > 0.01;
 
-        if (chunkCount <= 5 || chunkCount % 50 === 0) {
-          console.log(
-            `🎤 Chunk ${chunkCount} - hasAudio: ${hasAudio}, maxAmplitude: ${maxAmplitude.toFixed(4)}, samples: ${downsampled.length}`,
-          );
-        }
-
         if (chunkCount === 100 && !hasAudio) {
-          console.warn('⚠️ 100 chunks işlendi ama ses tespit edilmedi! Mikrofona konuşuyor musun?');
+          console.warn('⚠️ No audio detected after 100 chunks — check microphone');
         }
 
         const pcmData = this.float32ToInt16(downsampled);
@@ -136,8 +130,7 @@ export class AudioCaptureService {
       return;
     }
 
-    console.log('Stopping audio capture...');
-
+    // Stop audio capture
     this.workletNode?.port.close();
     this.workletNode?.disconnect();
     this.mediaStream?.getTracks().forEach((track) => track.stop());
@@ -152,8 +145,6 @@ export class AudioCaptureService {
     this.isSending = false;
     this.consecutiveErrors = 0;
     this.sentChunkCount = 0;
-
-    console.log('Audio capture stopped');
   }
 
   /**

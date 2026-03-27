@@ -113,17 +113,14 @@ export class SignalRService {
 
   private registerOnServerEvents(): void {
     this.hubConnection.on('IncomingCall', (data: IncomingCallEvent) => {
-      console.log('SignalR IncomingCall received:', data);
       this.incomingCallSubject.next(data);
     });
 
     this.hubConnection.on('SummaryDraftReady', (data: SummaryDraftEvent) => {
-      console.log('SignalR SummaryDraftReady received:', data);
       this.summaryDraftSubject.next(data);
     });
 
     this.hubConnection.on('TranscriptUpdated', (data: TranscriptUpdatedEvent) => {
-      console.log('🎤 SignalR TranscriptUpdated received:', data);
       this.transcriptUpdatedSubject.next(data);
     });
 
@@ -151,7 +148,6 @@ export class SignalRService {
     if (this.hubConnection?.state === signalR.HubConnectionState.Connected) {
       try {
         await this.hubConnection.invoke('RegisterAgent', extension);
-        console.log(`Registered agent extension: ${extension}`);
       } catch (err) {
         console.error(`Failed to register agent: ${err}`);
       }
@@ -174,19 +170,11 @@ export class SignalRService {
       const uint8Array = new Uint8Array(audioChunk);
       const arrayData = Array.from(uint8Array);
 
-      if (this.audioChunkCounter === 1 || this.audioChunkCounter % 20 === 0) {
-        console.log(`[SignalR] Invoking StreamAudio #${this.audioChunkCounter}`, {
-          callId,
-          chunkSize: audioChunk.byteLength,
-          arrayLength: arrayData.length,
-        });
+      if (this.audioChunkCounter === 1 || this.audioChunkCounter % 50 === 0) {
+        console.log(`Audio chunks sent: ${this.audioChunkCounter}`);
       }
 
       await this.hubConnection.invoke('StreamAudio', callId, arrayData);
-
-      if (this.audioChunkCounter === 1) {
-        console.log('✓ [SignalR] First StreamAudio invoke successful!');
-      }
     } catch (err: any) {
       console.error(`Failed to stream audio:`, {
         error: err?.message || err,
@@ -203,9 +191,7 @@ export class SignalRService {
   public async finalizeCall(callId: string): Promise<void> {
     if (this.hubConnection?.state === signalR.HubConnectionState.Connected) {
       try {
-        console.log(`🏁 Finalizing transcription for call: ${callId}`);
         await this.hubConnection.invoke('FinalizeCall', callId);
-        console.log('✅ Call transcription finalized successfully');
         this.audioChunkCounter = 0; // Reset counter
       } catch (err) {
         console.error(`Failed to finalize call: ${err}`);

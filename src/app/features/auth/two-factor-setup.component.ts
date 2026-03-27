@@ -1,4 +1,4 @@
-import { Component, signal, inject, OnInit } from '@angular/core';
+import { Component, signal, inject, OnInit, SecurityContext } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
 import { MatIconModule } from '@angular/material/icon';
@@ -55,7 +55,8 @@ export class TwoFactorSetupComponent implements OnInit {
       .subscribe({
         next: (info) => {
           this.setupInfo.set(info);
-          this.safeQrSvg.set(this.sanitizer.bypassSecurityTrustHtml(info.qrCodeSvg));
+          const sanitizedSvg = this.sanitizer.sanitize(SecurityContext.HTML, info.qrCodeSvg) ?? '';
+          this.safeQrSvg.set(this.sanitizer.bypassSecurityTrustHtml(sanitizedSvg));
           this.showSetup.set(true);
           this.setupStep.set(1);
         },

@@ -1,4 +1,12 @@
-import { Component, inject, OnInit, viewChild, AfterViewInit, HostListener } from '@angular/core';
+import {
+  Component,
+  inject,
+  OnInit,
+  viewChild,
+  AfterViewInit,
+  HostListener,
+  signal,
+} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatTableModule, MatTableDataSource } from '@angular/material/table';
 import { MatIconModule } from '@angular/material/icon';
@@ -18,7 +26,7 @@ import { CallApiService, CallRecord } from '../../services/call-api.service';
 import { NotificationService } from '../../../../core/services/notification.service';
 import { AuthService } from '../../../../core/services/auth.service';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
-import { AdminApiService } from '../../../admin/services/admin-api.service';
+import { AdminApiService, CustomerDetailDto } from '../../../admin/services/admin-api.service';
 
 @Component({
   selector: 'app-call-history',
@@ -52,15 +60,26 @@ export class CallHistoryComponent implements OnInit, AfterViewInit {
   adminApi = inject(AdminApiService);
 
   dataSource = new MatTableDataSource<CallRecord>([]);
-  displayedColumns: string[] = [
-    'customer',
-    'category',
-    'summaryStatus',
-    'startTime',
-    'duration',
-    'summary',
-    'actions',
-  ];
+  displayedColumns: string[] = ['startTime', 'customer', 'category', 'summaryStatus'];
+
+  selectedCall = signal<CallRecord | null>(null);
+  selectedCustomer = signal<CustomerDetailDto | null>(null);
+
+  selectRow(call: CallRecord): void {
+    if (this.selectedCall()?.id === call.id) {
+      this.selectedCall.set(null);
+      this.selectedCustomer.set(null);
+    } else {
+      this.selectedCall.set(call);
+      this.selectedCustomer.set(null);
+      if (call.customerId) {
+        this.adminApi.getCustomerById(call.customerId).subscribe({
+          next: (customer) => this.selectedCustomer.set(customer),
+          error: () => this.selectedCustomer.set(null),
+        });
+      }
+    }
+  }
 
   paginator = viewChild.required(MatPaginator);
   sort = viewChild.required(MatSort);
@@ -376,10 +395,10 @@ export class CallHistoryComponent implements OnInit, AfterViewInit {
 
     data.forEach((call) => {
       html += `<tr>
-        <td>${call.customerName || 'Manueller Eintrag'}</td>
-        <td>${call.callerNumber || ''}</td>
-        <td>${this.categoryLabels[call.category] || 'Unbekannt'}</td>
-        <td>${this.getSummaryStatusLabel(call.summaryStatus)}</td>
+        <td>${this.escapeHtml(call.customerName || 'Manueller Eintrag')}</td>
+        <td>${this.escapeHtml(call.callerNumber || '')}</td>
+        <td>${this.escapeHtml(this.categoryLabels[call.category] || 'Unbekannt')}</td>
+        <td>${this.escapeHtml(this.getSummaryStatusLabel(call.summaryStatus))}</td>
         <td>${new Date(call.startTime).toLocaleString('de-DE')}</td>
         <td>${call.durationSeconds}</td>
       </tr>`;
@@ -393,5 +412,15 @@ export class CallHistoryComponent implements OnInit, AfterViewInit {
       pw.print();
       pw.close();
     }, 250);
+  }
+
+  /** Escapes user-supplied strings before interpolating into raw HTML (document.write). */
+  private escapeHtml(text: string): string {
+    return text
+      .replaceAll('&', '&amp;')
+      .replaceAll('<', '&lt;')
+      .replaceAll('>', '&gt;')
+      .replaceAll('"', '&quot;')
+      .replaceAll("'", '&#39;');
   }
 }

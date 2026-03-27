@@ -39,8 +39,6 @@ Agent: Gern geschehen! Gibt es noch etwas, womit ich Ihnen helfen kann?
 Kunde: Nein, das war alles. Auf Wiederhören!
 Agent: Auf Wiederhören und einen schönen Tag noch!`;
 
-    console.log('🔔 Simulating incoming call:', { callId, phoneNumber, extension });
-
     // Use proper RxJS chaining: webhook → wait → populate-transcript
     return this.http.post(`${environment.apiUrl}/api/webhooks/nfon/incoming-call`, payload).pipe(
       switchMap(() => {

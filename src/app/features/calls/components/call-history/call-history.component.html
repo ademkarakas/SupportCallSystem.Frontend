@@ -1,4 +1,4 @@
-﻿<div class="call-history-page global-page-container page-enter">
+<div class="call-history-page global-page-container page-enter">
   <!-- Page Header -->
   <header class="page-header">
     <div class="header-content">
@@ -108,97 +108,145 @@
 
     <!-- Desktop Table View -->
     @if (!isMobile) {
-      <div class="table-container">
-        <table mat-table [dataSource]="dataSource" matSort class="data-table">
-          <ng-container matColumnDef="customer">
-            <th mat-header-cell *matHeaderCellDef mat-sort-header>Kunde</th>
-            <td mat-cell *matCellDef="let call" class="font-medium">
-              {{ call.customerName || 'Manueller Eintrag' }}
-            </td>
-          </ng-container>
+      <div class="master-detail-layout" [class.detail-open]="selectedCall()">
+        <!-- Master: Table -->
+        <div class="table-container master-panel">
+          <table mat-table [dataSource]="dataSource" matSort class="data-table">
+            <ng-container matColumnDef="startTime">
+              <th mat-header-cell *matHeaderCellDef mat-sort-header>Datum</th>
+              <td mat-cell *matCellDef="let call">
+                <span class="date">{{ call.startTime | date: 'dd.MM.yy, HH:mm' }}</span>
+              </td>
+            </ng-container>
 
-          <ng-container matColumnDef="category">
-            <th mat-header-cell *matHeaderCellDef mat-sort-header>Kategorie</th>
-            <td mat-cell *matCellDef="let call">
-              <span class="badge badge-neutral">{{
-                categoryLabels[call.category] || call.category || 'Unbekannt'
-              }}</span>
-            </td>
-          </ng-container>
+            <ng-container matColumnDef="customer">
+              <th mat-header-cell *matHeaderCellDef mat-sort-header>Kunde</th>
+              <td mat-cell *matCellDef="let call" class="font-medium">
+                {{ call.customerName || 'Manueller Eintrag' }}
+              </td>
+            </ng-container>
 
-          <ng-container matColumnDef="summaryStatus">
-            <th mat-header-cell *matHeaderCellDef mat-sort-header>Status</th>
-            <td mat-cell *matCellDef="let call">
-              <span class="status-chip" [ngClass]="getSummaryStatusClass(call.summaryStatus)">
-                <span class="status-dot"></span>
-                {{ getSummaryStatusLabel(call.summaryStatus) }}
-              </span>
-            </td>
-          </ng-container>
+            <ng-container matColumnDef="category">
+              <th mat-header-cell *matHeaderCellDef mat-sort-header>Kategorie</th>
+              <td mat-cell *matCellDef="let call">
+                <span class="badge badge-neutral">{{
+                  categoryLabels[call.category] || call.category || 'Unbekannt'
+                }}</span>
+              </td>
+            </ng-container>
 
-          <ng-container matColumnDef="startTime">
-            <th mat-header-cell *matHeaderCellDef mat-sort-header>Datum & Zeit</th>
-            <td mat-cell *matCellDef="let call">
-              <span class="date">{{ call.startTime | date: 'dd.MM.yyyy, HH:mm:ss' }}</span>
-            </td>
-          </ng-container>
-
-          <ng-container matColumnDef="duration">
-            <th mat-header-cell *matHeaderCellDef mat-sort-header>Dauer</th>
-            <td mat-cell *matCellDef="let call" class="color-text-secondary">
-              {{ formatDuration(call.durationSeconds) }}
-            </td>
-          </ng-container>
-
-          <ng-container matColumnDef="summary">
-            <th mat-header-cell *matHeaderCellDef>Zusammenfassung</th>
-            <td mat-cell *matCellDef="let call" class="summary-cell">
-              {{ call.approvedSummary || call.draftSummary || '—' }}
-            </td>
-          </ng-container>
-
-          <ng-container matColumnDef="actions">
-            <th mat-header-cell *matHeaderCellDef class="text-right">Aktionen</th>
-            <td mat-cell *matCellDef="let call" class="text-right">
-              <div class="action-buttons">
-                <button
-                  class="btn btn-secondary btn-sm"
-                  (click)="viewCallerProfile(call, $event)"
-                  matTooltip="Anrufer-Profil anzeigen"
+            <ng-container matColumnDef="summaryStatus">
+              <th mat-header-cell *matHeaderCellDef mat-sort-header>Status</th>
+              <td mat-cell *matCellDef="let call">
+                <mat-icon
+                  class="status-icon"
+                  [ngClass]="getSummaryStatusClass(call.summaryStatus)"
+                  [matTooltip]="getSummaryStatusLabel(call.summaryStatus)"
                 >
-                  <mat-icon>person_search</mat-icon>
-                  <span>Profil</span>
+                  {{
+                    call.summaryStatus === 'Approved' || call.summaryStatus === '2'
+                      ? 'done'
+                      : 'radio_button_unchecked'
+                  }}
+                </mat-icon>
+              </td>
+            </ng-container>
+
+            <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+            <tr
+              mat-row
+              *matRowDef="let row; columns: displayedColumns"
+              class="interactive-row"
+              [class.selected-row]="selectedCall()?.id === row.id"
+              (click)="selectRow(row)"
+              (keydown.enter)="selectRow(row)"
+            ></tr>
+          </table>
+
+          @if (!isLoading && dataSource.filteredData.length === 0) {
+            <div class="empty-state">
+              <mat-icon class="empty-icon">history_toggle_off</mat-icon>
+              <p>
+                {{
+                  hasActiveFilters
+                    ? 'Keine Ergebnisse für die gewählten Filter.'
+                    : 'Keine Anrufhistorie gefunden.'
+                }}
+              </p>
+              @if (hasActiveFilters) {
+                <button class="btn btn-secondary btn-sm" (click)="resetFilters()">
+                  <mat-icon>filter_alt_off</mat-icon>
+                  <span>Filter zurücksetzen</span>
                 </button>
-              </div>
-            </td>
-          </ng-container>
+              }
+            </div>
+          }
+        </div>
 
-          <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-          <tr
-            mat-row
-            *matRowDef="let row; columns: displayedColumns"
-            class="interactive-row"
-            (click)="navigateToDetail(row.id)"
-            (keydown.enter)="navigateToDetail(row.id)"
-          ></tr>
-        </table>
-
-        @if (!isLoading && dataSource.filteredData.length === 0) {
-          <div class="empty-state">
-            <mat-icon class="empty-icon">history_toggle_off</mat-icon>
-            <p>
-              {{
-                hasActiveFilters
-                  ? 'Keine Ergebnisse für die gewählten Filter.'
-                  : 'Keine Anrufhistorie gefunden.'
-              }}
-            </p>
-            @if (hasActiveFilters) {
-              <button class="btn btn-secondary btn-sm" (click)="resetFilters()">
-                <mat-icon>filter_alt_off</mat-icon>
-                <span>Filter zurücksetzen</span>
+        <!-- Detail: Caller Profile Card -->
+        @if (selectedCall(); as sc) {
+          <div class="caller-profile-panel">
+            <div class="profile-card-header">
+              <span>Anrufer-Profil</span>
+              <button
+                class="btn-icon-close"
+                (click)="selectedCall.set(null)"
+                matTooltip="Schließen"
+              >
+                <mat-icon>close</mat-icon>
               </button>
+            </div>
+
+            <div class="profile-field">
+              <span class="profile-label">Name:</span>
+              <span class="profile-value">{{ sc.customerName || '—' }}</span>
+            </div>
+            <div class="profile-field">
+              <span class="profile-label">Firma:</span>
+              <span class="profile-value">{{ selectedCustomer()?.company || '—' }}</span>
+            </div>
+            <div class="profile-field">
+              <span class="profile-label">E-Mail:</span><span class="profile-value">{{ selectedCustomer()?.email || '—' }}</span>
+            </div>
+            <div class="profile-field">
+              <span class="profile-label">Telefon:</span>
+              <span class="profile-value">{{ sc.callerNumber || '—' }}</span>
+            </div>
+            <div class="profile-field">
+              <span class="profile-label">Kategorie:</span>
+              <span class="profile-value">{{
+                categoryLabels[sc.category] || sc.category || '—'
+              }}</span>
+            </div>
+            <div class="profile-field">
+              <span class="profile-label">Datum:</span>
+              <span class="profile-value">{{ sc.startTime | date: 'dd.MM.yyyy, HH:mm' }}</span>
+            </div>
+            <div class="profile-field">
+              <span class="profile-label">Dauer:</span>
+              <span class="profile-value">{{ formatDuration(sc.durationSeconds) }}</span>
+            </div>
+
+            @if (sc.approvedSummary || sc.draftSummary) {
+              <div class="profile-summary-block">
+                <span class="profile-label">Letzte genehmigte Zusammenfassung:</span>
+                <p class="profile-summary-text">{{ sc.approvedSummary || sc.draftSummary }}</p>
+              </div>
             }
+
+            <div class="profile-actions">
+              <button
+                class="btn btn-secondary btn-sm flex-1"
+                (click)="viewCallerProfile(sc, $event)"
+              >
+                <mat-icon>person_search</mat-icon>
+                Kunden-Historie
+              </button>
+              <button class="btn btn-secondary btn-sm flex-1" (click)="navigateToDetail(sc.id)">
+                <mat-icon>open_in_new</mat-icon>
+                Anruf-Detail
+              </button>
+            </div>
           </div>
         }
       </div>
@@ -303,3 +351,6 @@
     ></mat-paginator>
   </div>
 </div>
+
+
+

@@ -96,11 +96,8 @@ export class CallViewComponent implements OnInit, OnDestroy {
 
     // Listen for AI summary drafts
     this.signalR.summaryDraft$.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((event) => {
-      console.log('🤖 Received AI Summary Draft notification:', event);
-
       const currentCall = this.call();
       if (event?.callId?.toLowerCase() === currentCall?.id?.toLowerCase()) {
-        console.log('✅ Matching call found, updating UI state');
         this.isProcessingManual.set(false); // Reset manual processing state
         this.call.update((c) =>
           c
@@ -165,15 +162,13 @@ export class CallViewComponent implements OnInit, OnDestroy {
 
           // Auto-start microphone if call is active (not ended)
           if (!data.endTime && !this.audioCapture.isCaptureActive) {
-            console.log('🎤 Auto-starting microphone for active call...');
             this.audioCapture
               .startCapture(data.id)
               .then(() => {
-                console.log('✅ Microphone auto-started successfully');
                 this.notification.showSuccess('Mikrofon aktiviert - Transkription läuft');
               })
               .catch((err) => {
-                console.error('❌ Failed to auto-start microphone:', err);
+                console.error('Failed to start microphone:', err);
                 this.notification.showError(
                   'Automatische Mikrofonerfassung konnte nicht gestartet werden.',
                 );
@@ -228,26 +223,27 @@ export class CallViewComponent implements OnInit, OnDestroy {
     // Check if consent needs to be recorded first (0=NotAsked, 1=Granted, 2=Declined)
     const consentValue = activeCall.consent;
     const isNotAsked = consentValue === 'NotAsked' || consentValue === 0 || consentValue === '0';
-    console.log('📋 Checking consent status:', consentValue, { isNotAsked });
 
     // Create the consent recording observable (or empty observable if not needed)
     const consentObs$ = isNotAsked
       ? this.callApi.recordConsent(activeCall.id, true).pipe(
           tap(() => {
-            console.log('✅ Consent recorded successfully');
             this.call.update((c) => (c ? { ...c, consent: 'Granted' } : null));
           }),
           catchError((err) => {
             // If it's a 400 because consent was already granted, we can ignore it
             if (err.status === 400) {
-              console.warn('⚠️ Consent recording returned 400 - possibly already granted');
               return of(null);
             }
-            console.error('❌ Failed to record consent:', err);
+            console.error('Failed to record consent:', err);
             return of(null);
           }),
         )
-      : of(null).pipe(tap(() => console.log('✅ Consent already recorded:', consentValue)));
+      : of(null).pipe(
+          tap(() => {
+            // Consent already recorded
+          }),
+        );
 
     // Chain: record consent → end call → navigate
     this.isRecording.set(false); // Set loading state
@@ -261,12 +257,10 @@ export class CallViewComponent implements OnInit, OnDestroy {
       .pipe(
         // Finalize Vosk transcription first to flush remaining text
         switchMap(() => {
-          console.log('🏁 Finalizing Whisper transcription...');
           return from(this.signalR.finalizeCall(activeCall.id));
         }),
         // Then end the call on backend (may trigger AI summary)
         switchMap(() => {
-          console.log('🛑 Sending endCall request to backend...');
           return this.callApi.endCall(activeCall.id, new Date());
         }),
         finalize(() => {
@@ -277,13 +271,12 @@ export class CallViewComponent implements OnInit, OnDestroy {
       )
       .subscribe({
         next: () => {
-          // Note: Response is void (no body), which is expected
-          console.log('✅ Call ended successfully on backend (void response is expected)');
+          // Response is void (no body), which is expected
           this.call.update((c) => (c ? { ...c, endTime: new Date() } : null));
           this.notification.showSuccess('Gespräch beendet. Warte auf KI-Zusammenfassung...');
         },
         error: (err) => {
-          console.error('❌ Failed to end call on backend:', err);
+          console.error('Failed to end call:', err);
           this.notification.showError('Fehler beim Beenden des Anrufs');
           this.isRecording.set(true); // Restore recording state on error
         },

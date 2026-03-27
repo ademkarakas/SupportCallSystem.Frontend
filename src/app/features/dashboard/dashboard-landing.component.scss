@@ -77,8 +77,23 @@
   padding: 20px;
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 10px;
   min-height: 122px;
+  border-top: 4px solid transparent;
+  border-radius: 0 0 var(--radius-lg) var(--radius-lg);
+
+  &.stat-card--calls {
+    border-top-color: var(--color-info);
+  }
+  &.stat-card--duration {
+    border-top-color: #8b5cf6;
+  }
+  &.stat-card--resolution {
+    border-top-color: var(--color-success);
+  }
+  &.stat-card--tasks {
+    border-top-color: var(--color-warning);
+  }
 
   .stat-header {
     display: flex;
@@ -100,7 +115,7 @@
         color: var(--color-info);
       }
       &.duration {
-        color: #8b5cf6; // violet — no standard variable
+        color: #8b5cf6;
       }
       &.resolution {
         color: var(--color-success);
@@ -112,15 +127,17 @@
   }
 
   .stat-body {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-end;
-
     .value {
-      font-size: 28px;
+      font-size: 32px;
       font-weight: 700;
       color: var(--color-text-primary);
     }
+  }
+
+  .stat-meta {
+    font-size: 12px;
+    color: var(--color-text-secondary);
+    margin-top: 2px;
   }
 }
 

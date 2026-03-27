@@ -57,15 +57,140 @@
         <mat-icon>person_search</mat-icon>
         Anrufer-Profil
       </button>
-      <button class="btn btn-danger-filled" *ngIf="isRecording()" (click)="endCall()">
+    </div>
+  </header>
+
+  <!-- ================================================================
+       ACTIVE CALL LAYOUT (call in progress)
+       2-column: Customer info + consent LEFT | Notes RIGHT
+       ================================================================ -->
+  <div class="active-call-body" *ngIf="isRecording()" [formGroup]="approvalForm">
+    <!-- Left: Customer + Consent -->
+    <div class="active-left">
+      <div class="card customer-brief-card">
+        <div class="customer-brief-name">{{ call()?.customerName || 'Unbekannte Nummer' }}</div>
+        <div class="customer-brief-phone">
+          <mat-icon>phone</mat-icon>
+          {{ call()?.callerNumber || '—' }}
+        </div>
+        @if (call()?.customerId && customerHistory()) {
+          <div class="customer-brief-meta">
+            @if (customerHistory()!.company) {
+              <span><mat-icon>business</mat-icon> {{ customerHistory()!.company }}</span>
+            }
+            @if (customerHistory()!.recentCalls.length > 0) {
+              <span>
+                <mat-icon>history</mat-icon>
+                Letzter Anruf: {{ customerHistory()!.recentCalls[0].startTime | date: 'dd.MM.yy' }}
+              </span>
+            }
+          </div>
+        }
+      </div>
+
+      <!-- Consent banner -->
+      <div
+        class="banner consent-banner"
+        *ngIf="call()?.consent === 'NotAsked' || call()?.consent === 0"
+      >
+        <div class="banner-content">
+          <div class="icon-box"><mat-icon>privacy_tip</mat-icon></div>
+          <div class="text-box">
+            <p class="title">KI-Analyse freischalten?</p>
+            <p class="desc">Einwilligung des Kunden zur Gesprächsanalyse einholen.</p>
+          </div>
+        </div>
+        <div class="banner-actions">
+          <button class="btn btn-primary btn-sm" (click)="grantConsent()">
+            <mat-icon>check</mat-icon> Einwilligung erteilt
+          </button>
+          <button class="btn btn-secondary btn-sm" (click)="declineConsent()">
+            <mat-icon>block</mat-icon> Ablehnen
+          </button>
+        </div>
+      </div>
+
+      <!-- Consent granted confirmation -->
+      <div
+        class="consent-granted-box"
+        *ngIf="call()?.consent === 'Granted' || call()?.consent === 1"
+      >
+        <mat-icon>check_circle</mat-icon>
+        <div>
+          <strong>Einwilligung erteilt</strong>
+          <p>
+            KI-Verarbeitung und Aufzeichnung genehmigt um
+            {{ call()?.startTime | date: 'HH:mm' }} Uhr
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right: Notes only -->
+    <div class="active-right">
+      <div class="card active-notes-card">
+        <div class="card-header">
+          <h3>Notizen:</h3>
+          <span class="char-count">{{ approvalForm.get('summary')?.value?.length || 0 }}/500</span>
+        </div>
+        <mat-form-field appearance="outline" class="w-full notes-field">
+          <textarea
+            matInput
+            rows="12"
+            formControlName="summary"
+            placeholder="Was wurde gesprochen? Stichpunkte..."
+          ></textarea>
+        </mat-form-field>
+
+        <!-- Dictation controls -->
+        <div
+          class="dictation-toolbar"
+          *ngIf="
+            call()?.consent === 'Declined' ||
+            call()?.consent === 2 ||
+            call()?.consent === 'NotAsked' ||
+            call()?.consent === 0
+          "
+        >
+          <button
+            class="btn btn-sm btn-secondary"
+            *ngIf="!dictation.isDictating() && !dictation.isTranscribing()"
+            (click)="startDictation()"
+            matTooltip="Notizen per Sprache diktieren"
+          >
+            <mat-icon>mic</mat-icon> Diktieren
+          </button>
+          <ng-container *ngIf="dictation.isDictating()">
+            <button class="btn btn-sm btn-danger-filled" (click)="stopDictationAndAppend()">
+              <mat-icon>stop</mat-icon> Fertig
+            </button>
+            <button class="btn btn-sm btn-secondary" (click)="cancelDictation()">
+              <mat-icon>close</mat-icon> Abbrechen
+            </button>
+            <span class="dictation-status"><span class="pulse-dot"></span> Aufnahme läuft...</span>
+          </ng-container>
+          <span *ngIf="dictation.isTranscribing()" class="dictation-status">
+            <mat-progress-spinner mode="indeterminate" diameter="16"></mat-progress-spinner>
+            Transkribiere...
+          </span>
+        </div>
+      </div>
+    </div>
+
+    <!-- End Call button — full width -->
+    <div class="active-end-row">
+      <button class="btn btn-danger-filled btn-end-call" (click)="endCall()">
         <mat-icon>call_end</mat-icon>
         Gespräch beenden
       </button>
     </div>
-  </header>
+  </div>
 
-  <!-- Workspace Layout -->
-  <div class="workspace-layout">
+  <!-- ================================================================
+       POST-CALL LAYOUT (call ended) — AI panel + documentation form
+       ================================================================ -->
+
+  <div class="workspace-layout" *ngIf="!isRecording()">
     <!-- Main Intelligence Panel -->
     <div class="card intelligence-panel">
       <div class="card-header">
@@ -73,36 +198,9 @@
           <mat-icon class="color-primary">auto_fix_high</mat-icon>
           <h3>INTELLIGENTE DOKUMENTATION</h3>
         </div>
-        <span class="badge badge-active" *ngIf="isRecording()">AI MITSCHRIFT AKTIV</span>
       </div>
 
       <div class="panel-body">
-        <!-- AI Consent Workflow -->
-        <div
-          class="banner consent-banner"
-          *ngIf="call()?.consent === 'NotAsked' || call()?.consent === 0"
-        >
-          <div class="banner-content">
-            <div class="icon-box">
-              <mat-icon>privacy_tip</mat-icon>
-            </div>
-            <div class="text-box">
-              <p class="title">KI-Analyse freischalten?</p>
-              <p class="desc">
-                Fragen Sie den Kunden nach seiner Einwilligung zur Gesprächsanalyse.
-              </p>
-            </div>
-          </div>
-          <div class="banner-actions">
-            <button class="btn btn-primary btn-sm" (click)="grantConsent()">
-              <mat-icon>check</mat-icon> Einwilligung erteilt
-            </button>
-            <button class="btn btn-secondary btn-sm" (click)="declineConsent()">
-              <mat-icon>block</mat-icon> Ablehnen
-            </button>
-          </div>
-        </div>
-
         <!-- AI Documentation Content -->
         <div
           class="documentation-content"

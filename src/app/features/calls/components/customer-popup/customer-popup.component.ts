@@ -20,7 +20,6 @@ export class CustomerPopupComponent {
   ) {}
 
   onAccept(): void {
-    console.log('CustomerPopup: Accept button clicked');
     this.dialogRef.close({ action: 'accept' });
   }
 

@@ -15,7 +15,7 @@
         <span class="last-updated" *ngIf="lastRefreshed()">
           Aktualisiert: {{ lastRefreshed() | date: 'HH:mm:ss' }}
         </span>
-        <button mat-stroked-button (click)="loadData()" [disabled]="isLoading()">
+        <button class="refresh-btn" (click)="loadData()" [disabled]="isLoading()">
           <mat-icon>refresh</mat-icon>
           Aktualisieren
         </button>
@@ -200,6 +200,3 @@
     </div>
   </div>
 </div>
-
-
-
