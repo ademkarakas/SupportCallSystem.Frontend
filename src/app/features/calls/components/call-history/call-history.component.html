@@ -32,84 +32,83 @@
     </div>
   </header>
 
-  <!-- Data Table Card -->
-  <div class="data-table-card">
-    <!-- Filter Toolbar -->
-    <div class="filter-toolbar">
-      <div class="filter-row-search">
-        <div class="search-input-wrapper">
-          <mat-icon class="search-icon">search</mat-icon>
-          <input
-            class="search-input"
-            placeholder="Kunde, Kategorie oder Zusammenfassung suchen..."
-            [(ngModel)]="filterText"
-            (input)="applyFilters()"
-          />
+  <div class="history-layout" [class.detail-open]="!isMobile && selectedCall()">
+    <!-- Data Table Card -->
+    <div class="data-table-card">
+      <!-- Filter Toolbar -->
+      <div class="filter-toolbar">
+        <div class="filter-row-search">
+          <div class="search-input-wrapper">
+            <mat-icon class="search-icon">search</mat-icon>
+            <input
+              class="search-input"
+              placeholder="Kunde, Kategorie oder Zusammenfassung suchen..."
+              [(ngModel)]="filterText"
+              (input)="applyFilters()"
+            />
+          </div>
+          @if (hasActiveFilters) {
+            <button class="btn btn-secondary btn-sm filter-reset-btn" (click)="resetFilters()">
+              <mat-icon>filter_alt_off</mat-icon>
+              <span>Zurücksetzen</span>
+            </button>
+          }
         </div>
-        @if (hasActiveFilters) {
-          <button class="btn btn-secondary btn-sm filter-reset-btn" (click)="resetFilters()">
-            <mat-icon>filter_alt_off</mat-icon>
-            <span>Zurücksetzen</span>
-          </button>
-        }
+
+        <div class="filter-row-fields">
+          <mat-form-field appearance="outline" class="filter-field">
+            <mat-label>Kategorie</mat-label>
+            <mat-select [(ngModel)]="filterCategory" (selectionChange)="applyFilters()">
+              <mat-option value="">Alle Kategorien</mat-option>
+              @for (cat of categories; track cat) {
+                <mat-option [value]="cat">{{ categoryLabels[cat] }}</mat-option>
+              }
+            </mat-select>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="filter-field">
+            <mat-label>Zusammenfassung</mat-label>
+            <mat-select [(ngModel)]="filterStatus" (selectionChange)="applyFilters()">
+              <mat-option value="">Alle Status</mat-option>
+              @for (s of summaryStatuses; track s.value) {
+                <mat-option [value]="s.value">{{ s.label }}</mat-option>
+              }
+            </mat-select>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="filter-field filter-field-date">
+            <mat-label>Von</mat-label>
+            <input
+              matInput
+              [matDatepicker]="pickerFrom"
+              [(ngModel)]="filterDateFrom"
+              (dateChange)="applyFilters()"
+            />
+            <mat-datepicker-toggle matIconSuffix [for]="pickerFrom"></mat-datepicker-toggle>
+            <mat-datepicker #pickerFrom></mat-datepicker>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="filter-field filter-field-date">
+            <mat-label>Bis</mat-label>
+            <input
+              matInput
+              [matDatepicker]="pickerTo"
+              [(ngModel)]="filterDateTo"
+              (dateChange)="applyFilters()"
+            />
+            <mat-datepicker-toggle matIconSuffix [for]="pickerTo"></mat-datepicker-toggle>
+            <mat-datepicker #pickerTo></mat-datepicker>
+          </mat-form-field>
+        </div>
       </div>
 
-      <div class="filter-row-fields">
-        <mat-form-field appearance="outline" class="filter-field">
-          <mat-label>Kategorie</mat-label>
-          <mat-select [(ngModel)]="filterCategory" (selectionChange)="applyFilters()">
-            <mat-option value="">Alle Kategorien</mat-option>
-            @for (cat of categories; track cat) {
-              <mat-option [value]="cat">{{ categoryLabels[cat] }}</mat-option>
-            }
-          </mat-select>
-        </mat-form-field>
+      <!-- Loading Bar -->
+      @if (isLoading) {
+        <mat-progress-bar mode="indeterminate" class="loading-bar"></mat-progress-bar>
+      }
 
-        <mat-form-field appearance="outline" class="filter-field">
-          <mat-label>Zusammenfassung</mat-label>
-          <mat-select [(ngModel)]="filterStatus" (selectionChange)="applyFilters()">
-            <mat-option value="">Alle Status</mat-option>
-            @for (s of summaryStatuses; track s.value) {
-              <mat-option [value]="s.value">{{ s.label }}</mat-option>
-            }
-          </mat-select>
-        </mat-form-field>
-
-        <mat-form-field appearance="outline" class="filter-field filter-field-date">
-          <mat-label>Von</mat-label>
-          <input
-            matInput
-            [matDatepicker]="pickerFrom"
-            [(ngModel)]="filterDateFrom"
-            (dateChange)="applyFilters()"
-          />
-          <mat-datepicker-toggle matIconSuffix [for]="pickerFrom"></mat-datepicker-toggle>
-          <mat-datepicker #pickerFrom></mat-datepicker>
-        </mat-form-field>
-
-        <mat-form-field appearance="outline" class="filter-field filter-field-date">
-          <mat-label>Bis</mat-label>
-          <input
-            matInput
-            [matDatepicker]="pickerTo"
-            [(ngModel)]="filterDateTo"
-            (dateChange)="applyFilters()"
-          />
-          <mat-datepicker-toggle matIconSuffix [for]="pickerTo"></mat-datepicker-toggle>
-          <mat-datepicker #pickerTo></mat-datepicker>
-        </mat-form-field>
-      </div>
-    </div>
-
-    <!-- Loading Bar -->
-    @if (isLoading) {
-      <mat-progress-bar mode="indeterminate" class="loading-bar"></mat-progress-bar>
-    }
-
-    <!-- Desktop Table View -->
-    @if (!isMobile) {
-      <div class="master-detail-layout" [class.detail-open]="selectedCall()">
-        <!-- Master: Table -->
+      <!-- Desktop Table View -->
+      @if (!isMobile) {
         <div class="table-container master-panel">
           <table mat-table [dataSource]="dataSource" matSort class="data-table">
             <ng-container matColumnDef="startTime">
@@ -122,7 +121,12 @@
             <ng-container matColumnDef="customer">
               <th mat-header-cell *matHeaderCellDef mat-sort-header>Kunde</th>
               <td mat-cell *matCellDef="let call" class="font-medium">
-                {{ call.customerName || 'Manueller Eintrag' }}
+                <div class="name-cell">
+                  <div class="name-avatar" [ngClass]="getAvatarClass(call.customerName)">
+                    {{ getInitials(call.customerName) }}
+                  </div>
+                  <span>{{ call.customerName || 'Manueller Eintrag' }}</span>
+                </div>
               </td>
             </ng-container>
 
@@ -182,175 +186,208 @@
             </div>
           }
         </div>
+      }
 
-        <!-- Detail: Caller Profile Card -->
-        @if (selectedCall(); as sc) {
-          <div class="caller-profile-panel">
-            <div class="profile-card-header">
-              <span>Anrufer-Profil</span>
-              <button
-                class="btn-icon-close"
-                (click)="selectedCall.set(null)"
-                matTooltip="Schließen"
-              >
-                <mat-icon>close</mat-icon>
-              </button>
-            </div>
-
-            <div class="profile-field">
-              <span class="profile-label">Name:</span>
-              <span class="profile-value">{{ sc.customerName || '—' }}</span>
-            </div>
-            <div class="profile-field">
-              <span class="profile-label">Firma:</span>
-              <span class="profile-value">{{ selectedCustomer()?.company || '—' }}</span>
-            </div>
-            <div class="profile-field">
-              <span class="profile-label">E-Mail:</span><span class="profile-value">{{ selectedCustomer()?.email || '—' }}</span>
-            </div>
-            <div class="profile-field">
-              <span class="profile-label">Telefon:</span>
-              <span class="profile-value">{{ sc.callerNumber || '—' }}</span>
-            </div>
-            <div class="profile-field">
-              <span class="profile-label">Kategorie:</span>
-              <span class="profile-value">{{
-                categoryLabels[sc.category] || sc.category || '—'
-              }}</span>
-            </div>
-            <div class="profile-field">
-              <span class="profile-label">Datum:</span>
-              <span class="profile-value">{{ sc.startTime | date: 'dd.MM.yyyy, HH:mm' }}</span>
-            </div>
-            <div class="profile-field">
-              <span class="profile-label">Dauer:</span>
-              <span class="profile-value">{{ formatDuration(sc.durationSeconds) }}</span>
-            </div>
-
-            @if (sc.approvedSummary || sc.draftSummary) {
-              <div class="profile-summary-block">
-                <span class="profile-label">Letzte genehmigte Zusammenfassung:</span>
-                <p class="profile-summary-text">{{ sc.approvedSummary || sc.draftSummary }}</p>
-              </div>
-            }
-
-            <div class="profile-actions">
-              <button
-                class="btn btn-secondary btn-sm flex-1"
-                (click)="viewCallerProfile(sc, $event)"
-              >
-                <mat-icon>person_search</mat-icon>
-                Kunden-Historie
-              </button>
-              <button class="btn btn-secondary btn-sm flex-1" (click)="navigateToDetail(sc.id)">
-                <mat-icon>open_in_new</mat-icon>
-                Anruf-Detail
-              </button>
-            </div>
-          </div>
-        }
-      </div>
-    }
-
-    <!-- Mobile Card View -->
-    @if (isMobile) {
-      <div class="mobile-cards-container">
-        @if (!isLoading && dataSource.filteredData.length === 0) {
-          <div class="empty-state">
-            <mat-icon class="empty-icon">history_toggle_off</mat-icon>
-            <p>
-              {{
-                hasActiveFilters
-                  ? 'Keine Ergebnisse für die gewählten Filter.'
-                  : 'Keine Anrufhistorie gefunden.'
-              }}
-            </p>
-            @if (hasActiveFilters) {
-              <button class="btn btn-secondary btn-sm" (click)="resetFilters()">
-                <mat-icon>filter_alt_off</mat-icon>
-                <span>Filter zurücksetzen</span>
-              </button>
-            }
-          </div>
-        }
-
-        @for (
-          call of dataSource.filteredData
-            | slice
-              : (paginator().pageIndex || 0) * (paginator().pageSize || 15)
-              : ((paginator().pageIndex || 0) + 1) * (paginator().pageSize || 15);
-          track call.id
-        ) {
-          <div class="call-card" [routerLink]="['/calls/detail']" [queryParams]="{ id: call.id }">
-            <div class="card-header">
-              <div class="card-time">
-                <mat-icon class="time-icon">schedule</mat-icon>
-                <div class="time-info">
-                  <span class="date">{{ call.startTime | date: 'dd.MM.yyyy, HH:mm:ss' }}</span>
-                </div>
-              </div>
-              <div class="card-badges">
-                <span class="badge badge-neutral">{{
-                  categoryLabels[call.category] || call.category || 'Unbekannt'
-                }}</span>
-                <span class="status-chip" [ngClass]="getSummaryStatusClass(call.summaryStatus)">
-                  <span class="status-dot"></span>
-                  {{ getSummaryStatusLabel(call.summaryStatus) }}
-                </span>
-              </div>
-            </div>
-
-            <div class="card-body">
-              <div class="info-row">
-                <mat-icon class="info-icon">person</mat-icon>
-                <div class="info-content">
-                  <span class="info-label">Kunde</span>
-                  <span class="info-value">{{ call.customerName || 'Manueller Eintrag' }}</span>
-                </div>
-              </div>
-
-              <div class="info-row">
-                <mat-icon class="info-icon">timer</mat-icon>
-                <div class="info-content">
-                  <span class="info-label">Dauer</span>
-                  <span class="info-value">{{ formatDuration(call.durationSeconds) }}</span>
-                </div>
-              </div>
-
-              @if (call.approvedSummary || call.draftSummary) {
-                <div class="info-row summary-row">
-                  <mat-icon class="info-icon">notes</mat-icon>
-                  <div class="info-content">
-                    <span class="info-label">Zusammenfassung</span>
-                    <span class="info-value summary-text">{{
-                      call.approvedSummary || call.draftSummary
-                    }}</span>
-                  </div>
-                </div>
+      <!-- Mobile Card View -->
+      @if (isMobile) {
+        <div class="mobile-cards-container">
+          @if (!isLoading && dataSource.filteredData.length === 0) {
+            <div class="empty-state">
+              <mat-icon class="empty-icon">history_toggle_off</mat-icon>
+              <p>
+                {{
+                  hasActiveFilters
+                    ? 'Keine Ergebnisse für die gewählten Filter.'
+                    : 'Keine Anrufhistorie gefunden.'
+                }}
+              </p>
+              @if (hasActiveFilters) {
+                <button class="btn btn-secondary btn-sm" (click)="resetFilters()">
+                  <mat-icon>filter_alt_off</mat-icon>
+                  <span>Filter zurücksetzen</span>
+                </button>
               }
             </div>
+          }
 
-            <div class="card-actions">
-              <button
-                class="btn btn-secondary btn-sm btn-block-mobile"
-                (click)="viewCallerProfile(call, $event)"
-              >
-                <mat-icon>person_search</mat-icon>
-                <span>Anrufer-Profil</span>
-              </button>
+          @for (
+            call of dataSource.filteredData
+              | slice
+                : (paginator().pageIndex || 0) * (paginator().pageSize || 15)
+                : ((paginator().pageIndex || 0) + 1) * (paginator().pageSize || 15);
+            track call.id
+          ) {
+            <div class="call-card" [routerLink]="['/calls/detail']" [queryParams]="{ id: call.id }">
+              <div class="card-header">
+                <div class="card-time">
+                  <mat-icon class="time-icon">schedule</mat-icon>
+                  <div class="time-info">
+                    <span class="date">{{ call.startTime | date: 'dd.MM.yyyy, HH:mm:ss' }}</span>
+                  </div>
+                </div>
+                <div class="card-badges">
+                  <span class="badge badge-neutral">{{
+                    categoryLabels[call.category] || call.category || 'Unbekannt'
+                  }}</span>
+                  <span class="status-chip" [ngClass]="getSummaryStatusClass(call.summaryStatus)">
+                    <span class="status-dot"></span>
+                    {{ getSummaryStatusLabel(call.summaryStatus) }}
+                  </span>
+                </div>
+              </div>
+
+              <div class="card-body">
+                <div class="info-row">
+                  <div class="info-avatar" [ngClass]="getAvatarClass(call.customerName)">
+                    {{ getInitials(call.customerName) }}
+                  </div>
+                  <div class="info-content">
+                    <span class="info-label">Kunde</span>
+                    <span class="info-value">{{ call.customerName || 'Manueller Eintrag' }}</span>
+                  </div>
+                </div>
+
+                <div class="info-row">
+                  <mat-icon class="info-icon">timer</mat-icon>
+                  <div class="info-content">
+                    <span class="info-label">Dauer</span>
+                    <span class="info-value">{{ formatDuration(call.durationSeconds) }}</span>
+                  </div>
+                </div>
+
+                @if (call.approvedSummary || call.draftSummary) {
+                  <div class="info-row summary-row">
+                    <mat-icon class="info-icon">notes</mat-icon>
+                    <div class="info-content">
+                      <span class="info-label">Zusammenfassung</span>
+                      <span class="info-value summary-text">{{
+                        call.approvedSummary || call.draftSummary
+                      }}</span>
+                    </div>
+                  </div>
+                }
+              </div>
+
+              <div class="card-actions">
+                <button
+                  class="btn btn-secondary btn-sm btn-block-mobile"
+                  (click)="viewCallerProfile(call, $event)"
+                >
+                  <mat-icon>person_search</mat-icon>
+                  <span>Anrufer-Profil</span>
+                </button>
+              </div>
+            </div>
+          }
+        </div>
+      }
+
+      <mat-paginator
+        [pageSizeOptions]="[15, 30, 50]"
+        showFirstLastButtons
+        class="custom-paginator"
+      ></mat-paginator>
+    </div>
+
+    <!-- Detail: Caller Profile Card -->
+    @if (!isMobile && selectedCall(); as sc) {
+      <div class="caller-profile-panel">
+        <div class="profile-card-header">
+          <div class="profile-header-title">
+            <mat-icon>person_search</mat-icon>
+            <span>Anrufer-Profil</span>
+          </div>
+          <button class="btn-icon-close" (click)="selectedCall.set(null)" matTooltip="Schließen">
+            <mat-icon>close</mat-icon>
+          </button>
+        </div>
+
+        <div class="profile-hero">
+          <div class="profile-avatar" [ngClass]="getAvatarClass(sc.customerName)">
+            {{ getInitials(sc.customerName) }}
+          </div>
+          <div class="profile-hero-info">
+            <h3 class="profile-hero-name">{{ sc.customerName || 'Unbekannter Anrufer' }}</h3>
+            @if (sc.callerNumber) {
+              <div class="profile-hero-phone">
+                <mat-icon>phone</mat-icon>
+                <span>{{ sc.callerNumber }}</span>
+              </div>
+            }
+          </div>
+        </div>
+
+        <div class="profile-details">
+          @if (selectedCustomer()?.company) {
+            <div class="profile-field">
+              <mat-icon class="field-icon">business</mat-icon>
+              <div class="field-content">
+                <span class="profile-label">Firma</span>
+                <span class="profile-value">{{ selectedCustomer()?.company }}</span>
+              </div>
+            </div>
+          }
+
+          @if (selectedCustomer()?.email) {
+            <div class="profile-field">
+              <mat-icon class="field-icon">email</mat-icon>
+              <div class="field-content">
+                <span class="profile-label">E-Mail</span>
+                <span class="profile-value">{{ selectedCustomer()?.email }}</span>
+              </div>
+            </div>
+          }
+
+          <div class="profile-field">
+            <mat-icon class="field-icon">label</mat-icon>
+            <div class="field-content">
+              <span class="profile-label">Kategorie</span>
+              <span class="profile-value">
+                <span class="badge badge-neutral">{{
+                  categoryLabels[sc.category] || sc.category || '—'
+                }}</span>
+              </span>
             </div>
           </div>
+
+          <div class="profile-field">
+            <mat-icon class="field-icon">event</mat-icon>
+            <div class="field-content">
+              <span class="profile-label">Datum</span>
+              <span class="profile-value">{{ sc.startTime | date: 'dd.MM.yyyy, HH:mm' }}</span>
+            </div>
+          </div>
+
+          <div class="profile-field">
+            <mat-icon class="field-icon">timer</mat-icon>
+            <div class="field-content">
+              <span class="profile-label">Dauer</span>
+              <span class="profile-value">{{ formatDuration(sc.durationSeconds) }}</span>
+            </div>
+          </div>
+        </div>
+
+        @if (sc.approvedSummary || sc.draftSummary) {
+          <div class="profile-summary-block">
+            <div class="summary-header">
+              <mat-icon class="summary-icon">notes</mat-icon>
+              <span class="profile-label">Zusammenfassung</span>
+            </div>
+            <p class="profile-summary-text">{{ sc.approvedSummary || sc.draftSummary }}</p>
+          </div>
         }
+
+        <div class="profile-actions">
+          <button class="btn btn-secondary btn-sm flex-1" (click)="viewCallerProfile(sc, $event)">
+            <mat-icon>person_search</mat-icon>
+            Kunden-Historie
+          </button>
+          <button class="btn btn-secondary btn-sm flex-1" (click)="navigateToDetail(sc.id)">
+            <mat-icon>open_in_new</mat-icon>
+            Anruf-Detail
+          </button>
+        </div>
       </div>
     }
-
-    <mat-paginator
-      [pageSizeOptions]="[15, 30, 50]"
-      showFirstLastButtons
-      class="custom-paginator"
-    ></mat-paginator>
   </div>
 </div>
-
-
-

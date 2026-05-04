@@ -63,10 +63,17 @@
                 tabindex="0"
               >
                 <td>
-                  {{ customer.fullName }}
-                  @if (customer.isDeleted) {
-                    <span class="deleted-badge">gelöscht</span>
-                  }
+                  <div class="name-cell">
+                    <div class="name-avatar" [ngClass]="getAvatarClass(customer.fullName)">
+                      {{ getInitials(customer.fullName) }}
+                    </div>
+                    <div class="name-text">
+                      <span class="name-value">{{ customer.fullName }}</span>
+                      @if (customer.isDeleted) {
+                        <span class="deleted-badge">gelöscht</span>
+                      }
+                    </div>
+                  </div>
                 </td>
                 <td>{{ customer.phoneNumber }}</td>
                 <td>{{ customer.company || '—' }}</td>

@@ -130,6 +130,25 @@ export class CallerProfileComponent implements OnInit {
     return 'none';
   }
 
+  getInitials(name: string | null | undefined): string {
+    if (!name) return '--';
+    const parts = name.trim().split(/\s+/).filter(Boolean);
+    if (!parts.length) return '--';
+    const first = parts[0]?.[0] ?? '';
+    const last = parts.length > 1 ? (parts.at(-1)?.[0] ?? '') : '';
+    const initials = `${first}${last}`.toUpperCase();
+    return initials || '--';
+  }
+
+  getAvatarClass(name: string | null | undefined): string {
+    if (!name) return 'avatar-tone-1';
+    let hash = 0;
+    for (let i = 0; i < name.length; i++) {
+      hash = (hash + (name.codePointAt(i) ?? 0)) % 4;
+    }
+    return `avatar-tone-${hash + 1}`;
+  }
+
   private loadCalls(phone: string): void {
     this.isLoading.set(true);
     this.searchedPhone.set(phone);

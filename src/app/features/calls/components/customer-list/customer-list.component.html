@@ -56,7 +56,12 @@
                 tabindex="0"
               >
                 <td>
-                  <span class="customer-name-text">{{ customer.fullName }}</span>
+                  <div class="name-cell">
+                    <div class="name-avatar" [ngClass]="getAvatarClass(customer.fullName)">
+                      {{ getInitials(customer.fullName) }}
+                    </div>
+                    <span class="customer-name-text">{{ customer.fullName }}</span>
+                  </div>
                 </td>
                 <td>{{ customer.phoneNumber }}</td>
                 <td>

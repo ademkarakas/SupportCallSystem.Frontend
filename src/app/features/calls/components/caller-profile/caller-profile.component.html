@@ -1,5 +1,4 @@
 <div class="caller-profile-page global-page-container page-enter">
-
   <!-- Page Header -->
   <header class="page-header">
     <div class="header-content">
@@ -20,21 +19,20 @@
   <!-- Loading skeleton -->
   @if (isLoading()) {
     <div class="skeleton-container">
-      <div class="skeleton caller-skeleton" style="height: 96px; border-radius: 16px;"></div>
+      <div class="skeleton caller-skeleton" style="height: 96px; border-radius: 16px"></div>
       <div class="stats-grid">
         @for (_ of [1, 2, 3]; track $index) {
-          <div class="skeleton" style="height: 100px; border-radius: 16px;"></div>
+          <div class="skeleton" style="height: 100px; border-radius: 16px"></div>
         }
       </div>
       @for (_ of [1, 2, 3, 4]; track $index) {
-        <div class="skeleton" style="height: 88px; border-radius: 12px; margin-bottom: 10px;"></div>
+        <div class="skeleton" style="height: 88px; border-radius: 12px; margin-bottom: 10px"></div>
       }
     </div>
   }
 
   <!-- Profile Content -->
   @if (!isLoading() && searchedPhone()) {
-
     <!-- Caller Identity Card -->
     <div class="caller-identity-card card">
       <div class="caller-avatar">
@@ -123,7 +121,9 @@
               <div class="item-content">
                 <div class="item-top-row">
                   <span class="item-customer">
-                    <mat-icon class="item-icon">person</mat-icon>
+                    <span class="name-avatar" [ngClass]="getAvatarClass(call.customerName)">
+                      {{ getInitials(call.customerName) }}
+                    </span>
                     {{ call.customerName || 'Unbekannter Anrufer' }}
                   </span>
                   <div class="item-badges">
@@ -140,7 +140,9 @@
                     {{ formatDuration(call.durationSeconds) }}
                   </span>
                   @if (call.approvedSummary || call.draftSummary) {
-                    <span class="item-summary">{{ call.approvedSummary || call.draftSummary }}</span>
+                    <span class="item-summary">{{
+                      call.approvedSummary || call.draftSummary
+                    }}</span>
                   } @else {
                     <span class="item-summary item-summary--empty">Keine Zusammenfassung</span>
                   }
@@ -172,7 +174,7 @@
             [pageSizeOptions]="[10, 25, 50]"
             (page)="onPageChange($event)"
             showFirstLastButtons
-            class="profile-paginator"
+            class="custom-paginator"
           ></mat-paginator>
         }
       </div>
@@ -209,5 +211,4 @@
       </div>
     </div>
   }
-
 </div>
