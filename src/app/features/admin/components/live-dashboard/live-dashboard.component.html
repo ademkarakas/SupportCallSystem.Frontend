@@ -73,7 +73,7 @@
         <span class="count-badge">{{ activeCalls().length }}</span>
       </div>
 
-      <div class="table-container">
+      <div class="table-container hide-mobile">
         <div *ngIf="isLoading()" class="loading-overlay">
           <span>Laden…</span>
         </div>
@@ -115,6 +115,39 @@
           </tbody>
         </table>
       </div>
+
+      <div class="mobile-cards-container show-mobile" *ngIf="!isLoading()">
+        <div *ngFor="let call of activeCallRows()" class="active-call-card">
+          <div class="card-header">
+            <div class="caller-cell">
+              <span class="live-dot"></span>
+              <span class="caller-number font-medium">{{ call.callerNumber }}</span>
+            </div>
+            <span class="duration-badge">{{ call.elapsedLabel }}</span>
+          </div>
+          <div class="card-body">
+            <div class="detail-row">
+              <span class="detail-label">Kunde</span>
+              <span *ngIf="call.customerName" class="customer-name">{{ call.customerName }}</span>
+              <span *ngIf="!call.customerName" class="no-customer">Unbekannt</span>
+            </div>
+            <div class="detail-row">
+              <span class="detail-label">Agent</span>
+              <span class="agent-id">{{ agentDisplayName(call.agentUserId) }}</span>
+            </div>
+          </div>
+        </div>
+        <div *ngIf="activeCalls().length === 0" class="empty-row card-empty">
+          <mat-icon>phone_disabled</mat-icon>
+          <span>Keine aktiven Anrufe</span>
+        </div>
+      </div>
+
+      <div class="mobile-cards-container show-mobile" *ngIf="isLoading()">
+        <div class="loading-overlay">
+          <span>Laden…</span>
+        </div>
+      </div>
     </div>
 
     <!-- Call Queue -->
@@ -151,7 +184,7 @@
       <span>Agenten-Status</span>
     </div>
 
-    <div class="table-container">
+    <div class="table-container hide-mobile">
       <table class="data-table" *ngIf="!isLoading()">
         <thead>
           <tr>
@@ -195,6 +228,44 @@
       </table>
 
       <div *ngIf="isLoading()" class="loading-overlay">
+        <span>Laden…</span>
+      </div>
+    </div>
+
+    <div class="mobile-cards-container show-mobile" *ngIf="!isLoading()">
+      <div *ngFor="let row of agentRows()" class="agent-card">
+        <div class="agent-card-header">
+          <div class="agent-cell">
+            <div class="agent-avatar">{{ row.name | slice: 0 : 1 }}</div>
+            <div class="agent-info">
+              <span class="agent-name font-medium">{{ row.name }}</span>
+              <span class="agent-email text-sm text-secondary">{{ row.email }}</span>
+            </div>
+          </div>
+          <span class="status-badge" [class]="row.status">
+            <span class="status-dot" [class]="row.status"></span>
+            {{ row.status === 'busy' ? 'Beschäftigt' : 'Verfügbar' }}
+          </span>
+        </div>
+        <div class="agent-card-body">
+          <div class="detail-row">
+            <span class="detail-label">Durchwahl</span>
+            <span class="agent-ext font-medium">{{ row.extension || '—' }}</span>
+          </div>
+          <div class="detail-row" *ngIf="row.activeCallSince">
+            <span class="detail-label">Im Gespräch seit</span>
+            <span class="call-since font-medium">{{ row.elapsedLabel }}</span>
+          </div>
+        </div>
+      </div>
+      <div *ngIf="agentRows().length === 0" class="empty-row card-empty">
+        <mat-icon>person_off</mat-icon>
+        <span>Keine Agenten gefunden</span>
+      </div>
+    </div>
+
+    <div class="mobile-cards-container show-mobile" *ngIf="isLoading()">
+      <div class="loading-overlay">
         <span>Laden…</span>
       </div>
     </div>

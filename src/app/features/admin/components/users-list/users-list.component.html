@@ -35,7 +35,7 @@
         <p>Benutzer werden geladen...</p>
       </div>
     } @else {
-      <div class="table-container">
+      <div class="table-container hide-mobile">
         <table class="data-table">
           <thead>
             <tr>
@@ -82,6 +82,36 @@
             }
           </tbody>
         </table>
+      </div>
+
+      <div class="mobile-cards-container show-mobile">
+        @for (user of pagedUsers(); track user.id) {
+          <button
+            type="button"
+            class="user-card"
+            (click)="editUser(user)"
+            (keydown.enter)="editUser(user)"
+          >
+            <div class="card-header">
+              <div class="header-left">
+                <div class="user-avatar-small" [ngClass]="getRoleBadgeClass(user.roles)">
+                  {{ (user.firstName[0] || '') + (user.lastName[0] || '') }}
+                </div>
+                <div class="name-block">
+                  <span class="name-text">{{ user.firstName }} {{ user.lastName }}</span>
+                  <span class="email-text">{{ user.email }}</span>
+                </div>
+              </div>
+              <span class="role-badge" [ngClass]="getRoleBadgeClass(user.roles)">
+                {{ getRoleLabel(user.roles) }}
+              </span>
+            </div>
+            <div class="card-meta">
+              <span class="meta-label">Nebenstelle</span>
+              <span class="meta-value">{{ user.extension || '—' }}</span>
+            </div>
+          </button>
+        }
       </div>
 
       <mat-paginator

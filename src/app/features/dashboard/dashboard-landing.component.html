@@ -95,7 +95,7 @@
         </button>
       </div>
 
-      <div class="table-container">
+      <div class="table-container hide-mobile">
         @if (activities().length > 0) {
           <table class="data-table">
             <thead>
@@ -131,6 +131,42 @@
               }
             </tbody>
           </table>
+        } @else {
+          <div class="empty-state">
+            <mat-icon class="empty-icon">history</mat-icon>
+            <p>Keine aktuellen Aktivitäten vorhanden.</p>
+          </div>
+        }
+      </div>
+
+      <div class="mobile-cards-container show-mobile">
+        @if (activities().length > 0) {
+          @for (activity of activities(); track activity.callId) {
+            <div
+              class="activity-card"
+              [routerLink]="['/calls/detail']"
+              [queryParams]="{ id: activity.callId }"
+            >
+              <div class="card-header">
+                <div class="title-row">
+                  <span class="activity-title">{{ activity.customerName || 'Unbekannt' }}</span>
+                  <span class="activity-time">{{ activity.relativeTime }}</span>
+                </div>
+              </div>
+              <div class="card-body">
+                <div class="info-row">
+                  <span class="info-label">Aktivität</span>
+                  <span class="info-value">{{ activity.title }}</span>
+                </div>
+                <div class="badges-row">
+                  <span class="badge badge-neutral">{{ getCategoryLabel(activity.category) }}</span>
+                  <span class="badge" [ngClass]="getStatusClass(activity.status)">
+                    {{ getStatusLabel(activity.status) }}
+                  </span>
+                </div>
+              </div>
+            </div>
+          }
         } @else {
           <div class="empty-state">
             <mat-icon class="empty-icon">history</mat-icon>

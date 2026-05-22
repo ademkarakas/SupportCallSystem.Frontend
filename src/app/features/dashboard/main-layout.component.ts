@@ -54,6 +54,10 @@ export class MainLayoutComponent implements OnInit {
   isMobileMenuOpen = signal(false);
   debugPanelVisible = signal(false);
 
+  // Dropdown states
+  isCallsMenuOpen = signal(false);
+  isAdminMenuOpen = signal(false);
+
   userInitials = computed(() => {
     const user = this.auth.currentUser();
     if (!user) return '?';
@@ -78,6 +82,31 @@ export class MainLayoutComponent implements OnInit {
 
   closeMobileMenu() {
     this.isMobileMenuOpen.set(false);
+  }
+
+  closeAllDropdowns() {
+    this.isCallsMenuOpen.set(false);
+    this.isAdminMenuOpen.set(false);
+  }
+
+  toggleCallsMenu() {
+    this.isAdminMenuOpen.set(false);
+    if (this.isSidebarCollapsed() && !this.isMobile()) {
+      this.isSidebarCollapsed.set(false);
+      this.isCallsMenuOpen.set(true);
+    } else {
+      this.isCallsMenuOpen.set(!this.isCallsMenuOpen());
+    }
+  }
+
+  toggleAdminMenu() {
+    this.isCallsMenuOpen.set(false);
+    if (this.isSidebarCollapsed() && !this.isMobile()) {
+      this.isSidebarCollapsed.set(false);
+      this.isAdminMenuOpen.set(true);
+    } else {
+      this.isAdminMenuOpen.set(!this.isAdminMenuOpen());
+    }
   }
 
   toggleTheme() {

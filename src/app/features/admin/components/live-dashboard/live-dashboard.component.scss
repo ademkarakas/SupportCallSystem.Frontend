@@ -313,6 +313,102 @@
   font-size: 0.875rem;
 }
 
+// ── Mobile Cards ─────────────────────────────────────────────────────────────
+.mobile-cards-container {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-md);
+
+  @media (max-width: 480px) {
+    padding: var(--spacing-sm);
+  }
+}
+
+.agent-card,
+.active-call-card {
+  background-color: var(--color-card-bg);
+  border: 1px solid var(--color-card-border);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  box-shadow: var(--shadow-sm);
+  display: flex;
+  flex-direction: column;
+  transition: all var(--transition-fast);
+
+  &:active {
+    transform: scale(0.98);
+  }
+
+  .agent-card-header,
+  .card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: var(--spacing-md);
+    background-color: var(--color-table-header-bg);
+    border-bottom: 1px solid var(--color-card-border);
+    gap: var(--spacing-sm);
+    flex-wrap: wrap;
+
+    .agent-cell,
+    .caller-cell {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .agent-info {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+  }
+
+  .agent-card-body,
+  .card-body {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-md);
+    padding: var(--spacing-md);
+
+    .detail-row {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+
+      .detail-label {
+        font-size: 11px;
+        color: var(--color-text-secondary);
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        font-weight: 600;
+      }
+
+      .detail-value,
+      .agent-id,
+      .agent-ext,
+      .call-since,
+      .customer-name,
+      .no-customer,
+      .no-value {
+        font-size: 14px;
+        color: var(--color-text-primary);
+        font-weight: 500;
+      }
+    }
+  }
+}
+
+.card-empty {
+  padding: 40px 16px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  color: var(--color-text-secondary);
+}
+
 // ── Caller Cell ────────────────────────────────────────────────────────────────
 .caller-cell {
   display: flex;

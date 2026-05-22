@@ -105,6 +105,12 @@
   flex: 1 1 320px;
   height: 56px;
 
+  @media (max-width: 700px) {
+    flex: unset;
+    width: 100%;
+    height: auto;
+  }
+
   .search-input {
     height: 56px;
     border-radius: var(--radius-md) !important;
@@ -138,6 +144,11 @@
   flex-wrap: wrap;
   align-items: flex-start;
   flex: 3 1 400px;
+
+  @media (max-width: 700px) {
+    flex: unset;
+    width: 100%;
+  }
 
   .filter-field {
     flex: 1;

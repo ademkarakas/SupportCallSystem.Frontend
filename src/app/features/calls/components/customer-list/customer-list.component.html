@@ -37,7 +37,7 @@
         <p>Keine Kunden gefunden.</p>
       </div>
     } @else {
-      <div class="table-container">
+      <div class="table-container hide-mobile">
         <table class="data-table">
           <thead>
             <tr>
@@ -72,6 +72,34 @@
             }
           </tbody>
         </table>
+      </div>
+
+      <div class="mobile-cards-container show-mobile">
+        @for (customer of pagedCustomers(); track customer.key) {
+          <button
+            type="button"
+            class="customer-card"
+            (click)="openProfile(customer)"
+            (keydown.enter)="openProfile(customer)"
+          >
+            <div class="card-header">
+              <div class="header-left">
+                <div class="name-avatar" [ngClass]="getAvatarClass(customer.fullName)">
+                  {{ getInitials(customer.fullName) }}
+                </div>
+                <div class="name-block">
+                  <span class="customer-name-text">{{ customer.fullName }}</span>
+                  <span class="customer-phone">{{ customer.phoneNumber }}</span>
+                </div>
+              </div>
+              <span class="badge badge-neutral">{{ customer.totalCalls }}</span>
+            </div>
+            <div class="card-meta">
+              <span class="meta-label">Letzter Anruf</span>
+              <span class="meta-value">{{ customer.lastCallTime | date: 'dd.MM.yyyy HH:mm' }}</span>
+            </div>
+          </button>
+        }
       </div>
 
       <mat-paginator

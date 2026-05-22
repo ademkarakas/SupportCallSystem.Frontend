@@ -5,6 +5,12 @@
 }
 
 .page-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--spacing-md);
+  flex-wrap: wrap;
+
   .title-row {
     display: flex;
     align-items: center;
@@ -22,6 +28,15 @@
     margin: 0.25rem 0 0 2.5rem;
     color: var(--color-text-secondary);
     font-size: 0.875rem;
+  }
+
+  @media (max-width: 768px) {
+    flex-direction: column;
+    align-items: flex-start;
+
+    .subtitle {
+      margin-left: 0;
+    }
   }
 }
 
@@ -114,6 +129,86 @@
 .name-avatar.avatar-tone-4 {
   background: #276749;
   color: #ffffff;
+}
+
+.mobile-cards-container {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+  padding: var(--spacing-md);
+
+  @media (max-width: 480px) {
+    padding: var(--spacing-sm);
+  }
+}
+
+.customer-card {
+  border: 1px solid var(--color-card-border);
+  border-radius: var(--radius-md);
+  background: var(--color-card-bg);
+  padding: var(--spacing-md);
+  text-align: left;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+  box-shadow: var(--shadow-sm);
+  transition: all var(--transition-fast);
+
+  &:hover {
+    border-color: var(--color-brand);
+    box-shadow: var(--shadow-md);
+  }
+
+  &:active {
+    transform: scale(0.99);
+  }
+}
+
+.card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--spacing-sm);
+
+  .header-left {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+    min-width: 0;
+  }
+
+  .name-block {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+  }
+
+  .customer-phone {
+    font-size: var(--font-size-sm);
+    color: var(--color-text-secondary);
+  }
+}
+
+.card-meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--spacing-sm);
+  font-size: var(--font-size-sm);
+
+  .meta-label {
+    color: var(--color-text-tertiary);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    font-size: var(--font-size-xs);
+  }
+
+  .meta-value {
+    color: var(--color-text-primary);
+    font-weight: var(--font-weight-medium);
+  }
 }
 
 @keyframes spin {

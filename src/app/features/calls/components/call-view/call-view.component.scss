@@ -370,6 +370,25 @@
       }
     }
   }
+
+  @media (max-width: 768px) {
+    flex-direction: column;
+    gap: var(--spacing-md);
+
+    .header-actions {
+      width: 100%;
+      justify-content: flex-start;
+
+      .btn {
+        flex: 1 1 auto;
+        justify-content: center;
+      }
+    }
+
+    .subtitle-row {
+      flex-wrap: wrap;
+    }
+  }
 }
 
 .call-status-badge {

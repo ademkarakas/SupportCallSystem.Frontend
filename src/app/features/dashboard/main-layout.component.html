@@ -22,83 +22,111 @@
             routerLink="/dashboard"
             routerLinkActive="active"
             [routerLinkActiveOptions]="{ exact: true }"
+            (click)="closeAllDropdowns()"
           >
             <mat-icon>dashboard</mat-icon>
             <span class="label">Übersicht</span>
           </a>
         </li>
-        <li class="nav-item">
-          <a
-            routerLink="/calls"
-            routerLinkActive="active"
-            [routerLinkActiveOptions]="{ exact: true }"
-          >
-            <mat-icon>call</mat-icon>
-            <span class="label">Aktueller Anruf</span>
+
+        <!-- Calls Dropdown -->
+        <li class="nav-item dropdown-item" [class.is-open]="isCallsMenuOpen()">
+          <a class="dropdown-toggle" (click)="toggleCallsMenu()" style="cursor: pointer">
+            <mat-icon>support_agent</mat-icon>
+            <span class="label">Anrufe</span>
+            <mat-icon class="dropdown-arrow">{{
+              isCallsMenuOpen() ? 'expand_less' : 'expand_more'
+            }}</mat-icon>
           </a>
+          @if (isCallsMenuOpen() && !isSidebarCollapsed()) {
+            <ul class="dropdown-menu">
+              <li class="nav-item">
+                <a
+                  routerLink="/calls"
+                  routerLinkActive="active"
+                  [routerLinkActiveOptions]="{ exact: true }"
+                >
+                  <mat-icon>call</mat-icon>
+                  <span class="label">Aktueller Anruf</span>
+                </a>
+              </li>
+              <li class="nav-item">
+                <a routerLink="/calls/history" routerLinkActive="active">
+                  <mat-icon>history</mat-icon>
+                  <span class="label">Anrufhistorie</span>
+                </a>
+              </li>
+              <li class="nav-item">
+                <a routerLink="/calls/customers" routerLinkActive="active">
+                  <mat-icon>people</mat-icon>
+                  <span class="label">Kunden &amp; Anrufe</span>
+                </a>
+              </li>
+            </ul>
+          }
         </li>
-        <li class="nav-item">
-          <a routerLink="/calls/history" routerLinkActive="active">
-            <mat-icon>history</mat-icon>
-            <span class="label">Anrufhistorie</span>
-          </a>
-        </li>
-        <li class="nav-item">
-          <a routerLink="/calls/customers" routerLinkActive="active">
-            <mat-icon>people</mat-icon>
-            <span class="label">Kunden &amp; Anrufe</span>
-          </a>
-        </li>
+
+        <!-- Admin Dropdown -->
         @if (auth.isAdmin() || auth.hasRole('Agent')) {
-          <li class="nav-item">
-            <a routerLink="/admin/customers" routerLinkActive="active">
-              <mat-icon>manage_accounts</mat-icon>
-              <span class="label">Kundenverwaltung</span>
+          <li class="nav-item dropdown-item" [class.is-open]="isAdminMenuOpen()">
+            <a class="dropdown-toggle" (click)="toggleAdminMenu()" style="cursor: pointer">
+              <mat-icon>admin_panel_settings</mat-icon>
+              <span class="label">Administration</span>
+              <mat-icon class="dropdown-arrow">{{
+                isAdminMenuOpen() ? 'expand_less' : 'expand_more'
+              }}</mat-icon>
             </a>
+            @if (isAdminMenuOpen() && !isSidebarCollapsed()) {
+              <ul class="dropdown-menu">
+                <li class="nav-item">
+                  <a routerLink="/admin/customers" routerLinkActive="active">
+                    <mat-icon>manage_accounts</mat-icon>
+                    <span class="label">Kundenverwaltung</span>
+                  </a>
+                </li>
+                @if (auth.isAdmin()) {
+                  <li class="nav-item">
+                    <a routerLink="/admin/users" routerLinkActive="active">
+                      <mat-icon>group</mat-icon>
+                      <span class="label">Benutzer</span>
+                    </a>
+                  </li>
+                  <li class="nav-item">
+                    <a routerLink="/admin/activity" routerLinkActive="active">
+                      <mat-icon>analytics</mat-icon>
+                      <span class="label">Aktivität</span>
+                    </a>
+                  </li>
+                  <li class="nav-item">
+                    <a routerLink="/admin/live" routerLinkActive="active">
+                      <mat-icon>sensors</mat-icon>
+                      <span class="label">Live Dashboard</span>
+                    </a>
+                  </li>
+                  <li class="nav-item">
+                    <a routerLink="/admin/audit-log" routerLinkActive="active">
+                      <mat-icon>security</mat-icon>
+                      <span class="label">Prüfprotokoll</span>
+                    </a>
+                  </li>
+                }
+              </ul>
+            }
           </li>
         }
+
         <li class="nav-item">
-          <a routerLink="/reports" routerLinkActive="active">
+          <a routerLink="/reports" routerLinkActive="active" (click)="closeAllDropdowns()">
             <mat-icon>bar_chart</mat-icon>
             <span class="label">Berichte</span>
           </a>
         </li>
         <li class="nav-item">
-          <a routerLink="/notifications" routerLinkActive="active">
+          <a routerLink="/notifications" routerLinkActive="active" (click)="closeAllDropdowns()">
             <mat-icon>notifications</mat-icon>
             <span class="label">Benachrichtigungen</span>
           </a>
         </li>
-        @if (auth.isAdmin()) {
-          <li class="nav-divider"></li>
-          <li class="nav-item">
-            <a routerLink="/admin/users" routerLinkActive="active">
-              <mat-icon>group</mat-icon>
-              <span class="label">Benutzer</span>
-            </a>
-          </li>
-        }
-
-        @if (auth.isAdmin()) {
-          <li class="nav-item">
-            <a routerLink="/admin/activity" routerLinkActive="active">
-              <mat-icon>analytics</mat-icon>
-              <span class="label">Aktivität</span>
-            </a>
-          </li>
-          <li class="nav-item">
-            <a routerLink="/admin/live" routerLinkActive="active">
-              <mat-icon>sensors</mat-icon>
-              <span class="label">Live Dashboard</span>
-            </a>
-          </li>
-          <li class="nav-item">
-            <a routerLink="/admin/audit-log" routerLinkActive="active">
-              <mat-icon>security</mat-icon>
-              <span class="label">Prüfprotokoll</span>
-            </a>
-          </li>
-        }
         <li class="nav-divider"></li>
         @if (false) {
           <li class="nav-item">

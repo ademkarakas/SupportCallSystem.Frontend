@@ -262,6 +262,45 @@
       }
     }
   }
+
+  &.dropdown-item {
+    flex-direction: column;
+    align-items: stretch;
+    height: auto;
+    padding: 0;
+
+    .dropdown-toggle {
+      width: 100%;
+      mat-icon.dropdown-arrow {
+        margin-left: auto;
+        color: var(--color-text-secondary);
+      }
+
+      .sidebar-collapsed & {
+        mat-icon.dropdown-arrow {
+          display: none;
+        }
+      }
+    }
+
+    .dropdown-menu {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      background-color: var(--color-table-header-bg);
+      border-radius: 0 0 $radius-sm $radius-sm;
+
+      .nav-item a {
+        padding-left: 52px; // Indent submenu items
+        height: 40px;
+        font-size: 13px;
+
+        .sidebar-collapsed & {
+          padding-left: $spacing-6;
+        }
+      }
+    }
+  }
 }
 
 // ============================================================================

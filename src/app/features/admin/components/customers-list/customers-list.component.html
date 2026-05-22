@@ -42,7 +42,7 @@
         <p>Kunden werden geladen...</p>
       </div>
     } @else {
-      <div class="table-container">
+      <div class="table-container hide-mobile">
         <table class="data-table">
           <thead>
             <tr>
@@ -95,6 +95,52 @@
             }
           </tbody>
         </table>
+      </div>
+
+      <div class="mobile-cards-container show-mobile">
+        @for (customer of customers(); track customer.id) {
+          <button
+            type="button"
+            class="customer-card"
+            [class.deleted-row]="customer.isDeleted"
+            (click)="viewCustomer(customer)"
+            (keydown.enter)="viewCustomer(customer)"
+          >
+            <div class="card-header">
+              <div class="header-left">
+                <div class="name-avatar" [ngClass]="getAvatarClass(customer.fullName)">
+                  {{ getInitials(customer.fullName) }}
+                </div>
+                <div class="name-block">
+                  <div class="name-line">
+                    <span class="name-value">{{ customer.fullName }}</span>
+                    @if (customer.isDeleted) {
+                      <span class="deleted-badge">geloscht</span>
+                    }
+                  </div>
+                  <span class="customer-phone">{{ customer.phoneNumber }}</span>
+                </div>
+              </div>
+              <span class="badge badge-neutral">{{ customer.totalCallCount }}</span>
+            </div>
+            <div class="card-meta">
+              <span class="meta-label">Firma</span>
+              <span class="meta-value">{{ customer.company || '—' }}</span>
+            </div>
+            <div class="card-tags">
+              <span class="meta-label">Tags</span>
+              <div class="tags-wrap">
+                @if (customer.tags.length) {
+                  @for (tag of customer.tags; track tag) {
+                    <span class="tag-chip">{{ tag }}</span>
+                  }
+                } @else {
+                  <span class="no-tags">—</span>
+                }
+              </div>
+            </div>
+          </button>
+        }
       </div>
 
       <mat-paginator
