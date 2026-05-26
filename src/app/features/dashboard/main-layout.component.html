@@ -128,14 +128,16 @@
           </a>
         </li>
         <li class="nav-divider"></li>
-        @if (false) {
-          <li class="nav-item">
-            <a routerLink="/settings/security" routerLinkActive="active">
-              <mat-icon>verified_user</mat-icon>
-              <span class="label">2FA Sicherheit</span>
-            </a>
-          </li>
-        }
+        <li class="nav-item">
+          <a
+            routerLink="/settings/security"
+            routerLinkActive="active"
+            (click)="closeAllDropdowns()"
+          >
+            <mat-icon>verified_user</mat-icon>
+            <span class="label">2FA Sicherheit</span>
+          </a>
+        </li>
       </ul>
     </nav>
   </aside>

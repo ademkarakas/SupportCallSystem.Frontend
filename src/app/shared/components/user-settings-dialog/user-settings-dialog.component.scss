@@ -22,17 +22,13 @@
   align-items: center;
   justify-content: space-between;
   padding: 10px var(--spacing-lg);
-  background: var(--color-button-primary-bg);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  background: var(--color-table-header-bg);
+  border-bottom: 1px solid var(--color-table-border);
   flex-shrink: 0;
   position: relative;
 
   &::after {
-    content: '';
-    position: absolute;
-    inset: 0;
-    background: radial-gradient(circle at 80% 50%, rgba(255, 255, 255, 0.06) 0%, transparent 60%);
-    pointer-events: none;
+    display: none;
   }
 
   .header-left {
@@ -68,44 +64,22 @@
   flex-shrink: 0;
 
   .user-avatar-xl {
-    width: 44px;
-    height: 44px;
-    background-color: rgba(255, 255, 255, 0.2);
-    border: 2px solid rgba(255, 255, 255, 0.4);
+    width: 52px;
+    height: 52px;
+    background: linear-gradient(135deg, var(--color-brand), var(--color-primary));
+    border: 2px solid var(--color-card-bg);
     border-radius: var(--radius-full);
+    box-shadow: var(--shadow-md);
     display: flex;
     align-items: center;
     justify-content: center;
     font-weight: var(--font-weight-bold);
-    font-size: 16px;
-    color: #fff;
-    letter-spacing: 0.03em;
-    backdrop-filter: blur(4px);
-    transition: all var(--transition-base);
-  }
-
-  .avatar-edit-overlay {
-    position: absolute;
-    inset: 0;
-    border-radius: var(--radius-full);
-    background-color: rgba(0, 0, 0, 0.45);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    opacity: 0;
-    cursor: pointer;
-    transition: opacity var(--transition-fast);
-
-    mat-icon {
-      font-size: 20px;
-      width: 20px;
-      height: 20px;
-      color: #fff;
-    }
-  }
-
-  &:hover .avatar-edit-overlay {
-    opacity: 1;
+    font-size: 20px;
+    color: var(--color-button-primary-text);
+    letter-spacing: 0.05em;
+    transition:
+      transform var(--transition-base),
+      box-shadow var(--transition-base);
   }
 }
 
@@ -115,7 +89,7 @@
   .dialog-title {
     font-size: var(--font-size-lg);
     font-weight: var(--font-weight-semibold);
-    color: #fff;
+    color: var(--color-text-primary);
     margin: 0 0 2px;
     line-height: var(--line-height-tight);
   }
@@ -123,7 +97,7 @@
   .dialog-subtitle {
     font-size: var(--font-size-base);
     font-weight: var(--font-weight-medium);
-    color: rgba(255, 255, 255, 0.9);
+    color: var(--color-text-secondary);
     margin: 0;
     white-space: nowrap;
     overflow: hidden;
@@ -132,7 +106,7 @@
 
   .dialog-email {
     font-size: var(--font-size-sm);
-    color: rgba(255, 255, 255, 0.7);
+    color: var(--color-text-tertiary);
     margin: 2px 0 0;
     white-space: nowrap;
     overflow: hidden;
@@ -146,9 +120,9 @@
   height: 32px;
   min-width: 32px;
   border-radius: var(--radius-full);
-  background-color: rgba(255, 255, 255, 0.15);
-  border: 1px solid rgba(255, 255, 255, 0.3);
-  color: #fff;
+  background-color: var(--color-button-secondary-bg);
+  border: 1px solid var(--color-button-border);
+  color: var(--color-text-secondary);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -163,7 +137,8 @@
   }
 
   &:hover {
-    background-color: rgba(255, 255, 255, 0.28);
+    background-color: var(--color-table-row-hover);
+    color: var(--color-text-primary);
     transform: rotate(90deg);
   }
 }

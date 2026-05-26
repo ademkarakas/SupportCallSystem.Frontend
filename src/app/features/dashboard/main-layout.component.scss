@@ -271,6 +271,13 @@
 
     .dropdown-toggle {
       width: 100%;
+      box-sizing: border-box;
+      justify-content: flex-start;
+
+      .label {
+        flex: 1;
+      }
+
       mat-icon.dropdown-arrow {
         margin-left: auto;
         color: var(--color-text-secondary);
