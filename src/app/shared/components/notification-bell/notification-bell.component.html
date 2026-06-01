@@ -1,14 +1,14 @@
-<button class="bell-btn" [matMenuTriggerFor]="notifMenu" matTooltip="Benachrichtigungen">
-  @if (inbox.unreadCount() > 0) {
-    <mat-icon
-      [matBadge]="inbox.unreadCount() > 99 ? '99+' : inbox.unreadCount()"
-      matBadgeColor="warn"
-      matBadgeSize="small"
-      >notifications</mat-icon
-    >
-  } @else {
-    <mat-icon>notifications_none</mat-icon>
-  }
+<button
+  class="bell-btn"
+  [matMenuTriggerFor]="notifMenu"
+  matTooltip="Benachrichtigungen"
+  [matBadge]="inbox.unreadCount() > 99 ? '99+' : inbox.unreadCount()"
+  [matBadgeHidden]="inbox.unreadCount() === 0"
+  matBadgeColor="warn"
+  matBadgeSize="small"
+  aria-label="Benachrichtigungen"
+>
+  <mat-icon>{{ inbox.unreadCount() > 0 ? 'notifications' : 'notifications_none' }}</mat-icon>
 </button>
 
 <mat-menu #notifMenu="matMenu" class="notif-menu-panel" xPosition="before">
@@ -33,25 +33,27 @@
   }
 
   @for (notif of preview(); track notif.id) {
-    <button class="notif-item" [class.unread]="!notif.read" (click)="onItemClick(notif)">
-      <div class="notif-icon-wrap" [ngClass]="colorClassFor(notif.type)">
-        <mat-icon>{{ iconFor(notif.type) }}</mat-icon>
-      </div>
-      <div class="notif-content">
-        <span class="notif-title">{{ notif.title }}</span>
-        <span class="notif-message">{{ notif.message }}</span>
-        <span class="notif-time">{{ relativeTime(notif.timestamp) }}</span>
-      </div>
+    <div class="notif-item-row" [class.unread]="!notif.read">
+      <button class="notif-item" mat-menu-item (click)="onItemClick(notif)">
+        <div class="notif-icon-wrap" [ngClass]="colorClassFor(notif.type)">
+          <mat-icon>{{ iconFor(notif.type) }}</mat-icon>
+        </div>
+        <div class="notif-content">
+          <span class="notif-title">{{ notif.title }}</span>
+          <span class="notif-message">{{ notif.message }}</span>
+          <span class="notif-time">{{ relativeTime(notif.timestamp) }}</span>
+        </div>
+      </button>
       <button
         class="notif-dismiss-btn"
         (click)="dismiss(notif, $event)"
         title="Entfernen"
         type="button"
-        tabindex="-1"
+        aria-label="Entfernen"
       >
         <mat-icon>close</mat-icon>
       </button>
-    </button>
+    </div>
   }
 
   <!-- Footer -->

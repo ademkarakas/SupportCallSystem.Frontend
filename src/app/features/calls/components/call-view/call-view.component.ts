@@ -1,4 +1,12 @@
-import { Component, DestroyRef, inject, OnInit, OnDestroy, signal } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  DestroyRef,
+  inject,
+  OnInit,
+  OnDestroy,
+  signal,
+} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
 import { MatButtonModule } from '@angular/material/button';
@@ -40,6 +48,7 @@ import { AdminApiService, CustomerWithHistoryDto } from '../../../admin/services
   ],
   templateUrl: './call-view.component.html',
   styleUrls: ['./call-view.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class CallViewComponent implements OnInit, OnDestroy {
   route = inject(ActivatedRoute);
@@ -182,6 +191,19 @@ export class CallViewComponent implements OnInit, OnDestroy {
       error: () => {
         this.notification.showError('Fehler beim Laden der Anrufsession.');
         this.router.navigate(['/dashboard']);
+      },
+    });
+  }
+
+  openLinkCustomerDialog() {
+    const currentCall = this.call();
+    if (!currentCall) return;
+
+    this.router.navigate(['/admin/customers/new'], {
+      queryParams: {
+        callerNumber: currentCall.callerNumber,
+        callId: currentCall.id,
+        returnUrl: this.router.url,
       },
     });
   }

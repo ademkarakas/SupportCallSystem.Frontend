@@ -1,4 +1,4 @@
-import { Component, inject, OnInit, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { MatIconModule } from '@angular/material/icon';
@@ -25,6 +25,7 @@ import { MatInputModule } from '@angular/material/input';
   templateUrl: './call-detail.component.html',
   styleUrls: ['./call-detail.component.scss'],
   animations: [fadeIn],
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class CallDetailComponent implements OnInit {
   route = inject(ActivatedRoute);
@@ -49,6 +50,19 @@ export class CallDetailComponent implements OnInit {
         this.notification.showError('Keine Anruf-ID angegeben.');
         this.router.navigate(['/dashboard']);
       }
+    });
+  }
+
+  openLinkCustomerDialog() {
+    const currentCall = this.call();
+    if (!currentCall) return;
+
+    this.router.navigate(['/admin/customers/new'], {
+      queryParams: {
+        callerNumber: currentCall.callerNumber,
+        callId: currentCall.id,
+        returnUrl: this.router.url,
+      },
     });
   }
 

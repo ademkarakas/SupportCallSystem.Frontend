@@ -73,6 +73,15 @@
           <mat-icon>phone</mat-icon>
           {{ call()?.callerNumber || '—' }}
         </div>
+
+        @if (!call()?.customerId) {
+          <div class="mt-2">
+            <button class="btn btn-primary btn-sm w-100" (click)="openLinkCustomerDialog()">
+              <mat-icon>person_add</mat-icon> Kunde zuweisen / erstellen
+            </button>
+          </div>
+        }
+
         @if (call()?.customerId && customerHistory()) {
           <div class="customer-brief-meta">
             @if (customerHistory()!.company) {
@@ -136,7 +145,7 @@
         <mat-form-field appearance="outline" class="w-full notes-field">
           <textarea
             matInput
-            rows="12"
+            rows="5"
             formControlName="summary"
             placeholder="Was wurde gesprochen? Stichpunkte..."
           ></textarea>

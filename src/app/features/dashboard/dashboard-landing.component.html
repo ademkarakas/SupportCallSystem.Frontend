@@ -116,7 +116,14 @@
                 >
                   <td class="color-text-secondary">{{ activity.relativeTime }}</td>
                   <td class="font-medium">{{ activity.title }}</td>
-                  <td>{{ activity.customerName }}</td>
+                  <td>
+                    <span class="customer-cell">
+                      <div class="name-avatar" [ngClass]="getAvatarClass(activity.customerName)">
+                        {{ getInitials(activity.customerName) }}
+                      </div>
+                      {{ activity.customerName || 'Unbekannt' }}
+                    </span>
+                  </td>
                   <td>
                     <span class="badge badge-neutral">{{
                       getCategoryLabel(activity.category)
@@ -149,7 +156,12 @@
             >
               <div class="card-header">
                 <div class="title-row">
-                  <span class="activity-title">{{ activity.customerName || 'Unbekannt' }}</span>
+                  <span class="activity-title">
+                    <div class="name-avatar" [ngClass]="getAvatarClass(activity.customerName)">
+                      {{ getInitials(activity.customerName) }}
+                    </div>
+                    {{ activity.customerName || 'Unbekannt' }}
+                  </span>
                   <span class="activity-time">{{ activity.relativeTime }}</span>
                 </div>
               </div>

@@ -294,13 +294,26 @@
       list-style: none;
       padding: 0;
       margin: 0;
-      background-color: var(--color-table-header-bg);
+      background-color: transparent;
       border-radius: 0 0 $radius-sm $radius-sm;
 
       .nav-item a {
         padding-left: 52px; // Indent submenu items
         height: 40px;
         font-size: 13px;
+        background-color: transparent;
+
+        &:hover {
+          background-color: transparent;
+        }
+
+        &.active {
+          background-color: var(--color-nav-active-bg);
+        }
+
+        &.active:hover {
+          background-color: var(--color-nav-active-bg);
+        }
 
         .sidebar-collapsed & {
           padding-left: $spacing-6;

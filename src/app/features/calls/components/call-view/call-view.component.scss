@@ -6,7 +6,7 @@
 
 .active-call-body {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: 4.5fr 7fr;
   grid-template-rows: auto auto;
   gap: var(--spacing-lg);
   padding: var(--spacing-lg) 0;
@@ -40,10 +40,11 @@
 
 // Customer brief card
 .customer-brief-card {
-  padding: 20px;
+  flex: 1;
+  padding: 24px 20px;
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 12px;
 }
 
 .customer-brief-name {
@@ -116,34 +117,34 @@
   }
 }
 
-  // Consent declined box
-  .consent-declined-box {
-    display: flex;
-    align-items: flex-start;
-    gap: 12px;
-    padding: 16px;
-    background: var(--color-status-error-bg, #fef2f2);
-    border: 1px solid var(--color-danger, #ef4444);
-    border-radius: var(--radius-md);
-    color: var(--color-danger, #ef4444);
+// Consent declined box
+.consent-declined-box {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 16px;
+  background: var(--color-status-error-bg, #fef2f2);
+  border: 1px solid var(--color-danger, #ef4444);
+  border-radius: var(--radius-md);
+  color: var(--color-danger, #ef4444);
 
-    mat-icon {
-      flex-shrink: 0;
-      margin-top: 2px;
-    }
-
-    strong {
-      display: block;
-      font-weight: 600;
-      margin-bottom: 2px;
-    }
-
-    p {
-      margin: 0;
-      font-size: 13px;
-      color: var(--color-danger, #ef4444);
-    }
+  mat-icon {
+    flex-shrink: 0;
+    margin-top: 2px;
   }
+
+  strong {
+    display: block;
+    font-weight: 600;
+    margin-bottom: 2px;
+  }
+
+  p {
+    margin: 0;
+    font-size: 13px;
+    color: var(--color-danger, #ef4444);
+  }
+}
 
 // Active notes card
 .active-notes-card {
@@ -166,6 +167,15 @@
 
   .notes-field {
     margin-top: 8px;
+
+    ::ng-deep textarea.mat-mdc-input-element {
+      padding: 4px 12px !important;
+
+      &::placeholder {
+        opacity: 0.4 !important;
+        color: var(--color-text-secondary) !important;
+      }
+    }
   }
 }
 
@@ -395,25 +405,25 @@
   display: inline-flex;
   align-items: center;
   gap: 7px;
-  padding: 5px 14px;
-  border-radius: var(--radius-full);
-  font-size: 11px;
-  font-weight: 700;
+  padding: 6px 12px;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 600;
   text-transform: uppercase;
-  letter-spacing: 0.07em;
+  letter-spacing: 0.05em;
 
   &.live {
-    background-color: var(--color-success-bg);
-    color: var(--color-success);
-    border: 1px solid color-mix(in srgb, var(--color-success) 30%, transparent);
-    box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-success) 12%, transparent);
+    background-color: var(--color-danger-bg, #fef2f2);
+    color: var(--color-danger, #ef4444);
+    border: 1px solid color-mix(in srgb, var(--color-danger, #ef4444) 30%, transparent);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-danger, #ef4444) 15%, transparent);
 
     .pulse {
       width: 8px;
       height: 8px;
       border-radius: 50%;
-      background-color: var(--color-success);
-      animation: pulse 1.5s infinite;
+      background-color: var(--color-danger, #ef4444);
+      animation: pulse-red 1.5s infinite;
       flex-shrink: 0;
     }
   }
@@ -437,7 +447,7 @@
 
 .workspace-layout {
   display: grid;
-  grid-template-columns: 2fr 1fr;
+  grid-template-columns: 1fr 1.2fr;
   gap: var(--spacing-xl);
   align-items: start;
 
@@ -454,7 +464,7 @@
 .intelligence-panel {
   display: flex;
   flex-direction: column;
-  min-height: 600px;
+  min-height: 450px;
   background-color: var(--color-card-bg);
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05); // Smooth shadow
   border-radius: var(--radius-lg);
@@ -710,6 +720,15 @@
   background-color: color-mix(in srgb, var(--color-card-bg) 92%, var(--color-main-bg));
   border-radius: var(--radius-md);
   border: 1px solid var(--color-table-border);
+
+  ::ng-deep textarea.mat-mdc-input-element {
+    padding: 4px 12px !important;
+
+    &::placeholder {
+      opacity: 0.4 !important;
+      color: var(--color-text-secondary) !important;
+    }
+  }
 }
 
 .form-actions,
@@ -910,5 +929,3 @@
 .loading-context {
   padding: 8px 0;
 }
-
-

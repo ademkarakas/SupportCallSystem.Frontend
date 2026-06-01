@@ -1,4 +1,13 @@
-import { Component, computed, DestroyRef, inject, OnInit, signal, viewChild } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  computed,
+  DestroyRef,
+  inject,
+  OnInit,
+  signal,
+  viewChild,
+} from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormsModule, FormBuilder, Validators } from '@angular/forms';
@@ -6,6 +15,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { MatIconModule } from '@angular/material/icon';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { AdminApiService, CallHistoryItemDto } from '../../services/admin-api.service';
+import { CallApiService } from '../../../calls/services/call-api.service';
 import { NotificationService } from '../../../../core/services/notification.service';
 import { ConfirmDialogComponent } from '../../../../shared/components/confirm-dialog/confirm-dialog.component';
 import { MatPaginator, MatPaginatorModule, PageEvent } from '@angular/material/paginator';
@@ -22,12 +32,14 @@ import { MatPaginator, MatPaginatorModule, PageEvent } from '@angular/material/p
   ],
   templateUrl: './customer-edit.component.html',
   styleUrls: ['./customer-edit.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class CustomerEditComponent implements OnInit {
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
   private readonly fb = inject(FormBuilder);
   private readonly adminApi = inject(AdminApiService);
+  private readonly callApi = inject(CallApiService);
   private readonly notification = inject(NotificationService);
   private readonly dialog = inject(MatDialog);
   private readonly destroyRef = inject(DestroyRef);
@@ -38,6 +50,9 @@ export class CustomerEditComponent implements OnInit {
   isDeleting = signal(false);
   isLoading = signal(false);
   isDirty = signal(false);
+
+  callIdToLink = signal<string | null>(null);
+  returnUrl = signal<string | null>(null);
 
   callHistory = signal<CallHistoryItemDto[]>([]);
   isHistoryLoading = signal(false);
@@ -85,6 +100,22 @@ export class CustomerEditComponent implements OnInit {
       this.loadCustomer(id);
     } else {
       this.isNew.set(true);
+    }
+
+    const callerNumber = this.route.snapshot.queryParamMap.get('callerNumber');
+    const callId = this.route.snapshot.queryParamMap.get('callId');
+    const returnUrl = this.route.snapshot.queryParamMap.get('returnUrl');
+
+    if (this.isNew() && callerNumber) {
+      this.createForm.patchValue({ phoneNumber: callerNumber });
+    }
+
+    if (callId) {
+      this.callIdToLink.set(callId);
+    }
+
+    if (returnUrl) {
+      this.returnUrl.set(returnUrl);
     }
 
     this.editForm.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(() => {
@@ -231,9 +262,27 @@ export class CustomerEditComponent implements OnInit {
         company: v.company || undefined,
       })
       .subscribe({
-        next: () => {
-          this.notification.showSuccess('Kunde wurde erstellt.');
-          this.router.navigate(['/admin/customers']);
+        next: (response) => {
+          const callId = this.callIdToLink();
+          if (callId) {
+            this.callApi.linkCustomerToCall(callId, response.customerId).subscribe({
+              next: () => {
+                this.notification.showSuccess('Kunde wurde erstellt und zugewiesen.');
+                this.isSaving.set(false);
+                this.router.navigateByUrl(this.returnUrl() ?? '/admin/customers');
+              },
+              error: () => {
+                this.notification.showError(
+                  'Kunde erstellt, aber die Zuweisung zum Anruf ist fehlgeschlagen.',
+                );
+                this.isSaving.set(false);
+              },
+            });
+          } else {
+            this.notification.showSuccess('Kunde wurde erstellt.');
+            this.isSaving.set(false);
+            this.router.navigateByUrl(this.returnUrl() ?? '/admin/customers');
+          }
         },
         error: () => {
           this.notification.showError('Erstellen fehlgeschlagen.');
@@ -315,6 +364,11 @@ export class CustomerEditComponent implements OnInit {
   }
 
   goBack() {
-    this.router.navigate(['/admin/customers']);
+    const returnUrl = this.returnUrl();
+    if (returnUrl) {
+      this.router.navigateByUrl(returnUrl);
+    } else {
+      this.router.navigate(['/admin/customers']);
+    }
   }
 }

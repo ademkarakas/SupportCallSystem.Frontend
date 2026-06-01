@@ -221,14 +221,14 @@ select.filter-input {
 }
 
 .chart-card {
-  padding: var(--spacing-xl);
+  padding: var(--spacing-lg);
 }
 
 .chart-header {
   display: flex;
   flex-direction: column;
   gap: 2px;
-  margin-bottom: var(--spacing-lg);
+  margin-bottom: var(--spacing-md);
 }
 
 .chart-title {
@@ -244,18 +244,18 @@ select.filter-input {
 }
 
 .chart-body {
-  height: 260px;
+  height: 200px;
   position: relative;
 
   canvas {
-    max-height: 260px;
+    max-height: 200px;
   }
 }
 
 .chart-body-doughnut {
-  height: 240px;
+  height: 200px;
   canvas {
-    max-height: 240px;
+    max-height: 200px;
   }
 }
 

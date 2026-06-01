@@ -11,7 +11,7 @@ export class DebugService {
   readonly http = inject(HttpClient);
   readonly auth = inject(AuthService);
 
-  simulateIncomingCall(phoneNumber: string = '+4915101234567', injectMockTranscript = false) {
+  simulateIncomingCall(phoneNumber: string = '+4915101234568', injectMockTranscript = false) {
     const user = this.auth.currentUser();
     const extension = user?.extension || '1001';
 

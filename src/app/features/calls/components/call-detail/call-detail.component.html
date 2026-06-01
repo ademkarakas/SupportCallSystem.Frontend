@@ -54,7 +54,21 @@
           <div class="meta-grid-horizontal">
             <div class="meta-item">
               <span class="meta-label">Kunde</span>
-              <span class="meta-value">{{ c.customerName || 'Unbekannt' }}</span>
+              <span class="meta-value">
+                {{ c.customerName || 'Unbekannt' }}
+                @if (!c.customerId) {
+                  <button
+                    class="btn btn-secondary btn-sm"
+                    style="margin-left: 8px; padding: 2px 8px; font-size: 0.8rem"
+                    (click)="openLinkCustomerDialog()"
+                  >
+                    <mat-icon style="font-size: 14px; height: 14px; width: 14px"
+                      >person_add</mat-icon
+                    >
+                    Zuweisen
+                  </button>
+                }
+              </span>
             </div>
             <div class="meta-item">
               <span class="meta-label">Bearbeitet von</span>
